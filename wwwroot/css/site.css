@@ -1,0 +1,127 @@
+/* Base styles */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Make map container fill available space */
+#map {
+    height: calc(100vh - 180px);
+    min-height: 500px;
+    width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Legend styling */
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+    .legend-item img {
+        margin-right: 8px;
+        width: 20px;
+        height: 20px;
+    }
+
+/* Cards styling */
+.card {
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    font-weight: 500;
+}
+
+/* Modal styling */
+.incident-detail {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.incident-label {
+    font-weight: bold;
+    display: inline-block;
+    min-width: 120px;
+}
+
+/* Statistics styling */
+#statistics p {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#statistics span {
+    font-weight: bold;
+}
+
+/* Filters styling */
+.form-select, .form-check {
+    margin-bottom: 10px;
+}
+
+.form-check-label {
+    user-select: none;
+}
+
+/* Custom status colors */
+.status-ongoing {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.status-partial {
+    color: #fd7e14;
+    font-weight: bold;
+}
+
+.status-controlled {
+    color: #198754;
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #map {
+        height: 400px;
+    }
+
+    .incident-label {
+        min-width: 100px;
+    }
+}
+
+/* Footer styles */
+.footer {
+    position: relative;
+    margin-top: 20px;
+    padding: 10px 0;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Loading indicator */
+.loading {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #09f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

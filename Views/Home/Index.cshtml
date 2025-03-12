@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Greek Fire Incidents Map";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Filters</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select id="statusFilter" class="form-select">
+                            <option value="">All</option>
+                            <option value="ΣΕ ΕΞΕΛΙΞΗ">ΣΕ ΕΞΕΛΙΞΗ (In Progress)</option>
+                            <option value="ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ">ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ (Partial Control)</option>
+                            <option value="ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ">ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ (Full Control)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryFilter" class="form-label">Category</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ" id="forestFiresCheck" checked>
+                            <label class="form-check-label" for="forestFiresCheck">
+                                ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ (Forest Fires)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ" id="urbanFiresCheck" checked>
+                            <label class="form-check-label" for="urbanFiresCheck">
+                                ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ (Urban Fires)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ" id="assistanceCheck" checked>
+                            <label class="form-check-label" for="assistanceCheck">
+                                ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ (Assistance)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button id="refreshBtn" class="btn btn-primary">Refresh Data</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Legend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="legend-item">
+                        <img src="~/images/markers/forest-fire-ongoing.png" width="24" height="24" /> Forest Fire - In Progress
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/forest-fire-partial.png" width="24" height="24" /> Forest Fire - Partial Control
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/forest-fire-controlled.png" width="24" height="24" /> Forest Fire - Full Control
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/urban-fire-ongoing.png" width="24" height="24" /> Urban Fire - In Progress
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/urban-fire-partial.png" width="24" height="24" /> Urban Fire - Partial Control
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/urban-fire-controlled.png" width="24" height="24" /> Urban Fire - Full Control
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/assistance-ongoing.png" width="24" height="24" /> Assistance - In Progress
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/assistance-partial.png" width="24" height="24" /> Assistance - Partial Control
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/assistance-controlled.png" width="24" height="24" /> Assistance - Full Control
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div id="statistics">
+                        <p>Total Incidents: <span id="totalIncidents">0</span></p>
+                        <p>Forest Fires: <span id="forestFireCount">0</span></p>
+                        <p>Urban Fires: <span id="urbanFireCount">0</span></p>
+                        <p>Assistance: <span id="assistanceCount">0</span></p>
+                        <p>Last Updated: <span id="lastUpdated">Never</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="incidentModalLabel">Incident Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="incidentModalBody">
+                <!-- Incident details will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/map.js"></script>
+}
