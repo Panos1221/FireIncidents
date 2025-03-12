@@ -123,10 +123,7 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\FireInc
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\scopedcss\bundle\FireIncidents.styles.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\scopedcss\projectbundle\FireIncidents.bundle.scp.css
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\c2nfk42ev8-yqeu2qddxw.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\9oyaj0wmqx-61n19gt1b8.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\hhu6cz8n9g-254cty4nom.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\g9y5runz5c-xtxxf3hu2r.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\m9pdclz0vf-bqjiyaj88i.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\2k579cqpq0-c2jlpeoesf.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\n9iroo1rgy-erw9l3u2r3.gz
@@ -204,3 +201,7 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\refint\
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\FireIncidents.pdb
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\FireIncidents.genruntimeconfig.cache
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\ref\FireIncidents.dll
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\c2nfk42ev8-91awzuyouu.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\g9y5runz5c-b3evy44epu.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\hhu6cz8n9g-wveddh96k4.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\FireIncidents.sourcelink.json

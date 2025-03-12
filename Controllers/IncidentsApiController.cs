@@ -36,6 +36,9 @@ namespace FireIncidents.Controllers
             {
                 _logger.LogInformation("API request received for incidents");
 
+                // Clear the active incidents tracking for spreading out markers
+                _geocodingService.ClearActiveIncidents();
+
                 // Get the raw incidents
                 _logger.LogInformation("Calling scraper service");
                 var incidents = await _scraperService.ScrapeIncidentsAsync();

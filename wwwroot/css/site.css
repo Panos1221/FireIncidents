@@ -1,9 +1,86 @@
+/* CSS Variables for theming */
+:root {
+    --body-bg: #f8f9fa;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --card-header-bg: #f8f9fa;
+    --card-border: rgba(0, 0, 0, 0.125);
+    --card-shadow: rgba(0, 0, 0, 0.05);
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --btn-primary-bg: #0d6efd;
+    --btn-primary-border: #0d6efd;
+    --btn-primary-color: #ffffff;
+    --modal-bg: #ffffff;
+    --modal-border: rgba(0, 0, 0, 0.2);
+    --footer-bg: #f8f9fa;
+    --footer-color: #6c757d;
+    --map-border: rgba(0, 0, 0, 0.1);
+    --status-ongoing: #dc3545;
+    --status-partial: #fd7e14;
+    --status-controlled: #198754;
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+    --body-bg: #212529;
+    --text-color: #f8f9fa;
+    --card-bg: #343a40;
+    --card-header-bg: #2c3136;
+    --card-border: rgba(255, 255, 255, 0.125);
+    --card-shadow: rgba(0, 0, 0, 0.25);
+    --input-bg: #2c3136;
+    --input-border: #495057;
+    --btn-primary-bg: #0d6efd;
+    --btn-primary-border: #0d6efd;
+    --btn-primary-color: #ffffff;
+    --modal-bg: #343a40;
+    --modal-border: rgba(255, 255, 255, 0.2);
+    --footer-bg: #2c3136;
+    --footer-color: #adb5bd;
+    --map-border: rgba(255, 255, 255, 0.1);
+    --status-ongoing: #ff4d59;
+    --status-partial: #ff922b;
+    --status-controlled: #20c997;
+}
+
 /* Base styles */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    background-color: var(--body-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Theme toggle button */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 2px 10px var(--card-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .theme-toggle:hover {
+        transform: scale(1.1);
+    }
+
+    .theme-toggle i {
+        font-size: 1.5rem;
+        color: var(--text-color);
+    }
 
 /* Make map container fill available space */
 #map {
@@ -11,7 +88,8 @@ html, body {
     min-height: 500px;
     width: 100%;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--card-shadow);
+    border: 1px solid var(--map-border);
 }
 
 /* Legend styling */
@@ -31,15 +109,58 @@ html, body {
 /* Cards styling */
 .card {
     margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 2px 4px var(--card-shadow);
+    transition: background-color 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-header {
-    background-color: #f8f9fa;
+    background-color: var(--card-header-bg);
+    border-bottom: 1px solid var(--card-border);
     font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+/* Form elements */
+.form-select, .form-control {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
+}
+
+    .form-select:focus, .form-control:focus {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+    }
+
+.form-check-input {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+}
+
+.form-check-label {
+    color: var(--text-color);
+    user-select: none;
 }
 
 /* Modal styling */
+.modal-content {
+    background-color: var(--modal-bg);
+    border: 1px solid var(--modal-border);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--card-border);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--card-border);
+}
+
 .incident-detail {
     margin-bottom: 10px;
     line-height: 1.5;
@@ -49,6 +170,19 @@ html, body {
     font-weight: bold;
     display: inline-block;
     min-width: 120px;
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-border);
+    color: var(--btn-primary-color);
+}
+
+.btn-secondary {
+    background-color: var(--card-header-bg);
+    border-color: var(--card-border);
+    color: var(--text-color);
 }
 
 /* Statistics styling */
@@ -62,40 +196,20 @@ html, body {
     font-weight: bold;
 }
 
-/* Filters styling */
-.form-select, .form-check {
-    margin-bottom: 10px;
-}
-
-.form-check-label {
-    user-select: none;
-}
-
 /* Custom status colors */
 .status-ongoing {
-    color: #dc3545;
+    color: var(--status-ongoing);
     font-weight: bold;
 }
 
 .status-partial {
-    color: #fd7e14;
+    color: var(--status-partial);
     font-weight: bold;
 }
 
 .status-controlled {
-    color: #198754;
+    color: var(--status-controlled);
     font-weight: bold;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    #map {
-        height: 400px;
-    }
-
-    .incident-label {
-        min-width: 100px;
-    }
 }
 
 /* Footer styles */
@@ -103,10 +217,11 @@ html, body {
     position: relative;
     margin-top: 20px;
     padding: 10px 0;
-    color: #6c757d;
-    background-color: #f8f9fa;
+    color: var(--footer-color);
+    background-color: var(--footer-bg);
     text-align: center;
     font-size: 0.9rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Loading indicator */
@@ -124,4 +239,46 @@ html, body {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Dark Mode Compatibility with Leaflet */
+[data-theme="dark"] .leaflet-tile {
+    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+[data-theme="dark"] .leaflet-container {
+    background: #303030;
+}
+
+[data-theme="dark"] .leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ddd;
+}
+
+[data-theme="dark"] .leaflet-control-zoom a {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--card-border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #map {
+        height: 400px;
+    }
+
+    .incident-label {
+        min-width: 100px;
+    }
+
+    .theme-toggle {
+        width: 40px;
+        height: 40px;
+        bottom: 10px;
+        right: 10px;
+    }
+
+        .theme-toggle i {
+            font-size: 1.2rem;
+        }
 }

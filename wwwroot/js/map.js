@@ -207,16 +207,13 @@ function showIncidentDetails(incident) {
             <span class="incident-label">Municipality:</span> ${incident.municipality || "Unknown"}
         </div>
         <div class="incident-detail">
-            <span class="incident-label">Location:</span> ${incident.location || "Unknown"}
+            <span class="incident-label">Details:</span> ${incident.location || "Unknown"}
         </div>
         <div class="incident-detail">
             <span class="incident-label">Start Date:</span> ${incident.startDate || "Unknown"}
         </div>
         <div class="incident-detail">
             <span class="incident-label">Last Update:</span> ${incident.lastUpdate || "Unknown"}
-        </div>
-        <div class="incident-detail">
-            <span class="incident-label">Coordinates:</span> ${incident.latitude.toFixed(5)}, ${incident.longitude.toFixed(5)}
         </div>
     `;
 

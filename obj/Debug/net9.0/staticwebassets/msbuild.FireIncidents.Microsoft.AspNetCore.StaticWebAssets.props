@@ -12,8 +12,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>yqeu2qddxw</Fingerprint>
-      <Integrity>KqCrEjLq8hdptklbeSrNK/hgsjh9JkT8C9Pv8pA7CbM=</Integrity>
+      <Fingerprint>91awzuyouu</Fingerprint>
+      <Integrity>zVVjxJEZqlcIrrD5VHzf52GFJpQMgwACABCKRjw4fIY=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</OriginalItemSpec>
@@ -84,11 +84,137 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>tmqlx2l02x</Fingerprint>
-      <Integrity>FdMU8sWgEj8PVwlLL4RX4i7k17kUMRWlXbdURJGi+/w=</Integrity>
+      <Fingerprint>6ilt60rfrh</Fingerprint>
+      <Integrity>4rfV2aBGwq+3T/GENoz5oh0jGQwMOsvlJtskqJSf0FY=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\assistance-ongoing.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\assistance-partial.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/assistance-partial.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>haye5g339v</Fingerprint>
+      <Integrity>5wXuJyh3Nca60GzSI7TsLaFuOhdNb/Fit2r+0AEwE8w=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\assistance-partial.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\assistance-controlled.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/backup/assistance-controlled.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>mwwbeeg72t</Fingerprint>
+      <Integrity>VgGffNOF8vQiTi7RauLw6smyxflB4Eoegm8YP68Nm2g=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\assistance-controlled.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\assistance-ongoing.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/backup/assistance-ongoing.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>6ilt60rfrh</Fingerprint>
+      <Integrity>4rfV2aBGwq+3T/GENoz5oh0jGQwMOsvlJtskqJSf0FY=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\assistance-ongoing.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\forest-fire-controlled.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/backup/forest-fire-controlled.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>h9crbwub02</Fingerprint>
+      <Integrity>1YE6V+fuKed5Xpw0jSJ5NazQxXkIV9vzKaLV2qYvcAU=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\forest-fire-controlled.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\forest-fire-ongoing.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/backup/forest-fire-ongoing.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>6i586x350f</Fingerprint>
+      <Integrity>3icvg6JHj2U4ATWCNfEVN21DwQg7c3vwqtu/B+yEPm4=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\forest-fire-ongoing.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\urban-fire-controlled.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/backup/urban-fire-controlled.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>wt0mcklgws</Fingerprint>
+      <Integrity>TKaHFdX4FNfVi9NIaTf9G2DOKQ3BnVi0d4loDMUET2Y=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\urban-fire-controlled.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\urban-fire-ongoing.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/backup/urban-fire-ongoing.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>ypfe0tguqj</Fingerprint>
+      <Integrity>FlsxjLI99nUeRe8Uj6o7sbqqq/lbO47HHhWqUSx40Fk=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\backup\urban-fire-ongoing.png'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\forest-fire-controlled.png'))">
       <SourceType>Package</SourceType>
@@ -120,11 +246,29 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>6i586x350f</Fingerprint>
-      <Integrity>3icvg6JHj2U4ATWCNfEVN21DwQg7c3vwqtu/B+yEPm4=</Integrity>
+      <Fingerprint>tyds7ogl75</Fingerprint>
+      <Integrity>tTxOpFu4imcyC3tKMnfKGUOfqTLqyHORwr8NW9dv4BE=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\forest-fire-ongoing.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\forest-fire-partial.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/forest-fire-partial.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>77frf64jx5</Fingerprint>
+      <Integrity>s8wjdXo9HaFKDDeFZ1+RPM49F7sWgq5puu1VCrKkAoA=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\forest-fire-partial.png'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\urban-fire-controlled.png'))">
       <SourceType>Package</SourceType>
@@ -156,11 +300,29 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>tcmhs5qsqk</Fingerprint>
-      <Integrity>kwQAhrXFhbWrrkLbDm6VZ60qxRe1dio4NmhjvKYxf+c=</Integrity>
+      <Fingerprint>ypfe0tguqj</Fingerprint>
+      <Integrity>FlsxjLI99nUeRe8Uj6o7sbqqq/lbO47HHhWqUSx40Fk=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\urban-fire-ongoing.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\urban-fire-partial.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/markers/urban-fire-partial.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>k90tivx7qu</Fingerprint>
+      <Integrity>aFvtsMJKLPKs75ous8T/eN0ednGSfrL8jQ6K+ZmtfnQ=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\urban-fire-partial.png'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\map.js'))">
       <SourceType>Package</SourceType>
@@ -174,8 +336,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>254cty4nom</Fingerprint>
-      <Integrity>9qRN6O4Bs59iLSKMEj0iGFwZoWvyase0DRkyieQN7bI=</Integrity>
+      <Fingerprint>wveddh96k4</Fingerprint>
+      <Integrity>ZFIjd+kQH5DBrmZFN1cKV9I7lNjbPxQptIasG3mEEuw=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\map.js'))</OriginalItemSpec>
@@ -192,8 +354,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>xtxxf3hu2r</Fingerprint>
-      <Integrity>hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo=</Integrity>
+      <Fingerprint>b3evy44epu</Fingerprint>
+      <Integrity>FwstAxF9/bY8sgwliaivGDjLkc0eLoNdqsDiCOEqXqw=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))</OriginalItemSpec>

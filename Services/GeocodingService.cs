@@ -8,24 +8,28 @@ using FireIncidents.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Net;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace FireIncidents.Services
 {
     public class GeocodingService
     {
         private readonly ILogger<GeocodingService> _logger;
-        private readonly HttpClient _httpClient;
         private readonly IMemoryCache _cache;
         private readonly string _nominatimBaseUrl = "https://nominatim.openstreetmap.org/search";
 
         // Default coordinates for fallback (center of Greece)
         private readonly double _defaultLat = 38.2;
         private readonly double _defaultLon = 23.8;
+
+        // Dictionary to store municipality mappings
+        private Dictionary<string, (double Lat, double Lon)> _municipalityCoordinates;
+
+        // Track incident coordinates to avoid placing them on top of each other
+        private Dictionary<string, List<(double Lat, double Lon)>> _activeIncidentCoordinates;
 
         // Predefined coordinates for common regions
         private readonly Dictionary<string, (double Lat, double Lon)> _regionCoordinates = new Dictionary<string, (double Lat, double Lon)>(StringComparer.OrdinalIgnoreCase)
@@ -48,11 +52,355 @@ namespace FireIncidents.Services
         public GeocodingService(ILogger<GeocodingService> logger, IHttpClientFactory httpClientFactory, IMemoryCache cache)
         {
             _logger = logger;
-            _httpClient = httpClientFactory.CreateClient("Nominatim");
             _cache = cache;
 
-            // Set a longer timeout for geocoding requests
-            _httpClient.Timeout = TimeSpan.FromSeconds(30);
+            // Initialize the municipality coordinates dictionary
+            InitializeMunicipalityCoordinates();
+
+            // Initialize the active incident coordinates tracker
+            _activeIncidentCoordinates = new Dictionary<string, List<(double Lat, double Lon)>>();
+        }
+
+        // Clear active incidents when starting a new fetch cycle
+        public void ClearActiveIncidents()
+        {
+            _activeIncidentCoordinates.Clear();
+        }
+
+        // Initialize the municipality coordinates database
+        private void InitializeMunicipalityCoordinates()
+        {
+            _municipalityCoordinates = new Dictionary<string, (double Lat, double Lon)>(StringComparer.OrdinalIgnoreCase);
+
+            // Load from built-in data first
+            LoadBuiltInMunicipalityData();
+
+            // Try to load from JSON file if it exists
+            try
+            {
+                var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "municipalities.json");
+                if (File.Exists(filePath))
+                {
+                    var json = File.ReadAllText(filePath, Encoding.UTF8);
+                    var data = JsonSerializer.Deserialize<Dictionary<string, (double Lat, double Lon)>>(json);
+
+                    if (data != null)
+                    {
+                        foreach (var item in data)
+                        {
+                            if (!_municipalityCoordinates.ContainsKey(item.Key))
+                            {
+                                _municipalityCoordinates[item.Key] = item.Value;
+                            }
+                        }
+
+                        _logger.LogInformation($"Loaded {data.Count} municipalities from JSON file");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading municipality data from JSON file");
+            }
+
+            _logger.LogInformation($"Initialized with {_municipalityCoordinates.Count} municipality coordinates");
+        }
+
+        // Load built-in municipality data (abbreviated for space)
+        private void LoadBuiltInMunicipalityData()
+        {
+            // ATTIKI (Athens) municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΘΗΝΑΙΩΝ"] = (37.9838, 23.7275);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΕΙΡΑΙΩΣ"] = (37.9432, 23.6469);
+            _municipalityCoordinates["ΔΗΜΟΣ ΓΛΥΦΑΔΑΣ"] = (37.8685, 23.7545);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΕΡΙΣΤΕΡΙΟΥ"] = (38.0133, 23.6913);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΛΙΘΕΑΣ"] = (37.9595, 23.7085);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΛΛΗΝΗΣ"] = (38.0054, 23.8791);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΜΑΡΟΥΣΙΟΥ"] = (38.0562, 23.8083);
+            _municipalityCoordinates["ΔΗΜΟΣ ΧΑΛΑΝΔΡΙΟΥ"] = (38.0227, 23.7965);
+            _municipalityCoordinates["ΔΗΜΟΣ ΗΛΙΟΥΠΟΛΕΩΣ"] = (37.9304, 23.7490);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΗΦΙΣΙΑΣ"] = (38.0809, 23.8081);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΑΛΕΩ"] = (38.0004, 23.6746);
+            _municipalityCoordinates["ΔΗΜΟΣ ΙΛΙΟΥ"] = (38.0337, 23.6994);
+            _municipalityCoordinates["ΔΗΜΟΣ ΒΥΡΩΝΟΣ"] = (37.9571, 23.7503);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΧΑΡΝΩΝ"] = (38.0836, 23.7402);
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΕΑΣ ΣΜΥΡΝΗΣ"] = (37.9452, 23.7171);
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΙΚΑΙΑΣ"] = (37.9661, 23.6434);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΓΙΩΝ ΑΝΑΡΓΥΡΩΝ"] = (38.0274, 23.7234);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΕΡΑΤΣΙΝΙΟΥ"] = (37.9660, 23.6276);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΛΙΜΟΥ"] = (37.9131, 23.7407);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΓΥΡΟΥΠΟΛΕΩΣ"] = (37.9049, 23.7505);
+            _municipalityCoordinates["ΔΗΜΟΣ ΖΩΓΡΑΦΟΥ"] = (37.9803, 23.7710);
+            _municipalityCoordinates["ΔΗΜΟΣ ΓΑΛΑΤΣΙΟΥ"] = (38.0201, 23.7529);
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΕΑΣ ΙΩΝΙΑΣ"] = (38.0376, 23.7594);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΛΑΙΟΥ ΦΑΛΗΡΟΥ"] = (37.9310, 23.7013);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΕΤΑΜΟΡΦΩΣΕΩΣ"] = (38.0610, 23.7608);
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΑΥΡΕΩΤΙΚΗΣ"] = (37.7165, 24.0602);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΠΑΤΩΝ"] = (37.9534, 23.9014);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΣΠΡΟΠΥΡΓΟΥ"] = (38.0597, 23.5988);
+            _municipalityCoordinates["ΔΗΜΟΣ ΡΑΦΗΝΑΣ"] = (38.0218, 24.0097);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΕΓΑΡΕΩΝ"] = (38.0056, 23.3399);
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΛΕΥΣΙΝΑΣ"] = (38.0418, 23.5413);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΡΩΠΙΑΣ"] = (37.9990, 23.8651);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΑΛΑΜΙΝΟΣ"] = (37.9392, 23.5016);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΓΙΟΥ ΔΗΜΗΤΡΙΟΥ"] = (37.9356, 23.7339);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΓΙΑΣ ΠΑΡΑΣΚΕΥΗΣ"] = (38.0113, 23.8195);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΑΝΔΡΑΣ-ΕΙΔΥΛΛΙΑΣ"] = (38.1450, 23.4950);
+            _municipalityCoordinates["ΔΗΜΟΣ ΦΥΛΗΣ"] = (38.1240, 23.6700);
+
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΙΒΑΔΕΙΑΣ"] = (38.4333, 23.1778);
+            _municipalityCoordinates["ΔΗΜΟΣ ΘΗΒΑΙΩΝ"] = (38.2322, 23.3194);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΑΧΟΒΑΣ-ΔΙΣΤΟΜΟΥ"] = (38.4170, 23.3600);
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΑΜΙΕΩΝ"] = (38.9023, 22.4323);
+
+
+            // THESSALONIKI municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΘΕΣΣΑΛΟΝΙΚΗΣ"] = (40.6401, 22.9444);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΑΜΑΡΙΑΣ"] = (40.5762, 22.9486);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΥΚΕΩΝ"] = (40.6374, 22.9508);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΥΛΟΥ ΜΕΛΑ"] = (40.6717, 22.9021);
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΕΑΠΟΛΗΣ"] = (40.6523, 22.9175);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΤΑΥΡΟΥΠΟΛΕΩΣ"] = (40.6623, 22.9098);
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΥΟΣΜΟΥ"] = (40.6640, 22.9087);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΜΠΕΛΟΚΗΠΩΝ"] = (40.6580, 22.9091);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΟΛΙΧΝΗΣ"] = (40.6646, 22.9335);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΥΛΑΙΑΣ"] = (40.5964, 22.9817);
+            _municipalityCoordinates["ΔΗΜΟΣ ΘΕΡΜΗΣ"] = (40.5236, 23.0128);
+
+            // PATRAS municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΤΡΕΩΝ"] = (38.2466, 21.7359);
+            _municipalityCoordinates["ΔΗΜΟΣ ΡΙΟΥ"] = (38.3030, 21.7868);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΙΟΥ"] = (38.2500, 22.0833);
+
+            // HERAKLION municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΗΡΑΚΛΕΙΟΥ"] = (35.3387, 25.1442);
+            _municipalityCoordinates["ΔΗΜΟΣ ΧΑΝΙΩΝ"] = (35.5138, 24.0180);
+            _municipalityCoordinates["ΔΗΜΟΣ ΡΕΘΥΜΝΗΣ"] = (35.3667, 24.4833);
+
+            // LARISSA municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΑΡΙΣΑΙΩΝ"] = (39.6383, 22.4179);
+            _municipalityCoordinates["ΔΗΜΟΣ ΒΟΛΟΥ"] = (39.3662, 22.9360);
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΚΚΑΙΩΝ"] = (39.5555, 21.7666);
+
+            // WEST GREECE municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΧΑΙΑΣ ΟΛΥΜΠΙΑΣ"] = (37.6441, 21.6245);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΙΑΛΕΙΑΣ"] = (38.2500, 22.0833);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΥΡΓΟΥ"] = (37.6750, 21.4367);
+            _municipalityCoordinates["ΔΗΜΟΣ ΗΛΙΔΑΣ"] = (37.9404, 21.3700);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΝΔΡΙΤΣΑΙΝΑΣ"] = (37.4896, 21.8798);
+            _municipalityCoordinates["ΔΗΜΟΣ ΖΑΧΑΡΩΣ"] = (37.4882, 21.6505);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΗΝΕΙΟΥ"] = (38.0333, 21.4667);
+
+            // HPEIROS municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΤΑΙΩΝ"] = (39.1566, 20.9877);
+            _municipalityCoordinates["ΔΗΜΟΣ ΙΩΑΝΝΙΤΩΝ"] = (39.6675, 20.8511);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΡΕΒΕΖΗΣ"] = (38.9597, 20.7517);
+            _municipalityCoordinates["ΔΗΜΟΣ ΗΓΟΥΜΕΝΙΤΣΑΣ"] = (39.5070, 20.2656);
+
+            // PELOPONNESE municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΦΥΛΙΑΣ"] = (37.1167, 21.5833);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΑΜΑΤΑΣ"] = (37.0389, 22.1142);
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΡΜΙΟΝΙΔΑΣ"] = (37.3833, 23.2500);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΥΛΟΥ"] = (36.9131, 21.6961);
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΥΡΩΤΑ"] = (36.8667, 22.6667);
+
+            // Add additional municipality entries for specific municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΤΑΙΩΝ - ΑΜΒΡΑΚΙΚΟΥ"] = (39.0464, 20.9026);
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΙΑΚΟΠΤΟΥ"] = (38.1997, 22.2027);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΙΑΛΕΙΑΣ - ΔΙΑΚΟΠΤΟΥ"] = (38.1997, 22.2027);
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΦΥΛΙΑΣ - ΓΑΡΓΑΛΙΑΝΩΝ"] = (37.0643, 21.6428);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΛΑΤΑΝΙΑ - ΒΟΥΚΟΛΙΩΝ"] = (35.4672, 23.7542);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΗΤΕΙΑΣ - ΛΕΥΚΗΣ"] = (35.1000, 26.1000);
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΕΛΤΑ - ΕΧΕΔΩΡΟΥ"] = (40.6962, 22.7815);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΕΓΑΡΑ"] = (38.0056, 23.3399);
+
+            // CRETE municipalities 
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΧΑΝΩΝ"] = (35.1917, 25.1539);
+            _municipalityCoordinates["ΔΗΜΟΣ ΒΙΑΝΝΟΥ"] = (35.0539, 25.4058);
+            _municipalityCoordinates["ΔΗΜΟΣ ΓΟΡΤΥΝΑΣ"] = (35.0653, 24.9461);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΙΣΣΑΜΟΥ"] = (35.4944, 23.6543);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΑΛΕΒΙΖΙΟΥ"] = (35.3264, 24.9928);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΙΝΩΑ ΠΕΔΙΑΔΑΣ"] = (35.2000, 25.3833);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΛΑΤΑΝΙΑ"] = (35.5156, 23.8700);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΗΤΕΙΑΣ"] = (35.2000, 26.1000);
+            _municipalityCoordinates["ΔΗΜΟΣ ΦΑΙΣΤΟΥ"] = (35.0644, 24.8069);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΓΙΟΥ ΝΙΚΟΛΑΟΥ"] = (35.1900, 25.7200);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΠΟΚΟΡΩΝΟΥ"] = (35.4000, 24.2000);
+
+            // Argolis (Άργολίδα)
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΓΟΥ"] = (37.6333, 22.7333);   // Argos
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΑΥΠΛΙΟΥ"] = (37.5670, 23.0000);  // Nafplio
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΠΙΔΑΥΡΟΥ"] = (37.6000, 22.8500); // Epidaurus
+            // Arcadia (Αρκαδία)
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΠΟΛΗΣ"] = (37.3233, 22.1394);    // Tripoli (Arcadia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΕΓΑΛΟΠΟΛΗΣ"] = (37.2656, 22.2847);   // Megalopolis
+            // Corinthia (Κορινθία)
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΟΡΙΝΘΟΥ"] = (37.9333, 22.9500);     // Corinth
+            // Laconia (Λακωνία)
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΠΑΡΤΗΣ"] = (37.0739, 22.4229);       // Sparta
+            // Messenia (Μεσσηνία)
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΑΜΑΤΑΣ"] = (37.0389, 22.1142);     // Kalamata
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΥΛΗΣ"] = (36.9000, 21.8000);          // Pylos
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΕΣΗΝΙΑΣ"] = (37.1333, 21.7833);       // Messini
+
+            // Aegean Sea municipalities (North Aegean)
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΥΤΙΛΗΝΗΣ"] = (39.1100, 26.5547); // Mytilene, Lesvos
+            _municipalityCoordinates["ΔΗΜΟΣ ΧΙΟΥ"] = (38.3670, 26.1356);      // Chios
+            _municipalityCoordinates["ΔΗΜΟΣ ΒΑΘΟΥ"] = (37.7547, 26.9569);       // Vathy, Samos
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΙΚΑΡΙΑΣ"] = (37.8586, 26.3900);     // Agios Kirykos, Ikaria
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΥΡΙΝΑΣ"] = (39.9667, 25.9167);      // Myrina, Lemnos
+
+            // Aegean Sea municipalities (Cyclades)
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΥΚΟΝΟΥ"] = (37.4468, 25.3289);     // Mykonos
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΑΞΟΥ"] = (37.1050, 25.3767);        // Naxos (Naxos Town)
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΑΝΤΟΡΙΝΗΣ"] = (36.4100, 25.4350);   // Santorini (Fira)
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΡΟΥ"] = (37.0833, 25.1500);        // Paros (Parikia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΥΡΟΥ"] = (37.5150, 24.9025);         // Syros (Ermoupoli)
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΗΝΟΥ"] = (37.5000, 25.6000);         // Tinos
+
+            // Aegean Sea municipalities (Dodecanese)
+            _municipalityCoordinates["ΔΗΜΟΣ ΡΟΔΟΥ"] = (36.4340, 28.2176);         // Rhodes
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΩ"] = (36.8941, 27.2869);            // Kos
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΥΜΝΟΥ"] = (36.9240, 26.9720);      // Kalymnos
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΕΡΟΥ"] = (37.0758, 27.1826);          // Leros
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΡΠΑΘΟΥ"] = (35.4760, 27.1480);       // Karpathos
+
+            // Aegean Sea municipalities (Saronic Gulf - part of Attica)
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΑΙΝΑΣ"] = (37.7500, 23.4300);      // Aegina
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΟΡΟΥ"] = (37.5325, 23.6175);         // Poros
+
+            // North Greece - Central Macedonia
+            _municipalityCoordinates["ΔΗΜΟΣ ΒΕΡΩΝ"] = (40.5230, 22.1990);   // Veria
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΙΛΚΙΣ"] = (40.9400, 22.8800);   // Kilkis
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΕΡΡΩΝ"] = (41.0873, 23.5471);   // Serres
+
+            // North Greece - Western Macedonia
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΟΖΑΝΗΣ"] = (40.3000, 21.7850);    // Kozani
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΣΤΟΡΙΑΣ"] = (40.5183, 21.2600);   // Kastoria
+            _municipalityCoordinates["ΔΗΜΟΣ ΦΛΩΡΙΝΑΣ"] = (40.7811, 21.4069);     // Florina
+            _municipalityCoordinates["ΔΗΜΟΣ ΓΡΕΒΕΝΩΝ"] = (40.1861, 21.4097);      // Grevena
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΤΟΛΕΜΑΪΔΑΣ"] = (40.6081, 21.5900);   // Ptolemaida
+
+            // North Greece - Eastern Macedonia and Thrace
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΛΕΞΑΝΔΡΟΥΠΟΛΗΣ"] = (40.8457, 25.8739); // Alexandroupoli
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΟΜΟΤΗΝΗΣ"] = (41.1224, 25.4066);       // Komotini
+            _municipalityCoordinates["ΔΗΜΟΣ ΞΑΝΘΗΣ"] = (41.1517, 24.8822);          // Xanthi
+
+            // Ionian Islands municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΕΡΚΥΡΑΣ"] = (39.6243, 19.9217);   // Corfu
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΕΦΑΛΑΙΝΑΣ"] = (38.1750, 20.6000);   // Kefalonia
+            _municipalityCoordinates["ΔΗΜΟΣ ΖΑΚΥΝΘΟΥ"] = (37.8000, 20.7800);   // Zakynthos
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΕΥΚΑΔΑΣ"] = (38.7667, 20.7333);   // Lefkada
+            _municipalityCoordinates["ΔΗΜΟΣ ΙΘΑΚΗΣ"] = (38.3167, 20.7833);   // Ithaca
+
+            // Cyclades municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΥΚΟΝΟΥ"] = (37.4468, 25.3289);   // Mykonos
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΑΞΟΥ"] = (37.1050, 25.3767);   // Naxos (Chora)
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΑΝΤΟΡΙΝΗΣ"] = (36.4100, 25.4350);   // Santorini (Fira)
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΡΟΥ"] = (37.0833, 25.1500);   // Paros (Parikia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΥΡΟΥ"] = (37.5150, 24.9025);   // Syros (Ermoupoli)
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΗΝΟΥ"] = (37.5000, 25.6000);   // Tinos
+            _municipalityCoordinates["ΔΗΜΟΣ ΙΟΥ"] = (36.7500, 25.4500);   // Ios (approx.)
+
+            // Dodecanese municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΡΟΔΟΥ"] = (36.4340, 28.2176);   // Rhodes
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΩ"] = (36.8941, 27.2869);   // Kos
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΥΜΝΟΥ"] = (36.9240, 26.9720);   // Kalymnos
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΕΡΟΥ"] = (37.0758, 27.1826);   // Leros
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΡΠΑΘΟΥ"] = (35.4760, 27.1480);   // Karpathos
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΣΤΕΛΛΟΡΙΖΟΥ"] = (36.1378, 29.5583);   // Kastellorizo
+
+            // Sporades municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΚΙΑΘΟΥ"] = (39.1667, 23.4833);   // Skiathos
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΚΟΠΕΛΟΥ"] = (39.1833, 22.8500);   // Skopelos
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΛΟΝΝΙΣΟΥ"] = (39.2000, 23.2500);   // Alonnisos
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΚΥΡΟΥ"] = (38.9750, 24.0917);   // Skyros
+
+            // Evia (Εύβοια) municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΧΑΛΚΙΔΑΣ"] = (38.4639, 23.6067);                  // Chalcis – the administrative capital of Evia
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΥΜΗΣ-ΑΛΙΒΕΡΙ"] = (38.4167, 24.0833);               // Kymi-Aliveri municipality (east-central Evia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΡΕΤΡΙΑΣ"] = (38.5500, 23.9000);                    // Eretria municipality (northeast Evia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΙΡΦΥΣ-ΜΕΣΣΑΠΙΑΣ"] = (38.1333, 23.7500);           // Dirfys-Messapia municipality (southern Evia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΙΣΤΙΑΣ-ΑΙΔΙΨΟΥ"] = (38.2167, 23.4500);              // Istiaia-Aidipsos municipality (northwest Evia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΑΝΤΟΥΔΙ-ΛΙΜΝΙΟΥ-ΑΓΙΑΣ ΑΝΝΑΣ"] = (38.1667, 23.6833); // Mantoudi-Limni-Agia Anna municipality (central-west Evia)
+
+
+            // Add more as needed
+
+            // Generate composite keys for region-municipality combinations
+            var compositeEntries = new Dictionary<string, (double Lat, double Lon)>();
+            foreach (var region in _regionCoordinates)
+            {
+                foreach (var municipality in _municipalityCoordinates)
+                {
+                    string compositeKey = $"{region.Key}-{municipality.Key}";
+                    compositeEntries[compositeKey] = municipality.Value;
+                }
+            }
+
+            // Add the composite entries to the main dictionary
+            foreach (var entry in compositeEntries)
+            {
+                _municipalityCoordinates[entry.Key] = entry.Value;
+            }
+        }
+
+        // Save newly discovered coordinates to enhance future geocoding
+        private void SaveNewCoordinates(string key, double lat, double lon)
+        {
+            if (string.IsNullOrEmpty(key) || lat == 0 || lon == 0)
+                return;
+
+            try
+            {
+                // Add to in-memory dictionary
+                if (!_municipalityCoordinates.ContainsKey(key))
+                {
+                    _municipalityCoordinates[key] = (lat, lon);
+                    _logger.LogInformation($"Added new coordinates for '{key}': {lat}, {lon}");
+
+                    // Create directory if it doesn't exist
+                    var directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    // Try to save to JSON file
+                    var filePath = Path.Combine(directoryPath, "municipalities.json");
+
+                    // Load existing data if file exists
+                    Dictionary<string, (double Lat, double Lon)> data = new Dictionary<string, (double Lat, double Lon)>();
+                    if (File.Exists(filePath))
+                    {
+                        try
+                        {
+                            var json = File.ReadAllText(filePath, Encoding.UTF8);
+                            var existingData = JsonSerializer.Deserialize<Dictionary<string, (double Lat, double Lon)>>(json);
+                            if (existingData != null)
+                            {
+                                data = existingData;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error reading existing municipality data file");
+                        }
+                    }
+
+                    // Add new entry
+                    data[key] = (lat, lon);
+
+                    // Save back to file
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    var newJson = JsonSerializer.Serialize(data, options);
+                    File.WriteAllText(filePath, newJson, Encoding.UTF8);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error saving new coordinates for '{key}'");
+            }
         }
 
         public async Task<GeocodedIncident> GeocodeIncidentAsync(FireIncident incident)
@@ -73,66 +421,141 @@ namespace FireIncidents.Services
             {
                 _logger.LogInformation($"Geocoding incident: {incident.Region}, {incident.Municipality}, {incident.Location}");
 
-                // First check if we have this location cached
+                // Create a unique key for this incident location
+                string locationKey = GetLocationKey(incident);
+
+                // Try different combinations of location data
+                string compositeKey = null;
+                string municipalityKey = null;
+                string regionKey = null;
+
+                // Build keys for lookup
+                if (!string.IsNullOrEmpty(incident.Region) && !string.IsNullOrEmpty(incident.Municipality))
+                {
+                    compositeKey = $"{incident.Region}-{incident.Municipality}";
+                }
+
+                if (!string.IsNullOrEmpty(incident.Municipality))
+                {
+                    municipalityKey = incident.Municipality;
+                }
+
+                if (!string.IsNullOrEmpty(incident.Region))
+                {
+                    regionKey = incident.Region;
+                }
+
+                // Check if we have cached coordinates for this exact location
                 string cacheKey = GetCacheKey(incident.Region, incident.Municipality, incident.Location);
 
+                double lat = 0;
+                double lon = 0;
+                bool foundCoordinates = false;
+
+                // Check if we already have this location cached
                 if (_cache.TryGetValue(cacheKey, out (double Lat, double Lon) coordinates))
                 {
                     _logger.LogInformation($"Found cached coordinates for {cacheKey}: {coordinates.Lat}, {coordinates.Lon}");
-                    geocodedIncident.Latitude = coordinates.Lat;
-                    geocodedIncident.Longitude = coordinates.Lon;
-                    return geocodedIncident;
+                    lat = coordinates.Lat;
+                    lon = coordinates.Lon;
+                    foundCoordinates = true;
                 }
-
-                // Try with predefined region coordinates first
-                if (!string.IsNullOrEmpty(incident.Region) && _regionCoordinates.TryGetValue(incident.Region, out var regionCoords))
+                else
                 {
-                    _logger.LogInformation($"Using predefined coordinates for region {incident.Region}: {regionCoords.Lat}, {regionCoords.Lon}");
-                    geocodedIncident.Latitude = regionCoords.Lat;
-                    geocodedIncident.Longitude = regionCoords.Lon;
+                    // FIRST APPROACH: Try to geocode with OSM (active searching)
+                    string searchAddress = GetPreciseSearchAddress(incident);
+                    _logger.LogInformation($"Attempting active search with: {searchAddress}");
 
-                    // Cache these coordinates
-                    _cache.Set(cacheKey, (regionCoords.Lat, regionCoords.Lon), TimeSpan.FromDays(30));
+                    try
+                    {
+                        var (geocodedLat, geocodedLon) = await GeocodeAddressAsync(searchAddress);
 
-                    // Try to get more precise coordinates with geocoding in the background
-                    Task.Run(async () => {
-                        try
+                        if (geocodedLat != 0 && geocodedLon != 0)
                         {
-                            // Still try to get more precise coordinates
-                            var (lat, lon) = await GeocodeAddressAsync(GetBestAddress(incident));
-                            if (lat != 0 && lon != 0)
+                            _logger.LogInformation($"Successfully geocoded to: {geocodedLat}, {geocodedLon}");
+                            lat = geocodedLat;
+                            lon = geocodedLon;
+                            foundCoordinates = true;
+
+                            // Cache these coordinates
+                            _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
+
+                            // Also save to our coordinates dictionary for future use
+                            if (municipalityKey != null)
                             {
-                                _logger.LogInformation($"Updated coordinates for {cacheKey} to {lat}, {lon}");
-                                _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
+                                SaveNewCoordinates(municipalityKey, lat, lon);
+                            }
+                            if (compositeKey != null)
+                            {
+                                SaveNewCoordinates(compositeKey, lat, lon);
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            _logger.LogError(ex, $"Background geocoding failed for {cacheKey}");
+                            _logger.LogWarning($"Active search failed for: {searchAddress}. Falling back to predefined coordinates.");
                         }
-                    });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error during active geocoding. Falling back to predefined coordinates.");
+                    }
 
-                    return geocodedIncident;
+                    // SECOND APPROACH: If active search failed, try predefined coordinates
+                    if (!foundCoordinates)
+                    {
+                        // Try looking up the composite key (region-municipality)
+                        if (compositeKey != null && _municipalityCoordinates.TryGetValue(compositeKey, out var compositeCoords))
+                        {
+                            _logger.LogInformation($"Using predefined coordinates for composite key '{compositeKey}': {compositeCoords.Lat}, {compositeCoords.Lon}");
+                            lat = compositeCoords.Lat;
+                            lon = compositeCoords.Lon;
+                            foundCoordinates = true;
+
+                            // Cache these coordinates
+                            _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
+                        }
+                        // Try looking up just the municipality
+                        else if (municipalityKey != null && _municipalityCoordinates.TryGetValue(municipalityKey, out var municipalityCoords))
+                        {
+                            _logger.LogInformation($"Using predefined coordinates for municipality '{municipalityKey}': {municipalityCoords.Lat}, {municipalityCoords.Lon}");
+                            lat = municipalityCoords.Lat;
+                            lon = municipalityCoords.Lon;
+                            foundCoordinates = true;
+
+                            // Cache these coordinates
+                            _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
+                        }
+                        // Try with predefined region coordinates
+                        else if (regionKey != null && _regionCoordinates.TryGetValue(regionKey, out var regionCoords))
+                        {
+                            _logger.LogInformation($"Using predefined coordinates for region '{regionKey}': {regionCoords.Lat}, {regionCoords.Lon}");
+                            lat = regionCoords.Lat;
+                            lon = regionCoords.Lon;
+                            foundCoordinates = true;
+
+                            // Cache these coordinates
+                            _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
+                        }
+                        else
+                        {
+                            // If nothing else worked, use default coordinates
+                            _logger.LogWarning($"No coordinates found. Using default coordinates for Greece.");
+                            lat = _defaultLat;
+                            lon = _defaultLon;
+                            foundCoordinates = true;
+                        }
+                    }
                 }
 
-                // Try geocoding with the best address we can construct
-                var (lat, lon) = await GeocodeAddressAsync(GetBestAddress(incident));
-
-                if (lat != 0 && lon != 0)
+                // Offset the coordinates if there are other incidents nearby
+                if (foundCoordinates)
                 {
-                    geocodedIncident.Latitude = lat;
-                    geocodedIncident.Longitude = lon;
-
-                    // Cache the result
-                    _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
-
-                    return geocodedIncident;
+                    (lat, lon) = GetOffsetCoordinates(locationKey, lat, lon);
                 }
 
-                // If that failed, fall back to default coordinates
-                _logger.LogWarning($"Geocoding failed for {incident.Region}, {incident.Municipality}, {incident.Location}. Using default coordinates.");
-                geocodedIncident.Latitude = _defaultLat;
-                geocodedIncident.Longitude = _defaultLon;
+                // Set the coordinates
+                geocodedIncident.Latitude = lat;
+                geocodedIncident.Longitude = lon;
 
                 return geocodedIncident;
             }
@@ -146,6 +569,119 @@ namespace FireIncidents.Services
 
                 return geocodedIncident;
             }
+        }
+
+        // Get a more precise search string for OSM
+        private string GetPreciseSearchAddress(FireIncident incident)
+        {
+            StringBuilder address = new StringBuilder();
+
+            // Build the most specific address possible
+            // If we have a specific location (not generic terms), include it
+            if (!string.IsNullOrEmpty(incident.Location) &&
+                !incident.Location.Equals("ΥΠΑΙΘΡΟΣ", StringComparison.OrdinalIgnoreCase) &&
+                !incident.Location.Equals("ΑΛΛΗ ΠΕΡΙΠΤΩΣΗ", StringComparison.OrdinalIgnoreCase) &&
+                !incident.Location.Equals("ΚΤΙΡΙΟ ΚΑΤΟΙΚΙΑΣ", StringComparison.OrdinalIgnoreCase) &&
+                !incident.Location.Contains("ΕΚΤΑΣΗ", StringComparison.OrdinalIgnoreCase))
+            {
+                address.Append(incident.Location);
+            }
+
+            // Always include municipality if available (most important part)
+            if (!string.IsNullOrEmpty(incident.Municipality))
+            {
+                if (address.Length > 0) address.Append(", ");
+
+                // If municipality contains " - ", it likely has a specific part after the hyphen
+                if (incident.Municipality.Contains(" - "))
+                {
+                    // Extract specific part after the dash
+                    var parts = incident.Municipality.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 2)
+                    {
+                        // Use the more specific part (after the dash)
+                        address.Append(parts[1]);
+                    }
+                    else
+                    {
+                        address.Append(incident.Municipality);
+                    }
+                }
+                else
+                {
+                    address.Append(incident.Municipality);
+                }
+            }
+
+            // Add region
+            if (!string.IsNullOrEmpty(incident.Region))
+            {
+                if (address.Length > 0) address.Append(", ");
+
+                // Clean up the region name - remove "ΠΕΡΙΦΕΡΕΙΑ" if present
+                string region = incident.Region;
+                if (region.StartsWith("ΠΕΡΙΦΕΡΕΙΑ ", StringComparison.OrdinalIgnoreCase))
+                {
+                    region = region.Substring("ΠΕΡΙΦΕΡΕΙΑ ".Length);
+                }
+
+                address.Append(region);
+            }
+
+            // Always add country
+            if (address.Length > 0) address.Append(", ");
+            address.Append("Greece");
+
+            return address.ToString();
+        }
+
+        // Get a unique key for the incident location
+        private string GetLocationKey(FireIncident incident)
+        {
+            // Create a key that uniquely identifies this location
+            if (!string.IsNullOrEmpty(incident.Municipality) && !string.IsNullOrEmpty(incident.Region))
+            {
+                return $"{incident.Region}-{incident.Municipality}".ToLowerInvariant();
+            }
+
+            if (!string.IsNullOrEmpty(incident.Region))
+            {
+                return incident.Region.ToLowerInvariant();
+            }
+
+            return "unknown";
+        }
+
+        // Get offset coordinates to avoid overlapping markers
+        private (double Lat, double Lon) GetOffsetCoordinates(string locationKey, double lat, double lon)
+        {
+            // Check if we already have incidents at this location
+            if (!_activeIncidentCoordinates.ContainsKey(locationKey))
+            {
+                _activeIncidentCoordinates[locationKey] = new List<(double Lat, double Lon)>();
+            }
+
+            var existingCoordinates = _activeIncidentCoordinates[locationKey];
+
+            // If this is the first incident at this location, use the exact coordinates
+            if (existingCoordinates.Count == 0)
+            {
+                existingCoordinates.Add((lat, lon));
+                return (lat, lon);
+            }
+
+            // Otherwise, offset the coordinates slightly
+            // The offset increases with each additional incident
+            double offsetDistance = 0.01 * (existingCoordinates.Count); // about 1km per incident
+            double angle = Math.PI * 2 * existingCoordinates.Count / 8; // Distribute in a circle
+
+            double offsetLat = lat + offsetDistance * Math.Sin(angle);
+            double offsetLon = lon + offsetDistance * Math.Cos(angle);
+
+            // Store the offset coordinates
+            existingCoordinates.Add((offsetLat, offsetLon));
+
+            return (offsetLat, offsetLon);
         }
 
         private string GetCacheKey(string region, string municipality, string location)
@@ -164,27 +700,6 @@ namespace FireIncidents.Services
             return Regex.Replace(input, @"[^\w\s]", "").Trim().Replace(" ", "_").ToLowerInvariant();
         }
 
-        private string GetBestAddress(FireIncident incident)
-        {
-            var addressParts = new List<string>();
-
-            // Add non-empty parts in order from most specific to least specific
-            if (!string.IsNullOrEmpty(incident.Location))
-                addressParts.Add(incident.Location);
-
-            if (!string.IsNullOrEmpty(incident.Municipality))
-                addressParts.Add(incident.Municipality);
-
-            if (!string.IsNullOrEmpty(incident.Region))
-                addressParts.Add(incident.Region);
-
-            // Always add the country
-            addressParts.Add("Greece");
-
-            // Join with commas
-            return string.Join(", ", addressParts);
-        }
-
         private async Task<(double Lat, double Lon)> GeocodeAddressAsync(string address)
         {
             if (string.IsNullOrEmpty(address))
@@ -200,79 +715,112 @@ namespace FireIncidents.Services
 
                 _logger.LogInformation($"Geocoding address: {address}");
 
-                // Properly encode the address for URL
-                var encodedAddress = Uri.EscapeDataString(address);
-                var requestUrl = $"{_nominatimBaseUrl}?q={encodedAddress}&format=json&limit=1&accept-language=el";
-
-                // Add required headers for Nominatim
-                _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("User-Agent", "FireIncidentsMapApplication/1.0");
-                _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-
-                var response = await _httpClient.GetAsync(requestUrl);
-
-                if (!response.IsSuccessStatusCode)
+                // Create a new HttpClient for each request to avoid header issues
+                using (var client = new HttpClient())
                 {
-                    _logger.LogWarning($"Geocoding request failed with status code {response.StatusCode}");
-                    return (0, 0);
-                }
+                    // Configure timeout
+                    client.Timeout = TimeSpan.FromSeconds(30);
 
-                var content = await response.Content.ReadAsStringAsync();
+                    // Add required headers for Nominatim
+                    client.DefaultRequestHeaders.Add("User-Agent", "FireIncidentsMapApplication/1.0");
+                    client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-                // Check if we got an empty array
-                if (content == "[]" || string.IsNullOrWhiteSpace(content))
-                {
-                    _logger.LogWarning($"Geocoding returned no results for: {address}");
-                    return (0, 0);
-                }
+                    // Properly encode the address for URL
+                    var encodedAddress = Uri.EscapeDataString(address);
 
-                try
-                {
-                    var results = JsonSerializer.Deserialize<JsonElement[]>(content);
+                    // Enhanced parameters for better results:
+                    // - limit=1: get only the best match
+                    // - accept-language=el: prefer Greek results
+                    // - addressdetails=1: get the address details
+                    // - countrycodes=gr: limit to Greece
+                    // - bounded=1: prefer results within the viewport
+                    var requestUrl = $"{_nominatimBaseUrl}?q={encodedAddress}&format=json&limit=1&accept-language=el&addressdetails=1&countrycodes=gr";
 
-                    if (results != null && results.Length > 0)
+                    // Add viewbox parameter to limit to Greece
+                    requestUrl += "&viewbox=19.22,34.72,29.64,41.75&bounded=1";
+
+                    _logger.LogDebug($"Geocoding request URL: {requestUrl}");
+                    var response = await client.GetAsync(requestUrl);
+
+                    if (!response.IsSuccessStatusCode)
                     {
-                        var result = results[0];
+                        _logger.LogWarning($"Geocoding request failed with status code {response.StatusCode}");
+                        return (0, 0);
+                    }
 
-                        if (result.TryGetProperty("lat", out JsonElement latElement) &&
-                            result.TryGetProperty("lon", out JsonElement lonElement))
+                    var content = await response.Content.ReadAsStringAsync();
+                    _logger.LogDebug($"Geocoding response: {content}");
+
+                    // Check if we got an empty array
+                    if (content == "[]" || string.IsNullOrWhiteSpace(content))
+                    {
+                        _logger.LogWarning($"Geocoding returned no results for: {address}");
+                        return (0, 0);
+                    }
+
+                    try
+                    {
+                        var results = JsonSerializer.Deserialize<JsonElement[]>(content);
+
+                        if (results != null && results.Length > 0)
                         {
-                            // Handle different ways lat/lon might be represented
-                            if (latElement.ValueKind == JsonValueKind.String &&
-                                lonElement.ValueKind == JsonValueKind.String)
+                            var result = results[0];
+
+                            // Also log the type of place found
+                            string placeType = "unknown";
+                            if (result.TryGetProperty("type", out JsonElement typeElement))
                             {
-                                if (double.TryParse(latElement.GetString(),
-                                    NumberStyles.Float,
-                                    CultureInfo.InvariantCulture,
-                                    out double lat) &&
-                                    double.TryParse(lonElement.GetString(),
-                                    NumberStyles.Float,
-                                    CultureInfo.InvariantCulture,
-                                    out double lon))
+                                placeType = typeElement.GetString() ?? "unknown";
+                            }
+
+                            string displayName = "unknown";
+                            if (result.TryGetProperty("display_name", out JsonElement displayElement))
+                            {
+                                displayName = displayElement.GetString() ?? "unknown";
+                            }
+
+                            _logger.LogInformation($"Found place type: {placeType}, name: {displayName}");
+
+                            if (result.TryGetProperty("lat", out JsonElement latElement) &&
+                                result.TryGetProperty("lon", out JsonElement lonElement))
+                            {
+                                // Handle different ways lat/lon might be represented
+                                if (latElement.ValueKind == JsonValueKind.String &&
+                                    lonElement.ValueKind == JsonValueKind.String)
                                 {
+                                    if (double.TryParse(latElement.GetString(),
+                                        NumberStyles.Float,
+                                        CultureInfo.InvariantCulture,
+                                        out double lat) &&
+                                        double.TryParse(lonElement.GetString(),
+                                        NumberStyles.Float,
+                                        CultureInfo.InvariantCulture,
+                                        out double lon))
+                                    {
+                                        _logger.LogInformation($"Successfully geocoded to: {lat}, {lon}");
+                                        return (lat, lon);
+                                    }
+                                }
+                                else if (latElement.ValueKind == JsonValueKind.Number &&
+                                        lonElement.ValueKind == JsonValueKind.Number)
+                                {
+                                    double lat = latElement.GetDouble();
+                                    double lon = lonElement.GetDouble();
                                     _logger.LogInformation($"Successfully geocoded to: {lat}, {lon}");
                                     return (lat, lon);
                                 }
                             }
-                            else if (latElement.ValueKind == JsonValueKind.Number &&
-                                    lonElement.ValueKind == JsonValueKind.Number)
-                            {
-                                double lat = latElement.GetDouble();
-                                double lon = lonElement.GetDouble();
-                                _logger.LogInformation($"Successfully geocoded to: {lat}, {lon}");
-                                return (lat, lon);
-                            }
                         }
-                    }
 
-                    _logger.LogWarning($"Could not extract coordinates from geocoding result for: {address}");
-                    return (0, 0);
-                }
-                catch (JsonException ex)
-                {
-                    _logger.LogError(ex, $"Error parsing geocoding JSON for address: {address}");
-                    _logger.LogDebug($"Raw JSON: {content}");
-                    return (0, 0);
+                        _logger.LogWarning($"Could not extract coordinates from geocoding result for: {address}");
+                        return (0, 0);
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogError(ex, $"Error parsing geocoding JSON for address: {address}");
+                        _logger.LogDebug($"Raw JSON: {content}");
+                        return (0, 0);
+                    }
                 }
             }
             catch (Exception ex)
@@ -280,6 +828,8 @@ namespace FireIncidents.Services
                 _logger.LogError(ex, $"Error geocoding address: {address}");
                 return (0, 0);
             }
+
+            return (0, 0);
         }
     }
 }

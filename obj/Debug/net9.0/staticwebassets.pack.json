@@ -21,6 +21,34 @@
       "PackagePath": "staticwebassets\\images\\markers\\assistance-ongoing.png"
     },
     {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\assistance-partial.png",
+      "PackagePath": "staticwebassets\\images\\markers\\assistance-partial.png"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\backup\\assistance-controlled.png",
+      "PackagePath": "staticwebassets\\images\\markers\\backup\\assistance-controlled.png"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\backup\\assistance-ongoing.png",
+      "PackagePath": "staticwebassets\\images\\markers\\backup\\assistance-ongoing.png"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\backup\\forest-fire-controlled.png",
+      "PackagePath": "staticwebassets\\images\\markers\\backup\\forest-fire-controlled.png"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\backup\\forest-fire-ongoing.png",
+      "PackagePath": "staticwebassets\\images\\markers\\backup\\forest-fire-ongoing.png"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\backup\\urban-fire-controlled.png",
+      "PackagePath": "staticwebassets\\images\\markers\\backup\\urban-fire-controlled.png"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\backup\\urban-fire-ongoing.png",
+      "PackagePath": "staticwebassets\\images\\markers\\backup\\urban-fire-ongoing.png"
+    },
+    {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\forest-fire-controlled.png",
       "PackagePath": "staticwebassets\\images\\markers\\forest-fire-controlled.png"
     },
@@ -29,12 +57,20 @@
       "PackagePath": "staticwebassets\\images\\markers\\forest-fire-ongoing.png"
     },
     {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\forest-fire-partial.png",
+      "PackagePath": "staticwebassets\\images\\markers\\forest-fire-partial.png"
+    },
+    {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\urban-fire-controlled.png",
       "PackagePath": "staticwebassets\\images\\markers\\urban-fire-controlled.png"
     },
     {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\urban-fire-ongoing.png",
       "PackagePath": "staticwebassets\\images\\markers\\urban-fire-ongoing.png"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\urban-fire-partial.png",
+      "PackagePath": "staticwebassets\\images\\markers\\urban-fire-partial.png"
     },
     {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\map.js",
