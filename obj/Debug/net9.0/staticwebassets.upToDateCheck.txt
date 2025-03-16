@@ -65,6 +65,7 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\di
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\images\fire-dept-icon.png
 wwwroot\images\markers\assistance-controlled.png
 wwwroot\images\markers\assistance-ongoing.png
 wwwroot\images\markers\assistance-partial.png

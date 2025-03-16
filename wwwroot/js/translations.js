@@ -60,7 +60,15 @@
         // Language
         "language": "Language",
         "english": "English",
-        "greek": "Greek"
+        "greek": "Greek",
+
+        // Footer
+        "footer": "Fire Incidents Map - Hellenic Fire Service",
+        "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service.",
+
+        // Theme
+        "darkMode": "Dark Mode",
+        "lightMode": "Light Mode"
     },
     el: {
         // General
@@ -123,7 +131,15 @@
         // Language
         "language": "Γλώσσα",
         "english": "Αγγλικά",
-        "greek": "Ελληνικά"
+        "greek": "Ελληνικά",
+
+        // Footer
+        "footer": "Χάρτης Πυρκαγιών - Δεδομένα Πυροσβεστικού Σώματος Ελλάδος",
+        "disclaimer": "Αυτή είναι μια ανεπίσημη εφαρμογή που δεν συνδέεται, δεν υποστηρίζεται και δεν έχει σχέση με το Πυροσβεστικό Σώμα Ελλάδος.",
+
+        // Theme
+        "darkMode": "Σκούρο Θέμα",
+        "lightMode": "Φωτεινό Θέμα"
     }
 };
 

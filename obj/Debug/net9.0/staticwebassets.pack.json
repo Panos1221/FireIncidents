@@ -13,6 +13,10 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\fire-dept-icon.png",
+      "PackagePath": "staticwebassets\\images\\fire-dept-icon.png"
+    },
+    {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\assistance-controlled.png",
       "PackagePath": "staticwebassets\\images\\markers\\assistance-controlled.png"
     },

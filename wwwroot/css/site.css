@@ -723,3 +723,47 @@ html, body {
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
     margin-right: 15px;
 }
+
+/* Custom PNG icon styling */
+.navbar-icon {
+    width: 28px;
+    height: 28px;
+    vertical-align: middle;
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover .navbar-icon {
+    transform: scale(1.15);
+}
+
+/* Add subtle glow in dark mode */
+[data-theme="dark"] .navbar-icon {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.4));
+}
+
+/* Footer and disclaimer styling */
+.footer {
+    position: relative;
+    margin-top: 20px;
+    padding: 15px 0;
+    color: var(--footer-color);
+    background-color: var(--footer-bg);
+    text-align: center;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.disclaimer {
+    margin-top: 5px;
+    font-size: 0.8rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+    opacity: 0.8;
+}
+
+[data-theme="dark"] .disclaimer {
+    opacity: 0.9;
+}

@@ -12,8 +12,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>1nebzhi99h</Fingerprint>
-      <Integrity>I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA=</Integrity>
+      <Fingerprint>vf05gvxmt5</Fingerprint>
+      <Integrity>ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</OriginalItemSpec>
@@ -53,6 +53,24 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\FireIncidents.uo6180gjdo.bundle.scp.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\fire-dept-icon.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>FireIncidents</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/FireIncidents</BasePath>
+      <RelativePath>images/fire-dept-icon.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>xoayaykznh</Fingerprint>
+      <Integrity>X4OSxLOprBfhcUVfc6fxbfep/xmX9v68ahLbkuJhU5o=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\fire-dept-icon.png'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\markers\assistance-controlled.png'))">
       <SourceType>Package</SourceType>
@@ -408,8 +426,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>43rs91aytw</Fingerprint>
-      <Integrity>IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8=</Integrity>
+      <Fingerprint>od4mdfgcnb</Fingerprint>
+      <Integrity>rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\translations.js'))</OriginalItemSpec>

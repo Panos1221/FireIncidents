@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "D2eGXjGJZEQGgU8RYb2M5iRoYQMUeTnvbeOGDgsKR0g=",
+  "Hash": "seVQL4nPkC6Ui3IFkEQFpsL51xVhQ454wXC+S+w7PJQ=",
   "Source": "FireIncidents",
   "BasePath": "_content/FireIncidents",
   "Mode": "Default",
@@ -374,12 +374,12 @@
       "OriginalItemSpec": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
     },
     {
-      "Identity": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-1nebzhi99h.gz",
+      "Identity": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-vf05gvxmt5.gz",
       "SourceId": "FireIncidents",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "_content/FireIncidents",
-      "RelativePath": "css/site#[.{fingerprint=1nebzhi99h}]?.css.gz",
+      "RelativePath": "css/site#[.{fingerprint=vf05gvxmt5}]?.css.gz",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Alternative",
@@ -388,8 +388,8 @@
       "RelatedAsset": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\css\\site.css",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "vmhie711h0",
-      "Integrity": "x8MsYqyRiDJayGCpGut9VbkoXbFzO+79xjc/KVgeLIc=",
+      "Fingerprint": "5idv8y1z04",
+      "Integrity": "Hfb+aLxQ+kFPigI00VpoVLDwuxi1Jre0fQCPN4jsyPY=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\css\\site.css"
@@ -1298,12 +1298,12 @@
       "OriginalItemSpec": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\lib\\jquery\\dist\\jquery.slim.min.map"
     },
     {
-      "Identity": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-43rs91aytw.gz",
+      "Identity": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-od4mdfgcnb.gz",
       "SourceId": "FireIncidents",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "_content/FireIncidents",
-      "RelativePath": "js/translations#[.{fingerprint=43rs91aytw}]?.js.gz",
+      "RelativePath": "js/translations#[.{fingerprint=od4mdfgcnb}]?.js.gz",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Alternative",
@@ -1312,8 +1312,8 @@
       "RelatedAsset": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\translations.js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "ici0dfr3kj",
-      "Integrity": "4pWOKpqXyFhmKSCBrrerjnF9gZvEUEUarkHRU2cpZD0=",
+      "Fingerprint": "zitqgwvn8p",
+      "Integrity": "BagHrpgRYKycY2QxPDrkSmwu3GDCZCO/bpS5eWyfVjo=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\translations.js"
@@ -1480,8 +1480,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "1nebzhi99h",
-      "Integrity": "I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA=",
+      "Fingerprint": "vf05gvxmt5",
+      "Integrity": "ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
@@ -1506,6 +1506,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\fire-dept-icon.png",
+      "SourceId": "FireIncidents",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\",
+      "BasePath": "_content/FireIncidents",
+      "RelativePath": "images/fire-dept-icon#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "xoayaykznh",
+      "Integrity": "X4OSxLOprBfhcUVfc6fxbfep/xmX9v68ahLbkuJhU5o=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\fire-dept-icon.png"
     },
     {
       "Identity": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\assistance-controlled.png",
@@ -1921,8 +1942,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "43rs91aytw",
-      "Integrity": "IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8=",
+      "Fingerprint": "od4mdfgcnb",
+      "Integrity": "rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\js\\translations.js"
@@ -3190,13 +3211,13 @@
   ],
   "Endpoints": [
     {
-      "Route": "css/site.1nebzhi99h.css",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-1nebzhi99h.gz",
+      "Route": "css/site.css",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-vf05gvxmt5.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.000299940012"
+          "Quality": "0.000286204923"
         }
       ],
       "ResponseHeaders": [
@@ -3206,19 +3227,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "3333"
+          "Value": "3493"
         },
         {
           "Name": "ETag",
-          "Value": "\"x8MsYqyRiDJayGCpGut9VbkoXbFzO+79xjc/KVgeLIc=\""
+          "Value": "\"Hfb+aLxQ+kFPigI00VpoVLDwuxi1Jre0fQCPN4jsyPY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 11:44:56 GMT"
+          "Value": "Sun, 16 Mar 2025 19:07:51 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
+          "Value": "no-cache"
         },
         {
           "Name": "Content-Encoding",
@@ -3234,26 +3255,18 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA=\""
+          "Value": "W/\"ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4=\""
         }
       ],
       "EndpointProperties": [
         {
-          "Name": "fingerprint",
-          "Value": "1nebzhi99h"
-        },
-        {
-          "Name": "label",
-          "Value": "css/site.css"
-        },
-        {
           "Name": "integrity",
-          "Value": "sha256-I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA="
+          "Value": "sha256-ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4="
         }
       ]
     },
     {
-      "Route": "css/site.1nebzhi99h.css",
+      "Route": "css/site.css",
       "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\css\\site.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -3263,7 +3276,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "16519"
+          "Value": "17454"
         },
         {
           "Name": "Content-Type",
@@ -3271,11 +3284,156 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA=\""
+          "Value": "\"ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 11:44:56 GMT"
+          "Value": "Sun, 16 Mar 2025 19:07:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.css.gz",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-vf05gvxmt5.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3493"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Hfb+aLxQ+kFPigI00VpoVLDwuxi1Jre0fQCPN4jsyPY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:07:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-Hfb+aLxQ+kFPigI00VpoVLDwuxi1Jre0fQCPN4jsyPY="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.vf05gvxmt5.css",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-vf05gvxmt5.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000286204923"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3493"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Hfb+aLxQ+kFPigI00VpoVLDwuxi1Jre0fQCPN4jsyPY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:07:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vf05gvxmt5"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.vf05gvxmt5.css",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17454"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:07:51 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3285,7 +3443,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "1nebzhi99h"
+          "Value": "vf05gvxmt5"
         },
         {
           "Name": "label",
@@ -3293,13 +3451,13 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA="
+          "Value": "sha256-ew3jhGQJs6wJffaKMsv8LlvQUwoqxzh0fU2JXERV9m4="
         }
       ]
     },
     {
-      "Route": "css/site.1nebzhi99h.css.gz",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-1nebzhi99h.gz",
+      "Route": "css/site.vf05gvxmt5.css.gz",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-vf05gvxmt5.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -3308,7 +3466,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "3333"
+          "Value": "3493"
         },
         {
           "Name": "Content-Type",
@@ -3316,11 +3474,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"x8MsYqyRiDJayGCpGut9VbkoXbFzO+79xjc/KVgeLIc=\""
+          "Value": "\"Hfb+aLxQ+kFPigI00VpoVLDwuxi1Jre0fQCPN4jsyPY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 11:44:56 GMT"
+          "Value": "Sun, 16 Mar 2025 19:07:51 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3338,7 +3496,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "1nebzhi99h"
+          "Value": "vf05gvxmt5"
         },
         {
           "Name": "label",
@@ -3346,144 +3504,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-x8MsYqyRiDJayGCpGut9VbkoXbFzO+79xjc/KVgeLIc="
-        }
-      ]
-    },
-    {
-      "Route": "css/site.css",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-1nebzhi99h.gz",
-      "Selectors": [
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip",
-          "Quality": "0.000299940012"
-        }
-      ],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "3333"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"x8MsYqyRiDJayGCpGut9VbkoXbFzO+79xjc/KVgeLIc=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 11:44:56 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "W/\"I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA=\""
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA="
-        }
-      ]
-    },
-    {
-      "Route": "css/site.css",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\css\\site.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "16519"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 11:44:56 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-I5qlmCV5Y935fB61hwqVkDc7plOezi5nGMSOkYkaPCA="
-        }
-      ]
-    },
-    {
-      "Route": "css/site.css.gz",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\c2nfk42ev8-1nebzhi99h.gz",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "3333"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"x8MsYqyRiDJayGCpGut9VbkoXbFzO+79xjc/KVgeLIc=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 11:44:56 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-x8MsYqyRiDJayGCpGut9VbkoXbFzO+79xjc/KVgeLIc="
+          "Value": "sha256-Hfb+aLxQ+kFPigI00VpoVLDwuxi1Jre0fQCPN4jsyPY="
         }
       ]
     },
@@ -3810,7 +3831,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3863,7 +3884,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3900,7 +3921,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3947,7 +3968,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4000,7 +4021,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4037,7 +4058,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4084,7 +4105,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4145,7 +4166,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4190,7 +4211,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4245,7 +4266,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4306,7 +4327,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4351,7 +4372,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 12 Mar 2025 22:37:00 GMT"
+          "Value": "Sun, 16 Mar 2025 12:08:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4378,6 +4399,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-lkzIE8zOUerxfYRxNkPt/gpArg269YDk/UNsV2Pv1n8="
+        }
+      ]
+    },
+    {
+      "Route": "images/fire-dept-icon.png",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\fire-dept-icon.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "350284"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"X4OSxLOprBfhcUVfc6fxbfep/xmX9v68ahLbkuJhU5o=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:06:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-X4OSxLOprBfhcUVfc6fxbfep/xmX9v68ahLbkuJhU5o="
+        }
+      ]
+    },
+    {
+      "Route": "images/fire-dept-icon.xoayaykznh.png",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\fire-dept-icon.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "350284"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"X4OSxLOprBfhcUVfc6fxbfep/xmX9v68ahLbkuJhU5o=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:06:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "xoayaykznh"
+        },
+        {
+          "Name": "label",
+          "Value": "images/fire-dept-icon.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-X4OSxLOprBfhcUVfc6fxbfep/xmX9v68ahLbkuJhU5o="
         }
       ]
     },
@@ -6588,13 +6691,13 @@
       ]
     },
     {
-      "Route": "js/translations.43rs91aytw.js",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-43rs91aytw.gz",
+      "Route": "js/translations.js",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-od4mdfgcnb.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.000438212095"
+          "Quality": "0.000401123145"
         }
       ],
       "ResponseHeaders": [
@@ -6604,19 +6707,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "2281"
+          "Value": "2492"
         },
         {
           "Name": "ETag",
-          "Value": "\"4pWOKpqXyFhmKSCBrrerjnF9gZvEUEUarkHRU2cpZD0=\""
+          "Value": "\"BagHrpgRYKycY2QxPDrkSmwu3GDCZCO/bpS5eWyfVjo=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 10:05:40 GMT"
+          "Value": "Sun, 16 Mar 2025 19:12:55 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
+          "Value": "no-cache"
         },
         {
           "Name": "Content-Encoding",
@@ -6632,26 +6735,18 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8=\""
+          "Value": "W/\"rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls=\""
         }
       ],
       "EndpointProperties": [
         {
-          "Name": "fingerprint",
-          "Value": "43rs91aytw"
-        },
-        {
-          "Name": "label",
-          "Value": "js/translations.js"
-        },
-        {
           "Name": "integrity",
-          "Value": "sha256-IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8="
+          "Value": "sha256-rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls="
         }
       ]
     },
     {
-      "Route": "js/translations.43rs91aytw.js",
+      "Route": "js/translations.js",
       "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\translations.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -6661,7 +6756,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "8454"
+          "Value": "9292"
         },
         {
           "Name": "Content-Type",
@@ -6669,11 +6764,156 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8=\""
+          "Value": "\"rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 10:05:40 GMT"
+          "Value": "Sun, 16 Mar 2025 19:12:55 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls="
+        }
+      ]
+    },
+    {
+      "Route": "js/translations.js.gz",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-od4mdfgcnb.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2492"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"BagHrpgRYKycY2QxPDrkSmwu3GDCZCO/bpS5eWyfVjo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:12:55 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-BagHrpgRYKycY2QxPDrkSmwu3GDCZCO/bpS5eWyfVjo="
+        }
+      ]
+    },
+    {
+      "Route": "js/translations.od4mdfgcnb.js",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-od4mdfgcnb.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000401123145"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2492"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"BagHrpgRYKycY2QxPDrkSmwu3GDCZCO/bpS5eWyfVjo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:12:55 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "od4mdfgcnb"
+        },
+        {
+          "Name": "label",
+          "Value": "js/translations.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls="
+        }
+      ]
+    },
+    {
+      "Route": "js/translations.od4mdfgcnb.js",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\translations.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "9292"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 16 Mar 2025 19:12:55 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -6683,7 +6923,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "43rs91aytw"
+          "Value": "od4mdfgcnb"
         },
         {
           "Name": "label",
@@ -6691,13 +6931,13 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8="
+          "Value": "sha256-rIj7DbKYgHNAWOWh48de3QyDmFBkKlBTCxVmNpBiRls="
         }
       ]
     },
     {
-      "Route": "js/translations.43rs91aytw.js.gz",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-43rs91aytw.gz",
+      "Route": "js/translations.od4mdfgcnb.js.gz",
+      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-od4mdfgcnb.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -6706,7 +6946,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "2281"
+          "Value": "2492"
         },
         {
           "Name": "Content-Type",
@@ -6714,11 +6954,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"4pWOKpqXyFhmKSCBrrerjnF9gZvEUEUarkHRU2cpZD0=\""
+          "Value": "\"BagHrpgRYKycY2QxPDrkSmwu3GDCZCO/bpS5eWyfVjo=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 10:05:40 GMT"
+          "Value": "Sun, 16 Mar 2025 19:12:55 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -6736,7 +6976,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "43rs91aytw"
+          "Value": "od4mdfgcnb"
         },
         {
           "Name": "label",
@@ -6744,144 +6984,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-4pWOKpqXyFhmKSCBrrerjnF9gZvEUEUarkHRU2cpZD0="
-        }
-      ]
-    },
-    {
-      "Route": "js/translations.js",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-43rs91aytw.gz",
-      "Selectors": [
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip",
-          "Quality": "0.000438212095"
-        }
-      ],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "2281"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"4pWOKpqXyFhmKSCBrrerjnF9gZvEUEUarkHRU2cpZD0=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 10:05:40 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "W/\"IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8=\""
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8="
-        }
-      ]
-    },
-    {
-      "Route": "js/translations.js",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\translations.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "8454"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 10:05:40 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-IOXNGfj4SFMy+L/syz0P8J5g1y7x7xTSNFxDAv/Gwi8="
-        }
-      ]
-    },
-    {
-      "Route": "js/translations.js.gz",
-      "AssetFile": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\Debug\\net9.0\\compressed\\xajcyjls62-43rs91aytw.gz",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "2281"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"4pWOKpqXyFhmKSCBrrerjnF9gZvEUEUarkHRU2cpZD0=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 16 Mar 2025 10:05:40 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-4pWOKpqXyFhmKSCBrrerjnF9gZvEUEUarkHRU2cpZD0="
+          "Value": "sha256-BagHrpgRYKycY2QxPDrkSmwu3GDCZCO/bpS5eWyfVjo="
         }
       ]
     },
