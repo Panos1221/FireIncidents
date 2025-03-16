@@ -1,7 +1,7 @@
 # Hellenic Fire Service Live Incidents Map
 
 ## Overview
-This web application provides real-time visualization of active fire incidents throughout Greece. It scrapes data from the official Greek Fire Service website and displays incidents on an interactive map with filtering capabilities.
+This web application provides real-time visualization of active incidents throughout Greece. It scrapes data from the official Greek Fire Service website and displays incidents on an interactive map with filtering capabilities.
 
 ## Live Demo
 The application is hosted on Azure and can be accessed [here](https://hfcliveincidents-hkcebcfdefgjcuh8.italynorth-01.azurewebsites.net/).
