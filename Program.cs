@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Text;
 
 namespace FireIncidents
 {
@@ -7,6 +8,9 @@ namespace FireIncidents
     {
         public static void Main(string[] args)
         {
+            // Register encoding for Greek
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             CreateHostBuilder(args).Build().Run();
         }
 

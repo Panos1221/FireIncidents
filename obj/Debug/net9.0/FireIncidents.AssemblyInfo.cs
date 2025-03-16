@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+956d435855e2f02bc9450473d4e2deab3b04386b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+efec53987b4cb4be6fe50f18baba73ace63179c5")]
 [assembly: System.Reflection.AssemblyProductAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

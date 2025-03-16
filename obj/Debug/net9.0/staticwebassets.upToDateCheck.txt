@@ -54,8 +54,10 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\di
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\js\theme.js
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\jquery.slim.min.map
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\js\translations.js
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\jquery.min.map
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap.css
@@ -75,11 +77,14 @@ wwwroot\images\markers\backup\urban-fire-ongoing.png
 wwwroot\images\markers\forest-fire-controlled.png
 wwwroot\images\markers\forest-fire-ongoing.png
 wwwroot\images\markers\forest-fire-partial.png
+wwwroot\images\markers\marker-shadow.png
 wwwroot\images\markers\urban-fire-controlled.png
 wwwroot\images\markers\urban-fire-ongoing.png
 wwwroot\images\markers\urban-fire-partial.png
 wwwroot\js\map.js
 wwwroot\js\site.js
+wwwroot\js\theme.js
+wwwroot\js\translations.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css
 wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
 wwwroot\lib\bootstrap\dist\css\bootstrap.min.css

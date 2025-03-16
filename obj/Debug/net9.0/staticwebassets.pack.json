@@ -61,6 +61,10 @@
       "PackagePath": "staticwebassets\\images\\markers\\forest-fire-partial.png"
     },
     {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\marker-shadow.png",
+      "PackagePath": "staticwebassets\\images\\markers\\marker-shadow.png"
+    },
+    {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\images\\markers\\urban-fire-controlled.png",
       "PackagePath": "staticwebassets\\images\\markers\\urban-fire-controlled.png"
     },
@@ -79,6 +83,14 @@
     {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\theme.js",
+      "PackagePath": "staticwebassets\\js\\theme.js"
+    },
+    {
+      "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\js\\translations.js",
+      "PackagePath": "staticwebassets\\js\\translations.js"
     },
     {
       "Id": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\wwwroot\\lib\\bootstrap\\LICENSE",

@@ -57,6 +57,7 @@ namespace FireIncidents.Services
             }
         }
 
+        // Update the GetHtmlAsync method in FireServiceScraperService.cs to better handle encoding
         private async Task<string> GetHtmlAsync()
         {
             try
@@ -65,7 +66,7 @@ namespace FireIncidents.Services
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
                 _httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml");
-                _httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9,el;q=0.8");
+                _httpClient.DefaultRequestHeaders.Add("Accept-Language", "el-GR,el;q=0.9,en-US;q=0.8,en;q=0.7");
 
                 _logger.LogInformation($"Sending request to {_url}");
                 var response = await _httpClient.GetAsync(_url);
@@ -82,52 +83,94 @@ namespace FireIncidents.Services
 
                 _logger.LogInformation($"Content-Type: {contentType}, CharSet: {charSet}");
 
-                // Use specified charset or fall back to UTF-8
-                Encoding encoding;
-                try
-                {
-                    if (string.IsNullOrEmpty(charSet))
-                    {
-                        encoding = Encoding.UTF8;
-                    }
-                    else
-                    {
-                        encoding = Encoding.GetEncoding(charSet);
-                    }
-                }
-                catch
-                {
-                    _logger.LogWarning($"Could not find encoding {charSet}, falling back to UTF-8");
-                    encoding = Encoding.UTF8;
-                }
+                // Default to UTF-8 if no charset is specified
+                Encoding encoding = Encoding.UTF8;
 
-                var html = encoding.GetString(contentBytes);
-
-                // Check if encoding might be wrong (common for Greek sites)
-                if (html.Contains("??????") || html.Contains("Î") || html.Contains("Ï") || html.Contains("ΠΕΡΙΦΕΡΕΙΑ") == false)
+                // Try to use the specified charset if available
+                if (!string.IsNullOrEmpty(charSet))
                 {
-                    _logger.LogWarning("Detected possible encoding issues, trying Windows-1253 (Greek)");
                     try
                     {
-                        // Try Greek Windows encoding
-                        encoding = Encoding.GetEncoding(1253); // Windows-1253 for Greek
-                        html = encoding.GetString(contentBytes);
+                        encoding = Encoding.GetEncoding(charSet);
+                        _logger.LogInformation($"Using specified encoding: {encoding.WebName}");
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        _logger.LogWarning("Failed with Windows-1253, trying ISO-8859-7");
+                        _logger.LogWarning($"Could not use specified encoding {charSet}: {ex.Message}. Falling back to UTF-8");
+                    }
+                }
+
+                string html = encoding.GetString(contentBytes);
+
+                // Check if encoding might be wrong (common for Greek sites)
+                bool encodingIssue = html.Contains("??????") ||
+                                     html.Contains("Î") ||
+                                     html.Contains("Ï") ||
+                                     html.Contains("ΠΕΡΙΦΕΡΕΙΑ") == false ||
+                                     html.Contains("�");
+
+                if (encodingIssue)
+                {
+                    _logger.LogWarning("Detected possible encoding issues, trying alternative encodings");
+
+                    // Try alternative encodings in order of likelihood
+                    List<(string Name, Encoding Encoding)> alternativeEncodings = new List<(string, Encoding)>();
+
+                    try
+                    {
+                        alternativeEncodings.Add(("Windows-1253 (Greek)", Encoding.GetEncoding(1253)));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Windows-1253 encoding not available: {ex.Message}");
+                    }
+
+                    try
+                    {
+                        alternativeEncodings.Add(("ISO-8859-7 (Greek)", Encoding.GetEncoding("iso-8859-7")));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"ISO-8859-7 encoding not available: {ex.Message}");
+                    }
+
+                    alternativeEncodings.Add(("UTF-8", Encoding.UTF8));
+
+                    // Try each alternative encoding
+                    foreach (var (name, altEncoding) in alternativeEncodings)
+                    {
                         try
                         {
-                            // Try ISO Greek
-                            encoding = Encoding.GetEncoding("iso-8859-7");
-                            html = encoding.GetString(contentBytes);
+                            string altHtml = altEncoding.GetString(contentBytes);
+
+                            // Basic check if this encoding works better
+                            if (!altHtml.Contains("??????") &&
+                                !altHtml.Contains("�") &&
+                                altHtml.Contains("ΠΕΡΙΦΕΡΕΙΑ"))
+                            {
+                                _logger.LogInformation($"Found better encoding: {name}");
+                                html = altHtml;
+                                encoding = altEncoding;
+                                break;
+                            }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            _logger.LogWarning("Failed with ISO-8859-7, staying with original encoding");
+                            _logger.LogWarning($"Error trying {name} encoding: {ex.Message}");
                         }
                     }
                 }
+
+                // For debugging: log a sample of the HTML to verify encoding
+                if (html != null && html.Length > 200)
+                {
+                    _logger.LogDebug($"Sample of decoded HTML: {html.Substring(0, 200)}...");
+                }
+
+                // For debugging: save the HTML to a file
+                var debugPath = Path.Combine(Directory.GetCurrentDirectory(), "debug_html.txt");
+                File.WriteAllText(debugPath, html, encoding);
+                _logger.LogInformation($"Saved HTML to {debugPath} for debugging");
 
                 return html;
             }

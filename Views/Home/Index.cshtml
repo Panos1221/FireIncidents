@@ -5,100 +5,142 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
-            <div class="card">
+            <!-- Filters Card -->
+            <div class="card filter-card">
                 <div class="card-header">
-                    <h5>Filters</h5>
+                    <h5 data-translate="filters">Filters</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label for="statusFilter" class="form-label">Status</label>
-                        <select id="statusFilter" class="form-select">
-                            <option value="">All</option>
-                            <option value="ΣΕ ΕΞΕΛΙΞΗ">ΣΕ ΕΞΕΛΙΞΗ (In Progress)</option>
-                            <option value="ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ">ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ (Partial Control)</option>
-                            <option value="ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ">ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ (Full Control)</option>
-                        </select>
+                        <label class="form-label section-title" data-translate="status">Status</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="ΣΕ ΕΞΕΛΙΞΗ" id="ongoingCheck" checked>
+                            <label class="form-check-label status-ongoing" for="ongoingCheck" data-translate="inProgress">
+                                ΣΕ ΕΞΕΛΙΞΗ (In Progress)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ" id="partialControlCheck" checked>
+                            <label class="form-check-label status-partial" for="partialControlCheck" data-translate="partialControl">
+                                ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ (Partial Control)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ" id="fullControlCheck">
+                            <label class="form-check-label status-controlled" for="fullControlCheck" data-translate="fullControl">
+                                ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ (Full Control)
+                            </label>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label for="categoryFilter" class="form-label">Category</label>
+                        <label class="form-label" data-translate="category">Category</label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ" id="forestFiresCheck" checked>
-                            <label class="form-check-label" for="forestFiresCheck">
+                            <label class="form-check-label" for="forestFiresCheck" data-translate="forestFires">
                                 ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ (Forest Fires)
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ" id="urbanFiresCheck" checked>
-                            <label class="form-check-label" for="urbanFiresCheck">
+                            <label class="form-check-label" for="urbanFiresCheck" data-translate="urbanFires">
                                 ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ (Urban Fires)
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ" id="assistanceCheck" checked>
-                            <label class="form-check-label" for="assistanceCheck">
+                            <label class="form-check-label" for="assistanceCheck" data-translate="assistance">
                                 ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ (Assistance)
                             </label>
                         </div>
                     </div>
                     <div class="d-grid gap-2">
-                        <button id="refreshBtn" class="btn btn-primary">Refresh Data</button>
+                        <button id="refreshBtn" class="btn btn-primary">
+                            <i class="fas fa-sync-alt me-1"></i> <span data-translate="refresh">Refresh Data</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div class="card mt-3">
+            <!-- Statistics Card -->
+            <div class="card mt-3 stats-card">
                 <div class="card-header">
-                    <h5>Legend</h5>
-                </div>
-                <div class="card-body">
-                    <div class="legend-item">
-                        <img src="~/images/markers/forest-fire-ongoing.png" width="24" height="24" /> Forest Fire - In Progress
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/forest-fire-partial.png" width="24" height="24" /> Forest Fire - Partial Control
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/forest-fire-controlled.png" width="24" height="24" /> Forest Fire - Full Control
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/urban-fire-ongoing.png" width="24" height="24" /> Urban Fire - In Progress
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/urban-fire-partial.png" width="24" height="24" /> Urban Fire - Partial Control
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/urban-fire-controlled.png" width="24" height="24" /> Urban Fire - Full Control
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/assistance-ongoing.png" width="24" height="24" /> Assistance - In Progress
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/assistance-partial.png" width="24" height="24" /> Assistance - Partial Control
-                    </div>
-                    <div class="legend-item">
-                        <img src="~/images/markers/assistance-controlled.png" width="24" height="24" /> Assistance - Full Control
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h5>Statistics</h5>
+                    <h5 data-translate="statistics">Statistics</h5>
                 </div>
                 <div class="card-body">
                     <div id="statistics">
-                        <p>Total Incidents: <span id="totalIncidents">0</span></p>
-                        <p>Forest Fires: <span id="forestFireCount">0</span></p>
-                        <p>Urban Fires: <span id="urbanFireCount">0</span></p>
-                        <p>Assistance: <span id="assistanceCount">0</span></p>
-                        <p>Last Updated: <span id="lastUpdated">Never</span></p>
+                        <div class="stat-item">
+                            <span class="stat-label" data-translate="totalIncidents">Total Incidents:</span>
+                            <span class="stat-value" id="totalIncidents">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-translate="forestFireCount">Forest Fires:</span>
+                            <span class="stat-value" id="forestFireCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-translate="urbanFireCount">Urban Fires:</span>
+                            <span class="stat-value" id="urbanFireCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-translate="assistanceCount">Assistance:</span>
+                            <span class="stat-value" id="assistanceCount">0</span>
+                        </div>
+                        <div class="stat-item last-updated">
+                            <span class="stat-label" data-translate="lastUpdated">Last Updated:</span>
+                            <span class="stat-value" id="lastUpdated">Never</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legend Card -->
+            <div class="card mt-3 legend-card">
+                <div class="card-header">
+                    <h5 data-translate="legend">Legend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="legend-item">
+                        <img src="~/images/markers/forest-fire-ongoing.png" width="24" height="24" />
+                        <span data-translate="forestFireInProgress">Forest Fire - In Progress</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/forest-fire-partial.png" width="24" height="24" />
+                        <span data-translate="forestFirePartial">Forest Fire - Partial Control</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/forest-fire-controlled.png" width="24" height="24" />
+                        <span data-translate="forestFireControlled">Forest Fire - Full Control</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/urban-fire-ongoing.png" width="24" height="24" />
+                        <span data-translate="urbanFireInProgress">Urban Fire - In Progress</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/urban-fire-partial.png" width="24" height="24" />
+                        <span data-translate="urbanFirePartial">Urban Fire - Partial Control</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/urban-fire-controlled.png" width="24" height="24" />
+                        <span data-translate="urbanFireControlled">Urban Fire - Full Control</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/assistance-ongoing.png" width="24" height="24" />
+                        <span data-translate="assistanceInProgress">Assistance - In Progress</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/assistance-partial.png" width="24" height="24" />
+                        <span data-translate="assistancePartial">Assistance - Partial Control</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/assistance-controlled.png" width="24" height="24" />
+                        <span data-translate="assistanceControlled">Assistance - Full Control</span>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Map Container -->
         <div class="col-md-9">
-            <div class="card">
+            <div class="card map-card">
                 <div class="card-body p-0">
                     <div id="map"></div>
                 </div>
@@ -107,18 +149,19 @@
     </div>
 </div>
 
+<!-- Incident Details Modal -->
 <div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="incidentModalLabel">Incident Details</h5>
+                <h5 class="modal-title" id="incidentModalLabel" data-translate="incidentDetails">Incident Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="incidentModalBody">
                 <!-- Incident details will be inserted here -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="close">Close</button>
             </div>
         </div>
     </div>
@@ -127,5 +170,5 @@
 @section Scripts {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="~/js/map.js"></script>
+    <script src="~/js/map.js" asp-append-version="true"></script>
 }

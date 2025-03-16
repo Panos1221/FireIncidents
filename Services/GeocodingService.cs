@@ -419,7 +419,8 @@ namespace FireIncidents.Services
 
             try
             {
-                _logger.LogInformation($"Geocoding incident: {incident.Region}, {incident.Municipality}, {incident.Location}");
+                _logger.LogInformation("Geocoding incident: {Region}, {Municipality}, {Location}",
+                    incident.Region, incident.Municipality, incident.Location);
 
                 // Create a unique key for this incident location
                 string locationKey = GetLocationKey(incident);
@@ -451,20 +452,23 @@ namespace FireIncidents.Services
                 double lat = 0;
                 double lon = 0;
                 bool foundCoordinates = false;
+                string sourceDescription = "Unknown";
 
                 // Check if we already have this location cached
                 if (_cache.TryGetValue(cacheKey, out (double Lat, double Lon) coordinates))
                 {
-                    _logger.LogInformation($"Found cached coordinates for {cacheKey}: {coordinates.Lat}, {coordinates.Lon}");
+                    _logger.LogInformation("Found cached coordinates for {CacheKey}: {Lat}, {Lon}",
+                        cacheKey, coordinates.Lat, coordinates.Lon);
                     lat = coordinates.Lat;
                     lon = coordinates.Lon;
                     foundCoordinates = true;
+                    sourceDescription = "Cache";
                 }
                 else
                 {
                     // FIRST APPROACH: Try to geocode with OSM (active searching)
                     string searchAddress = GetPreciseSearchAddress(incident);
-                    _logger.LogInformation($"Attempting active search with: {searchAddress}");
+                    _logger.LogInformation("Attempting active search with: {SearchAddress}", searchAddress);
 
                     try
                     {
@@ -472,10 +476,12 @@ namespace FireIncidents.Services
 
                         if (geocodedLat != 0 && geocodedLon != 0)
                         {
-                            _logger.LogInformation($"Successfully geocoded to: {geocodedLat}, {geocodedLon}");
+                            _logger.LogInformation("Successfully geocoded to: {Lat}, {Lon}",
+                                geocodedLat, geocodedLon);
                             lat = geocodedLat;
                             lon = geocodedLon;
                             foundCoordinates = true;
+                            sourceDescription = "Nominatim geocoding";
 
                             // Cache these coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
@@ -492,12 +498,13 @@ namespace FireIncidents.Services
                         }
                         else
                         {
-                            _logger.LogWarning($"Active search failed for: {searchAddress}. Falling back to predefined coordinates.");
+                            _logger.LogWarning("Active search failed for: {SearchAddress}. Falling back to predefined coordinates.",
+                                searchAddress);
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"Error during active geocoding. Falling back to predefined coordinates.");
+                        _logger.LogError(ex, "Error during active geocoding. Falling back to predefined coordinates.");
                     }
 
                     // SECOND APPROACH: If active search failed, try predefined coordinates
@@ -506,10 +513,12 @@ namespace FireIncidents.Services
                         // Try looking up the composite key (region-municipality)
                         if (compositeKey != null && _municipalityCoordinates.TryGetValue(compositeKey, out var compositeCoords))
                         {
-                            _logger.LogInformation($"Using predefined coordinates for composite key '{compositeKey}': {compositeCoords.Lat}, {compositeCoords.Lon}");
+                            _logger.LogInformation("Using predefined coordinates for composite key '{CompositeKey}': {Lat}, {Lon}",
+                                compositeKey, compositeCoords.Lat, compositeCoords.Lon);
                             lat = compositeCoords.Lat;
                             lon = compositeCoords.Lon;
                             foundCoordinates = true;
+                            sourceDescription = $"Predefined composite key: {compositeKey}";
 
                             // Cache these coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
@@ -517,10 +526,12 @@ namespace FireIncidents.Services
                         // Try looking up just the municipality
                         else if (municipalityKey != null && _municipalityCoordinates.TryGetValue(municipalityKey, out var municipalityCoords))
                         {
-                            _logger.LogInformation($"Using predefined coordinates for municipality '{municipalityKey}': {municipalityCoords.Lat}, {municipalityCoords.Lon}");
+                            _logger.LogInformation("Using predefined coordinates for municipality '{Municipality}': {Lat}, {Lon}",
+                                municipalityKey, municipalityCoords.Lat, municipalityCoords.Lon);
                             lat = municipalityCoords.Lat;
                             lon = municipalityCoords.Lon;
                             foundCoordinates = true;
+                            sourceDescription = $"Predefined municipality: {municipalityKey}";
 
                             // Cache these coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
@@ -528,10 +539,12 @@ namespace FireIncidents.Services
                         // Try with predefined region coordinates
                         else if (regionKey != null && _regionCoordinates.TryGetValue(regionKey, out var regionCoords))
                         {
-                            _logger.LogInformation($"Using predefined coordinates for region '{regionKey}': {regionCoords.Lat}, {regionCoords.Lon}");
+                            _logger.LogInformation("Using predefined coordinates for region '{Region}': {Lat}, {Lon}",
+                                regionKey, regionCoords.Lat, regionCoords.Lon);
                             lat = regionCoords.Lat;
                             lon = regionCoords.Lon;
                             foundCoordinates = true;
+                            sourceDescription = $"Predefined region: {regionKey}";
 
                             // Cache these coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
@@ -539,10 +552,12 @@ namespace FireIncidents.Services
                         else
                         {
                             // If nothing else worked, use default coordinates
-                            _logger.LogWarning($"No coordinates found. Using default coordinates for Greece.");
+                            _logger.LogWarning("No coordinates found. Using default coordinates for Greece: {Lat}, {Lon}",
+                                _defaultLat, _defaultLon);
                             lat = _defaultLat;
                             lon = _defaultLon;
                             foundCoordinates = true;
+                            sourceDescription = "Default Greece coordinates";
                         }
                     }
                 }
@@ -550,89 +565,132 @@ namespace FireIncidents.Services
                 // Offset the coordinates if there are other incidents nearby
                 if (foundCoordinates)
                 {
+                    var originalCoords = (lat, lon);
                     (lat, lon) = GetOffsetCoordinates(locationKey, lat, lon);
+
+                    // Only log if we actually offset the coordinates
+                    if (originalCoords.lat != lat || originalCoords.lon != lon)
+                    {
+                        _logger.LogDebug("Offset coordinates from ({OrigLat}, {OrigLon}) to ({NewLat}, {NewLon}) to avoid overlap",
+                            originalCoords.lat, originalCoords.lon, lat, lon);
+                    }
                 }
 
-                // Set the coordinates
+                // Set the coordinates and add geocoding source information
                 geocodedIncident.Latitude = lat;
                 geocodedIncident.Longitude = lon;
+                //geocodedIncident.IsGeocoded = true;
+                geocodedIncident.GeocodingSource = sourceDescription;
 
                 return geocodedIncident;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error geocoding incident: {incident.Region}, {incident.Municipality}, {incident.Location}");
+                _logger.LogError(ex, "Error geocoding incident: {Region}, {Municipality}, {Location}",
+                    incident.Region, incident.Municipality, incident.Location);
 
                 // Fall back to default coordinates
                 geocodedIncident.Latitude = _defaultLat;
                 geocodedIncident.Longitude = _defaultLon;
+                //geocodedIncident.IsGeocoded = false;
+                geocodedIncident.GeocodingSource = "Error fallback";
 
                 return geocodedIncident;
             }
         }
 
-        // Get a more precise search string for OSM
         private string GetPreciseSearchAddress(FireIncident incident)
         {
-            StringBuilder address = new StringBuilder();
+            // Use a StringBuilder to properly handle UTF-8 string concatenation
+            var address = new StringBuilder();
 
-            // Build the most specific address possible
-            // If we have a specific location (not generic terms), include it
-            if (!string.IsNullOrEmpty(incident.Location) &&
-                !incident.Location.Equals("ΥΠΑΙΘΡΟΣ", StringComparison.OrdinalIgnoreCase) &&
-                !incident.Location.Equals("ΑΛΛΗ ΠΕΡΙΠΤΩΣΗ", StringComparison.OrdinalIgnoreCase) &&
-                !incident.Location.Equals("ΚΤΙΡΙΟ ΚΑΤΟΙΚΙΑΣ", StringComparison.OrdinalIgnoreCase) &&
-                !incident.Location.Contains("ΕΚΤΑΣΗ", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                address.Append(incident.Location);
-            }
-
-            // Always include municipality if available (most important part)
-            if (!string.IsNullOrEmpty(incident.Municipality))
-            {
-                if (address.Length > 0) address.Append(", ");
-
-                // If municipality contains " - ", it likely has a specific part after the hyphen
-                if (incident.Municipality.Contains(" - "))
+                // Define terms that should be excluded (incident types and generic locations)
+                HashSet<string> excludedTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    // Extract specific part after the dash
-                    var parts = incident.Municipality.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length >= 2)
+                    // Generic locations
+                    "ΥΠΑΙΘΡΟΣ", "ΑΛΛΗ ΠΕΡΙΠΤΩΣΗ", "ΚΤΙΡΙΟ ΚΑΤΟΙΚΙΑΣ",
+                    "ΔΑΣΟΣ", "ΕΚΤΑΣΗ", "ΔΑΣΙΚΗ ΕΚΤΑΣΗ", "ΓΕΩΡΓΙΚΗ ΕΚΤΑΣΗ", "ΧΟΡΤΟΛΙΒΑΔΙΚΗ ΕΚΤΑΣΗ", "ΥΠΟΛΕΙΜΜΑΤΑ ΚΑΛΛΙΕΡΓΕΙΩΝ",
+            
+                    // Incident types
+                    "ΤΡΟΧΑΙΟ", "ΠΥΡΚΑΓΙΑ", "ΦΩΤΙΑ", "ΠΥΡΚΑΪΑ", "ΕΓΚΛΩΒΙΣΜΟΣ",
+                    "ΒΙΟΜΗΧΑΝΙΑ – ΒΙΟΤΕΧΝΙΑ", "ΒΙΟΜΗΧΑΝΙΑ", "ΒΙΟΤΕΧΝΙΑ",
+                    "ΚΑΛΑΜΙΑ", "ΒΑΛΤΟΙ", "ΚΑΛΑΜΙΑ - ΒΑΛΤΟΙ", "ΚΟΠΗ ΔΕΝΔΡΟΥ", "ΚΟΠΗ", "ΠΛΥΣΗ",
+
+            
+                    // Additional generic terms
+                    "ΚΤΙΡΙΟ", "ΚΤΙΡΙΟ ΥΓΕΙΑΣ", "ΚΤΙΡΙΟ ΥΓΕΙΑΣ ΚΑΙ ΚΟΙΝΩΝΙΚΗΣ ΠΡΟΝΟΙΑΣ",
+                    "ΑΛΛΗ", "ΑΛΛΟ", "ΑΛΛΗΣ", "ΑΛΛΟΥ"
+                };
+
+                // Build the most specific address possible
+                // Check if location is actually a geographical place (not an incident type or generic location)
+                bool locationIsGeographical = false;
+
+                if (!string.IsNullOrEmpty(incident.Location))
+                {
+                    // Check if the location is not in our excluded terms
+                    locationIsGeographical = !excludedTerms.Contains(incident.Location) &&
+                                            !excludedTerms.Any(term => incident.Location.Contains(term, StringComparison.OrdinalIgnoreCase));
+
+                    if (locationIsGeographical)
                     {
-                        // Use the more specific part (after the dash)
-                        address.Append(parts[1]);
+                        address.Append(incident.Location);
+                        _logger.LogDebug("Using specific location: {Location}", incident.Location);
                     }
                     else
                     {
-                        address.Append(incident.Municipality);
+                        _logger.LogDebug("Skipping non-geographical location: {Location}", incident.Location);
                     }
                 }
-                else
+
+                // Always include municipality if available (most important part)
+                if (!string.IsNullOrEmpty(incident.Municipality))
                 {
+                    if (address.Length > 0) address.Append(", ");
+
+                    // Preserve the original municipality format including "Δ." and hyphen
                     address.Append(incident.Municipality);
+                    _logger.LogDebug("Using complete municipality: {Municipality}", incident.Municipality);
                 }
-            }
 
-            // Add region
-            if (!string.IsNullOrEmpty(incident.Region))
-            {
-                if (address.Length > 0) address.Append(", ");
-
-                // Clean up the region name - remove "ΠΕΡΙΦΕΡΕΙΑ" if present
-                string region = incident.Region;
-                if (region.StartsWith("ΠΕΡΙΦΕΡΕΙΑ ", StringComparison.OrdinalIgnoreCase))
+                // Add region
+                if (!string.IsNullOrEmpty(incident.Region))
                 {
-                    region = region.Substring("ΠΕΡΙΦΕΡΕΙΑ ".Length);
+                    if (address.Length > 0) address.Append(", ");
+
+                    // Clean up the region name - remove "ΠΕΡΙΦΕΡΕΙΑ" if present
+                    string region = incident.Region;
+                    if (region.StartsWith("ΠΕΡΙΦΕΡΕΙΑ ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        region = region.Substring("ΠΕΡΙΦΕΡΕΙΑ ".Length);
+                    }
+
+                    address.Append(region);
+                    _logger.LogDebug("Using region: {Region}", region);
                 }
 
-                address.Append(region);
+                // Always add country
+                if (address.Length > 0) address.Append(", ");
+                address.Append("Greece");
+
+                // Ensure proper UTF-8 encoding for logging
+                string result = address.ToString();
+                byte[] addressBytes = Encoding.UTF8.GetBytes(result);
+                string addressUTF8 = Encoding.UTF8.GetString(addressBytes);
+
+                // Log the final address with proper encoding
+                _logger.LogDebug("Built search address: {Address}", addressUTF8);
+
+                return result;
             }
-
-            // Always add country
-            if (address.Length > 0) address.Append(", ");
-            address.Append("Greece");
-
-            return address.ToString();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error building search address");
+                // Return a fallback in case of any error
+                return "Greece";
+            }
         }
 
         // Get a unique key for the incident location
@@ -710,126 +768,268 @@ namespace FireIncidents.Services
 
             try
             {
-                // Ensure we're not sending requests too quickly (Nominatim has rate limits)
-                await Task.Delay(1000);
+                // Log with Unicode handling
+                byte[] addressBytes = Encoding.UTF8.GetBytes(address);
+                string addressUTF8 = Encoding.UTF8.GetString(addressBytes);
+                _logger.LogInformation("Geocoding address: {Address}", addressUTF8);
 
-                _logger.LogInformation($"Geocoding address: {address}");
+                // Generate multiple search variations
+                List<string> searchVariations = GenerateSearchVariations(address);
 
-                // Create a new HttpClient for each request to avoid header issues
-                using (var client = new HttpClient())
+                // Try each search variation until one succeeds
+                foreach (var searchAddress in searchVariations)
                 {
-                    // Configure timeout
-                    client.Timeout = TimeSpan.FromSeconds(30);
+                    // Ensure we're not sending requests too quickly (Nominatim has rate limits)
+                    await Task.Delay(1000);
 
-                    // Add required headers for Nominatim
-                    client.DefaultRequestHeaders.Add("User-Agent", "FireIncidentsMapApplication/1.0");
-                    client.DefaultRequestHeaders.Add("Accept", "application/json");
-
-                    // Properly encode the address for URL
-                    var encodedAddress = Uri.EscapeDataString(address);
-
-                    // Enhanced parameters for better results:
-                    // - limit=1: get only the best match
-                    // - accept-language=el: prefer Greek results
-                    // - addressdetails=1: get the address details
-                    // - countrycodes=gr: limit to Greece
-                    // - bounded=1: prefer results within the viewport
-                    var requestUrl = $"{_nominatimBaseUrl}?q={encodedAddress}&format=json&limit=1&accept-language=el&addressdetails=1&countrycodes=gr";
-
-                    // Add viewbox parameter to limit to Greece
-                    requestUrl += "&viewbox=19.22,34.72,29.64,41.75&bounded=1";
-
-                    _logger.LogDebug($"Geocoding request URL: {requestUrl}");
-                    var response = await client.GetAsync(requestUrl);
-
-                    if (!response.IsSuccessStatusCode)
+                    if (searchAddress != address)
                     {
-                        _logger.LogWarning($"Geocoding request failed with status code {response.StatusCode}");
-                        return (0, 0);
+                        _logger.LogDebug("Trying alternative search: {AlternativeAddress}", searchAddress);
                     }
 
-                    var content = await response.Content.ReadAsStringAsync();
-                    _logger.LogDebug($"Geocoding response: {content}");
-
-                    // Check if we got an empty array
-                    if (content == "[]" || string.IsNullOrWhiteSpace(content))
+                    // Create a new HttpClient for each request to avoid header issues
+                    using (var client = new HttpClient())
                     {
-                        _logger.LogWarning($"Geocoding returned no results for: {address}");
-                        return (0, 0);
-                    }
+                        // Configure timeout
+                        client.Timeout = TimeSpan.FromSeconds(30);
 
-                    try
-                    {
-                        var results = JsonSerializer.Deserialize<JsonElement[]>(content);
+                        // Add required headers for Nominatim with explicit encoding information
+                        client.DefaultRequestHeaders.Add("User-Agent", "FireIncidentsMapApplication/1.0");
+                        client.DefaultRequestHeaders.Add("Accept", "application/json; charset=utf-8");
+                        client.DefaultRequestHeaders.Add("Accept-Charset", "utf-8");
 
-                        if (results != null && results.Length > 0)
+                        // Properly encode the address for URL using UTF-8
+                        var encodedAddress = Uri.EscapeDataString(searchAddress);
+
+                        // Enhanced parameters for better results:
+                        var requestUrl = $"{_nominatimBaseUrl}?q={encodedAddress}&format=json&limit=1&accept-language=el&addressdetails=1&countrycodes=gr";
+
+                        // Add viewbox parameter to limit to Greece
+                        requestUrl += "&viewbox=19.22,34.72,29.64,41.75&bounded=1";
+
+                        _logger.LogDebug("Geocoding request URL: {Url}", requestUrl);
+
+                        var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                        request.Headers.Add("Accept-Encoding", "gzip, deflate, br");
+                        request.Headers.Add("Accept-Language", "el,en;q=0.9");
+
+                        var response = await client.SendAsync(request);
+
+                        if (!response.IsSuccessStatusCode)
                         {
-                            var result = results[0];
+                            _logger.LogWarning("Geocoding request failed with status code {StatusCode}", response.StatusCode);
+                            continue; // Try next variation
+                        }
 
-                            // Also log the type of place found
-                            string placeType = "unknown";
-                            if (result.TryGetProperty("type", out JsonElement typeElement))
+                        // Explicitly get content as bytes and convert to string with UTF-8 encoding
+                        var contentBytes = await response.Content.ReadAsByteArrayAsync();
+                        var content = Encoding.UTF8.GetString(contentBytes);
+
+                        // Log with Unicode handling
+                        _logger.LogDebug("Geocoding response: {Response}", content);
+
+                        // Check if we got an empty array
+                        if (content == "[]" || string.IsNullOrWhiteSpace(content))
+                        {
+                            _logger.LogWarning("Geocoding returned no results for address: {Address}", searchAddress);
+                            continue; // Try next variation
+                        }
+
+                        try
+                        {
+                            var results = JsonSerializer.Deserialize<JsonElement[]>(content);
+
+                            if (results != null && results.Length > 0)
                             {
-                                placeType = typeElement.GetString() ?? "unknown";
-                            }
+                                var result = results[0];
 
-                            string displayName = "unknown";
-                            if (result.TryGetProperty("display_name", out JsonElement displayElement))
-                            {
-                                displayName = displayElement.GetString() ?? "unknown";
-                            }
-
-                            _logger.LogInformation($"Found place type: {placeType}, name: {displayName}");
-
-                            if (result.TryGetProperty("lat", out JsonElement latElement) &&
-                                result.TryGetProperty("lon", out JsonElement lonElement))
-                            {
-                                // Handle different ways lat/lon might be represented
-                                if (latElement.ValueKind == JsonValueKind.String &&
-                                    lonElement.ValueKind == JsonValueKind.String)
+                                // Also log the type of place found
+                                string placeType = "unknown";
+                                if (result.TryGetProperty("type", out JsonElement typeElement))
                                 {
-                                    if (double.TryParse(latElement.GetString(),
-                                        NumberStyles.Float,
-                                        CultureInfo.InvariantCulture,
-                                        out double lat) &&
-                                        double.TryParse(lonElement.GetString(),
-                                        NumberStyles.Float,
-                                        CultureInfo.InvariantCulture,
-                                        out double lon))
+                                    placeType = typeElement.GetString() ?? "unknown";
+                                }
+
+                                string displayName = "unknown";
+                                if (result.TryGetProperty("display_name", out JsonElement displayElement))
+                                {
+                                    displayName = displayElement.GetString() ?? "unknown";
+                                }
+
+                                // Log with Unicode handling
+                                byte[] displayBytes = Encoding.UTF8.GetBytes(displayName);
+                                string displayUTF8 = Encoding.UTF8.GetString(displayBytes);
+                                _logger.LogInformation("Found place type: {PlaceType}, name: {DisplayName}", placeType, displayUTF8);
+
+                                if (result.TryGetProperty("lat", out JsonElement latElement) &&
+                                    result.TryGetProperty("lon", out JsonElement lonElement))
+                                {
+                                    // Handle different ways lat/lon might be represented
+                                    if (latElement.ValueKind == JsonValueKind.String &&
+                                        lonElement.ValueKind == JsonValueKind.String)
                                     {
-                                        _logger.LogInformation($"Successfully geocoded to: {lat}, {lon}");
+                                        if (double.TryParse(latElement.GetString(),
+                                            NumberStyles.Float,
+                                            CultureInfo.InvariantCulture,
+                                            out double lat) &&
+                                            double.TryParse(lonElement.GetString(),
+                                            NumberStyles.Float,
+                                            CultureInfo.InvariantCulture,
+                                            out double lon))
+                                        {
+                                            _logger.LogInformation("Successfully geocoded with variation \"{Variation}\": {Lat}, {Lon}",
+                                                searchAddress, lat, lon);
+                                            return (lat, lon);
+                                        }
+                                    }
+                                    else if (latElement.ValueKind == JsonValueKind.Number &&
+                                            lonElement.ValueKind == JsonValueKind.Number)
+                                    {
+                                        double lat = latElement.GetDouble();
+                                        double lon = lonElement.GetDouble();
+                                        _logger.LogInformation("Successfully geocoded with variation \"{Variation}\": {Lat}, {Lon}",
+                                            searchAddress, lat, lon);
                                         return (lat, lon);
                                     }
                                 }
-                                else if (latElement.ValueKind == JsonValueKind.Number &&
-                                        lonElement.ValueKind == JsonValueKind.Number)
-                                {
-                                    double lat = latElement.GetDouble();
-                                    double lon = lonElement.GetDouble();
-                                    _logger.LogInformation($"Successfully geocoded to: {lat}, {lon}");
-                                    return (lat, lon);
-                                }
                             }
-                        }
 
-                        _logger.LogWarning($"Could not extract coordinates from geocoding result for: {address}");
-                        return (0, 0);
-                    }
-                    catch (JsonException ex)
-                    {
-                        _logger.LogError(ex, $"Error parsing geocoding JSON for address: {address}");
-                        _logger.LogDebug($"Raw JSON: {content}");
-                        return (0, 0);
+                            _logger.LogWarning("Could not extract coordinates from geocoding result for address: {Address}", searchAddress);
+                            // Continue to next variation
+                        }
+                        catch (JsonException ex)
+                        {
+                            _logger.LogError(ex, "Error parsing geocoding JSON for address: {Address}", searchAddress);
+                            _logger.LogDebug("Raw JSON: {Content}", content);
+                            // Continue to next variation
+                        }
                     }
                 }
+
+                // If we get here, all variations failed
+                _logger.LogWarning("All geocoding attempts failed for: {Address}", addressUTF8);
+                return (0, 0);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error geocoding address: {address}");
+                _logger.LogError(ex, "Error geocoding address: {Address}", address);
                 return (0, 0);
             }
+        }
 
-            return (0, 0);
+        private List<string> GenerateSearchVariations(string address)
+        {
+            List<string> variations = new List<string>();
+
+            // Add the original address as the first option
+            variations.Add(address);
+
+            try
+            {
+                // Extract components from the address
+                // Typical format: "Δ. MUNICIPALITY - SPECIFIC_LOCATION, REGION, Greece"
+                string region = "Greece";
+                string municipality = "";
+                string specificLocation = "";
+
+                // First, split by ", " to separate the main parts
+                string[] mainParts = address.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (mainParts.Length >= 3)
+                {
+                    // Extract the region (usually the second-to-last part)
+                    region = mainParts[mainParts.Length - 2];
+
+                    // Extract the municipality part (first part)
+                    string municipalityPart = mainParts[0];
+
+                    // Check if it has a hyphen separator 
+                    if (municipalityPart.Contains(" - "))
+                    {
+                        string[] municipalityParts = municipalityPart.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (municipalityParts.Length >= 2)
+                        {
+                            // First part is the municipality
+                            municipality = municipalityParts[0];
+
+                            // Second part is the specific location
+                            specificLocation = municipalityParts[1];
+
+                            // Clean up municipality from the "Δ. " prefix if present
+                            if (municipality.StartsWith("Δ. ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                municipality = municipality.Substring(3);
+                            }
+
+                            // Add variations based on parsed components
+
+                            // 1. Just try the specific location with region
+                            variations.Add($"{specificLocation}, {region}, Greece");
+
+                            // 2. Try municipality without the specific location or "Δ." prefix
+                            variations.Add($"{municipality}, {region}, Greece");
+
+                            // 3. Try both parts without the hyphen and without "Δ." prefix
+                            variations.Add($"{municipality} {specificLocation}, {region}, Greece");
+
+                            // 4. Try specific location first, then municipality
+                            variations.Add($"{specificLocation}, {municipality}, {region}, Greece");
+                        }
+                    }
+                    else
+                    {
+                        // No hyphen, just try without the "Δ." prefix if present
+                        if (municipalityPart.StartsWith("Δ. ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            variations.Add($"{municipalityPart.Substring(3)}, {region}, Greece");
+                        }
+                    }
+                }
+                else if (mainParts.Length == 2)
+                {
+                    // Format might be "MUNICIPALITY, REGION, Greece"
+                    string municipalityPart = mainParts[0];
+                    region = mainParts[1];
+
+                    // Just try without the "Δ." prefix if present
+                    if (municipalityPart.StartsWith("Δ. ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        variations.Add($"{municipalityPart.Substring(3)}, {region}, Greece");
+                    }
+                }
+
+                // If there's a "Δ." in the address anywhere, try a version without it
+                if (address.Contains("Δ."))
+                {
+                    variations.Add(address.Replace("Δ. ", ""));
+                }
+
+                // If there's a hyphen anywhere, try a version with space instead
+                if (address.Contains(" - "))
+                {
+                    variations.Add(address.Replace(" - ", " "));
+                }
+
+                // Try just with the region name
+                if (!string.IsNullOrEmpty(region) && region != "Greece")
+                {
+                    variations.Add($"{region}, Greece");
+                }
+
+                // Make the variations unique (remove duplicates)
+                variations = variations.Distinct().ToList();
+
+                _logger.LogDebug("Generated {Count} search variations for: {Address}", variations.Count, address);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating search variations for: {Address}", address);
+                // Return just the original address if there's an error
+                return new List<string> { address };
+            }
+
+            return variations;
         }
     }
 }

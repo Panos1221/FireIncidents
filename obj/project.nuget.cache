@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "xRCE79mi43I=",
+  "dgSpecHash": "2Q+DDYN2Kc4=",
   "success": true,
   "projectFilePath": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\FireIncidents.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\pansa\\.nuget\\packages\\htmlagilitypack\\1.12.0\\htmlagilitypack.1.12.0.nupkg.sha512",
-    "C:\\Users\\pansa\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+    "C:\\Users\\pansa\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\pansa\\.nuget\\packages\\system.text.encoding.codepages\\9.0.0\\system.text.encoding.codepages.9.0.0.nupkg.sha512"
   ],
   "logs": []
 }
