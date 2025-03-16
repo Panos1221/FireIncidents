@@ -6,6 +6,15 @@ This web application provides real-time visualization of active incidents throug
 ## Live Demo
 The application is hosted on Azure and can be accessed [here](https://hfcliveincidents-hkcebcfdefgjcuh8.italynorth-01.azurewebsites.net/).
 
+### Azure Free Tier Limitations
+Please note that this application is hosted on Azure's Free Tier, which has the following limitations:
+- The application automatically sleeps after 20 minutes of inactivity
+- Limited to 60 minutes of CPU time per day
+- Shared infrastructure with other free tier applications
+- Cold starts may take 1-2 minutes when the application has been inactive
+
+Due to these limitations, the site may occasionally be unavailable or slow to load, especially during periods of inactivity. If you encounter the default Azure placeholder page or slow loading times, please wait a few minutes and try again as the application may be waking up from sleep mode.
+
 ## Features
 - **Real-time Data**: Scrapes and displays current fire incidents from the Greek Fire Service
 - **Interactive Map**: Visualizes incidents with location-specific markers
