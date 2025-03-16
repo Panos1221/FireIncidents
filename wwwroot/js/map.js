@@ -353,17 +353,13 @@ function filterIncidents() {
 
     console.log(`Filtered down to ${filteredIncidents.length} incidents`);
 
-    // Add filtered incidents to map
     addIncidentsToMap(filteredIncidents);
 
-    // Update statistics for filtered incidents
     updateStatistics(filteredIncidents);
 
-    // Fit map to show all filtered markers
     if (filteredIncidents.length > 0) {
         fitMapToMarkers();
 
-        // If this is initial load, mark it as complete after fitting the map
         if (isInitialLoad) {
             isInitialLoad = false;
         }
