@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using FireIncidents.Models;
-using Microsoft.Extensions.Logging;
 using System.Web;
 using System.Text;
-using System.Linq;
-using System.IO;
 
 namespace FireIncidents.Services
 {
@@ -33,7 +26,7 @@ namespace FireIncidents.Services
                 _logger.LogInformation("Starting to scrape fire incidents...");
                 string html = await GetHtmlAsync();
 
-                // For debugging: save the HTML to a file
+                // For debugging
                 var debugPath = Path.Combine(Directory.GetCurrentDirectory(), "debug_html.txt");
                 File.WriteAllText(debugPath, html, Encoding.UTF8);
                 _logger.LogInformation($"Saved HTML to {debugPath} for debugging");
@@ -42,7 +35,6 @@ namespace FireIncidents.Services
 
                 _logger.LogInformation($"Successfully scraped {incidents.Count} active incidents");
 
-                // Log each incident for debugging
                 foreach (var incident in incidents)
                 {
                     _logger.LogInformation($"Incident: {incident.Category} - {incident.Status} - {incident.Region} - {incident.Municipality} - {incident.Location}");
@@ -57,7 +49,6 @@ namespace FireIncidents.Services
             }
         }
 
-        // Update the GetHtmlAsync method in FireServiceScraperService.cs to better handle encoding
         private async Task<string> GetHtmlAsync()
         {
             try
@@ -74,19 +65,15 @@ namespace FireIncidents.Services
                 _logger.LogInformation($"Received response: {response.StatusCode}");
                 response.EnsureSuccessStatusCode();
 
-                // Get the response content with the correct encoding for Greek characters
                 var contentBytes = await response.Content.ReadAsByteArrayAsync();
 
-                // Try to detect charset from content-type header
                 var contentType = response.Content.Headers.ContentType;
                 string charSet = contentType?.CharSet;
 
                 _logger.LogInformation($"Content-Type: {contentType}, CharSet: {charSet}");
 
-                // Default to UTF-8 if no charset is specified
                 Encoding encoding = Encoding.UTF8;
 
-                // Try to use the specified charset if available
                 if (!string.IsNullOrEmpty(charSet))
                 {
                     try
@@ -102,7 +89,7 @@ namespace FireIncidents.Services
 
                 string html = encoding.GetString(contentBytes);
 
-                // Check if encoding might be wrong (common for Greek sites)
+                // Check if encoding might be wrong
                 bool encodingIssue = html.Contains("??????") ||
                                      html.Contains("Î") ||
                                      html.Contains("Ï") ||
@@ -161,13 +148,11 @@ namespace FireIncidents.Services
                     }
                 }
 
-                // For debugging: log a sample of the HTML to verify encoding
                 if (html != null && html.Length > 200)
                 {
                     _logger.LogDebug($"Sample of decoded HTML: {html.Substring(0, 200)}...");
                 }
 
-                // For debugging: save the HTML to a file
                 var debugPath = Path.Combine(Directory.GetCurrentDirectory(), "debug_html.txt");
                 File.WriteAllText(debugPath, html, encoding);
                 _logger.LogInformation($"Saved HTML to {debugPath} for debugging");
@@ -189,7 +174,6 @@ namespace FireIncidents.Services
 
             try
             {
-                // Define the tab IDs for different categories
                 var tabs = new Dictionary<string, string>
                 {
                     { "L1", "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ" },   // Forest Fires
@@ -197,7 +181,6 @@ namespace FireIncidents.Services
                     { "Q1", "ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ" }     // Assistance
                 };
 
-                // Define valid incident statuses (excluding ΛΗΞΗ/Completed)
                 var validStatuses = new HashSet<string>
                 {
                     "ΣΕ ΕΞΕΛΙΞΗ",          // In Progress
@@ -246,7 +229,7 @@ namespace FireIncidents.Services
                                 }
                             }
 
-                            // If it's "ΛΗΞΗ" (Completed), ignore this section
+                            // If its ΛΗΞΗ, ignore
                             if (text.StartsWith("ΛΗΞΗ"))
                             {
                                 _logger.LogInformation("Found ΛΗΞΗ section, skipping");

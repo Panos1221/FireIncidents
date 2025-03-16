@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-
-namespace FireIncidents.Logging
+﻿namespace FireIncidents.Logging
 {
     public static class LoggingExtensions
     {

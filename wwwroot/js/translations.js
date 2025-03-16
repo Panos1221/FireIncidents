@@ -185,7 +185,7 @@ function updatePageTranslations() {
 }
 
 
-// Update select options
+// select options
 function updateSelectOptions() {
     const statusFilter = document.getElementById('statusFilter');
     if (statusFilter) {

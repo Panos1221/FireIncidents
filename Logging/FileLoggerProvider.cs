@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Options;
 
 namespace FireIncidents.Logging
@@ -62,7 +57,6 @@ namespace FireIncidents.Logging
                 {
                     if (currentFileInfo.Exists && currentFileInfo.Length > _options.FileSizeLimitBytes)
                     {
-                        // Roll the file if it's too large
                         RollFiles();
                         currentFileName = GetCurrentFileName();
                     }

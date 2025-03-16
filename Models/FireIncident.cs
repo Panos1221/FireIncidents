@@ -1,5 +1,3 @@
-using System;
-
 namespace FireIncidents.Models
 {
     public class FireIncident
@@ -12,7 +10,6 @@ namespace FireIncidents.Models
         public string StartDate { get; set; } 
         public string LastUpdate { get; set; }
         
-        // Helper method to get the marker image based on status and category
         public string GetMarkerImage()
         {
             string statusCode = Status switch
@@ -34,7 +31,6 @@ namespace FireIncidents.Models
             return $"{categoryCode}-{statusCode}.png";
         }
         
-        // Helper property to get a well-formatted address for geocoding
         public string FullAddress => $"{Location}, {Municipality}, {Region}, Greece";
     }
 }

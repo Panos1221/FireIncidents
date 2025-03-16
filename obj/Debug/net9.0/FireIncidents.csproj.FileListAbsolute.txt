@@ -194,7 +194,6 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\staticw
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.FireIncidents.props
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.FireIncidents.props
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\staticwebassets.pack.json
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\FireInci.329BCC64.Up2Date
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\FireIncidents.dll
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\refint\FireIncidents.dll
@@ -204,6 +203,7 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\ref\Fir
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\g9y5runz5c-b3evy44epu.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\FireIncidents.sourcelink.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\w4qxfa2i2m-1bgkcytdz3.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\hhu6cz8n9g-q5d74b3cym.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\c2nfk42ev8-vf05gvxmt5.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\xajcyjls62-od4mdfgcnb.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\hhu6cz8n9g-2kloxirh5i.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\compressed\xajcyjls62-vgxdknbz0f.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

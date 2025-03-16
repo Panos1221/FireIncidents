@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc;
 using FireIncidents.Services;
 using FireIncidents.Models;
 
@@ -36,16 +31,13 @@ namespace FireIncidents.Controllers
             {
                 _logger.LogInformation("API request received for incidents");
 
-                // Clear the active incidents tracking for spreading out markers
                 _geocodingService.ClearActiveIncidents();
 
-                // Get the raw incidents
                 _logger.LogInformation("Calling scraper service");
                 var incidents = await _scraperService.ScrapeIncidentsAsync();
 
                 _logger.LogInformation($"Scraped {incidents.Count} incidents");
 
-                // Apply filters if specified
                 if (!string.IsNullOrEmpty(category))
                 {
                     _logger.LogInformation($"Filtering by category: {category}");
@@ -60,7 +52,6 @@ namespace FireIncidents.Controllers
 
                 _logger.LogInformation($"After filtering: {incidents.Count} incidents");
 
-                // Geocode all incidents
                 var geocodedIncidents = new List<GeocodedIncident>();
                 foreach (var incident in incidents)
                 {
@@ -84,7 +75,6 @@ namespace FireIncidents.Controllers
                     {
                         _logger.LogError(ex, $"Error geocoding incident: {incident.Location}");
 
-                        // Add the incident with default coordinates rather than skipping it
                         var fallbackIncident = new GeocodedIncident
                         {
                             Status = incident.Status,
@@ -94,7 +84,7 @@ namespace FireIncidents.Controllers
                             Location = incident.Location,
                             StartDate = incident.StartDate,
                             LastUpdate = incident.LastUpdate,
-                            Latitude = 38.2,  // Default coordinates (center of Greece)
+                            Latitude = 38.2,  
                             Longitude = 23.8
                         };
 

@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using FireIncidents.Services;
 using FireIncidents.Logging;
 using System.Text;
@@ -47,7 +41,6 @@ namespace FireIncidents
             // Set console encoding to UTF-8
             Console.OutputEncoding = Encoding.UTF8;
 
-            // Clear logs on application startup (optional)
             ClearLogs();
 
             // Log application startup

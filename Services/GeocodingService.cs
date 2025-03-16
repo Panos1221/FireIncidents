@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Web;
+﻿using System.Text.Json;
 using FireIncidents.Models;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.IO;
 
 namespace FireIncidents.Services
 {
@@ -21,11 +13,11 @@ namespace FireIncidents.Services
         private readonly IMemoryCache _cache;
         private readonly string _nominatimBaseUrl = "https://nominatim.openstreetmap.org/search";
 
-        // Default coordinates for fallback (center of Greece)
+        // center of Greece
         private readonly double _defaultLat = 38.2;
         private readonly double _defaultLon = 23.8;
 
-        // Dictionary to store municipality mappings
+        // municipality mappings
         private Dictionary<string, (double Lat, double Lon)> _municipalityCoordinates;
 
         // Track incident coordinates to avoid placing them on top of each other
@@ -72,10 +64,9 @@ namespace FireIncidents.Services
         {
             _municipalityCoordinates = new Dictionary<string, (double Lat, double Lon)>(StringComparer.OrdinalIgnoreCase);
 
-            // Load from built-in data first
             LoadBuiltInMunicipalityData();
 
-            // Try to load from JSON file if it exists
+            // load from JSON file if it exists
             try
             {
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "municipalities.json");
@@ -106,10 +97,10 @@ namespace FireIncidents.Services
             _logger.LogInformation($"Initialized with {_municipalityCoordinates.Count} municipality coordinates");
         }
 
-        // Load built-in municipality data (abbreviated for space)
+        // built-in municipality data (abbreviated for space)
         private void LoadBuiltInMunicipalityData()
         {
-            // ATTIKI (Athens) municipalities
+            // ATTIKI municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΑΘΗΝΑΙΩΝ"] = (37.9838, 23.7275);
             _municipalityCoordinates["ΔΗΜΟΣ ΠΕΙΡΑΙΩΣ"] = (37.9432, 23.6469);
             _municipalityCoordinates["ΔΗΜΟΣ ΓΛΥΦΑΔΑΣ"] = (37.8685, 23.7545);
@@ -204,7 +195,6 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΠΥΛΟΥ"] = (36.9131, 21.6961);
             _municipalityCoordinates["ΔΗΜΟΣ ΕΥΡΩΤΑ"] = (36.8667, 22.6667);
 
-            // Add additional municipality entries for specific municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΑΡΤΑΙΩΝ - ΑΜΒΡΑΚΙΚΟΥ"] = (39.0464, 20.9026);
             _municipalityCoordinates["ΔΗΜΟΣ ΔΙΑΚΟΠΤΟΥ"] = (38.1997, 22.2027);
             _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΙΑΛΕΙΑΣ - ΔΙΑΚΟΠΤΟΥ"] = (38.1997, 22.2027);
@@ -327,7 +317,7 @@ namespace FireIncidents.Services
 
             // Add more as needed
 
-            // Generate composite keys for region-municipality combinations
+            // keys for region-municipality combinations
             var compositeEntries = new Dictionary<string, (double Lat, double Lon)>();
             foreach (var region in _regionCoordinates)
             {
@@ -338,14 +328,13 @@ namespace FireIncidents.Services
                 }
             }
 
-            // Add the composite entries to the main dictionary
             foreach (var entry in compositeEntries)
             {
                 _municipalityCoordinates[entry.Key] = entry.Value;
             }
         }
 
-        // Save newly discovered coordinates to enhance future geocoding
+        // Save new coordinates for future geocoding
         private void SaveNewCoordinates(string key, double lat, double lon)
         {
             if (string.IsNullOrEmpty(key) || lat == 0 || lon == 0)
@@ -353,23 +342,19 @@ namespace FireIncidents.Services
 
             try
             {
-                // Add to in-memory dictionary
                 if (!_municipalityCoordinates.ContainsKey(key))
                 {
                     _municipalityCoordinates[key] = (lat, lon);
                     _logger.LogInformation($"Added new coordinates for '{key}': {lat}, {lon}");
 
-                    // Create directory if it doesn't exist
                     var directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
                     if (!Directory.Exists(directoryPath))
                     {
                         Directory.CreateDirectory(directoryPath);
                     }
 
-                    // Try to save to JSON file
                     var filePath = Path.Combine(directoryPath, "municipalities.json");
 
-                    // Load existing data if file exists
                     Dictionary<string, (double Lat, double Lon)> data = new Dictionary<string, (double Lat, double Lon)>();
                     if (File.Exists(filePath))
                     {
@@ -388,10 +373,8 @@ namespace FireIncidents.Services
                         }
                     }
 
-                    // Add new entry
                     data[key] = (lat, lon);
 
-                    // Save back to file
                     var options = new JsonSerializerOptions { WriteIndented = true };
                     var newJson = JsonSerializer.Serialize(data, options);
                     File.WriteAllText(filePath, newJson, Encoding.UTF8);
@@ -405,7 +388,6 @@ namespace FireIncidents.Services
 
         public async Task<GeocodedIncident> GeocodeIncidentAsync(FireIncident incident)
         {
-            // Create a geocoded incident with the same properties as the original incident
             var geocodedIncident = new GeocodedIncident
             {
                 Status = incident.Status,
@@ -422,15 +404,12 @@ namespace FireIncidents.Services
                 _logger.LogInformation("Geocoding incident: {Region}, {Municipality}, {Location}",
                     incident.Region, incident.Municipality, incident.Location);
 
-                // Create a unique key for this incident location
                 string locationKey = GetLocationKey(incident);
 
-                // Try different combinations of location data
                 string compositeKey = null;
                 string municipalityKey = null;
                 string regionKey = null;
 
-                // Build keys for lookup
                 if (!string.IsNullOrEmpty(incident.Region) && !string.IsNullOrEmpty(incident.Municipality))
                 {
                     compositeKey = $"{incident.Region}-{incident.Municipality}";
@@ -446,7 +425,7 @@ namespace FireIncidents.Services
                     regionKey = incident.Region;
                 }
 
-                // Check if we have cached coordinates for this exact location
+                // Check for cached coordinates for this location
                 string cacheKey = GetCacheKey(incident.Region, incident.Municipality, incident.Location);
 
                 double lat = 0;
@@ -454,7 +433,6 @@ namespace FireIncidents.Services
                 bool foundCoordinates = false;
                 string sourceDescription = "Unknown";
 
-                // Check if we already have this location cached
                 if (_cache.TryGetValue(cacheKey, out (double Lat, double Lon) coordinates))
                 {
                     _logger.LogInformation("Found cached coordinates for {CacheKey}: {Lat}, {Lon}",
@@ -466,7 +444,7 @@ namespace FireIncidents.Services
                 }
                 else
                 {
-                    // FIRST APPROACH: Try to geocode with OSM (active searching)
+                    // FIRST TRY: geocode with OSM (active searching)
                     string searchAddress = GetPreciseSearchAddress(incident);
                     _logger.LogInformation("Attempting active search with: {SearchAddress}", searchAddress);
 
@@ -483,10 +461,10 @@ namespace FireIncidents.Services
                             foundCoordinates = true;
                             sourceDescription = "Nominatim geocoding";
 
-                            // Cache these coordinates
+                            // Cache coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
 
-                            // Also save to our coordinates dictionary for future use
+                            // save to our coordinates dictionary for future use
                             if (municipalityKey != null)
                             {
                                 SaveNewCoordinates(municipalityKey, lat, lon);
@@ -507,10 +485,10 @@ namespace FireIncidents.Services
                         _logger.LogError(ex, "Error during active geocoding. Falling back to predefined coordinates.");
                     }
 
-                    // SECOND APPROACH: If active search failed, try predefined coordinates
+                    // SECOND TRY: If active search failed, try predefined coordinates
                     if (!foundCoordinates)
                     {
-                        // Try looking up the composite key (region-municipality)
+                        // Try looking to region-municipality
                         if (compositeKey != null && _municipalityCoordinates.TryGetValue(compositeKey, out var compositeCoords))
                         {
                             _logger.LogInformation("Using predefined coordinates for composite key '{CompositeKey}': {Lat}, {Lon}",
@@ -520,10 +498,9 @@ namespace FireIncidents.Services
                             foundCoordinates = true;
                             sourceDescription = $"Predefined composite key: {compositeKey}";
 
-                            // Cache these coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
                         }
-                        // Try looking up just the municipality
+                        // Try looking just the municipality
                         else if (municipalityKey != null && _municipalityCoordinates.TryGetValue(municipalityKey, out var municipalityCoords))
                         {
                             _logger.LogInformation("Using predefined coordinates for municipality '{Municipality}': {Lat}, {Lon}",
@@ -533,7 +510,6 @@ namespace FireIncidents.Services
                             foundCoordinates = true;
                             sourceDescription = $"Predefined municipality: {municipalityKey}";
 
-                            // Cache these coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
                         }
                         // Try with predefined region coordinates
@@ -546,7 +522,6 @@ namespace FireIncidents.Services
                             foundCoordinates = true;
                             sourceDescription = $"Predefined region: {regionKey}";
 
-                            // Cache these coordinates
                             _cache.Set(cacheKey, (lat, lon), TimeSpan.FromDays(30));
                         }
                         else
@@ -562,21 +537,19 @@ namespace FireIncidents.Services
                     }
                 }
 
-                // Offset the coordinates if there are other incidents nearby
+                // Offset the coordinates if there are other incidents on the same municipality
                 if (foundCoordinates)
                 {
                     var originalCoords = (lat, lon);
                     (lat, lon) = GetOffsetCoordinates(locationKey, lat, lon);
 
-                    // Only log if we actually offset the coordinates
                     if (originalCoords.lat != lat || originalCoords.lon != lon)
                     {
                         _logger.LogDebug("Offset coordinates from ({OrigLat}, {OrigLon}) to ({NewLat}, {NewLon}) to avoid overlap",
-                            originalCoords.lat, originalCoords.lon, lat, lon);
+                            originalCoords.lat, originalCoords.lon, lat, lon); //log if an incident gets offset coordinates
                     }
                 }
 
-                // Set the coordinates and add geocoding source information
                 geocodedIncident.Latitude = lat;
                 geocodedIncident.Longitude = lon;
                 //geocodedIncident.IsGeocoded = true;
@@ -589,7 +562,6 @@ namespace FireIncidents.Services
                 _logger.LogError(ex, "Error geocoding incident: {Region}, {Municipality}, {Location}",
                     incident.Region, incident.Municipality, incident.Location);
 
-                // Fall back to default coordinates
                 geocodedIncident.Latitude = _defaultLat;
                 geocodedIncident.Longitude = _defaultLon;
                 //geocodedIncident.IsGeocoded = false;
@@ -601,36 +573,30 @@ namespace FireIncidents.Services
 
         private string GetPreciseSearchAddress(FireIncident incident)
         {
-            // Use a StringBuilder to properly handle UTF-8 string concatenation
+            // StringBuilder to properly handle UTF-8 string
             var address = new StringBuilder();
 
             try
             {
-                // Define terms that should be excluded (incident types and generic locations)
+                // terms that should be excluded from search (incident types and generic locations)
                 HashSet<string> excludedTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    // Generic locations
                     "ΥΠΑΙΘΡΟΣ", "ΑΛΛΗ ΠΕΡΙΠΤΩΣΗ", "ΚΤΙΡΙΟ ΚΑΤΟΙΚΙΑΣ", "ΧΩΡΟΣ ΑΠΟΘΗΚΕΥΣΗΣ",
                     "ΔΑΣΟΣ", "ΕΚΤΑΣΗ", "ΔΑΣΙΚΗ ΕΚΤΑΣΗ", "ΓΕΩΡΓΙΚΗ ΕΚΤΑΣΗ", "ΧΟΡΤΟΛΙΒΑΔΙΚΗ ΕΚΤΑΣΗ", "ΥΠΟΛΕΙΜΜΑΤΑ ΚΑΛΛΙΕΡΓΕΙΩΝ",
             
-                    // Incident types
                     "ΤΡΟΧΑΙΟ", "ΠΥΡΚΑΓΙΑ", "ΦΩΤΙΑ", "ΠΥΡΚΑΪΑ", "ΕΓΚΛΩΒΙΣΜΟΣ", "ΔΙΑΣΩΣΗ ΖΩΟΥ",
                     "ΒΙΟΜΗΧΑΝΙΑ – ΒΙΟΤΕΧΝΙΑ", "ΒΙΟΜΗΧΑΝΙΑ", "ΒΙΟΤΕΧΝΙΑ",
                     "ΚΑΛΑΜΙΑ", "ΒΑΛΤΟΙ", "ΚΑΛΑΜΙΑ - ΒΑΛΤΟΙ", "ΚΟΠΗ ΔΕΝΔΡΟΥ", "ΚΟΠΗ", "ΠΛΥΣΗ", "ΜΕΤΑΦΟΡΙΚΑ ΜΕΣΑ",
 
             
-                    // Additional generic terms
                     "ΚΤΙΡΙΟ", "ΚΤΙΡΙΟ ΥΓΕΙΑΣ", "ΚΤΙΡΙΟ ΥΓΕΙΑΣ ΚΑΙ ΚΟΙΝΩΝΙΚΗΣ ΠΡΟΝΟΙΑΣ",
                     "ΑΛΛΗ", "ΑΛΛΟ", "ΑΛΛΗΣ", "ΑΛΛΟΥ"
                 };
 
-                // Build the most specific address possible
-                // Check if location is actually a geographical place (not an incident type or generic location)
                 bool locationIsGeographical = false;
 
                 if (!string.IsNullOrEmpty(incident.Location))
                 {
-                    // Check if the location is not in our excluded terms
                     locationIsGeographical = !excludedTerms.Contains(incident.Location) &&
                                             !excludedTerms.Any(term => incident.Location.Contains(term, StringComparison.OrdinalIgnoreCase));
 
@@ -645,24 +611,20 @@ namespace FireIncidents.Services
                     }
                 }
 
-                // Always include municipality if available (most important part)
                 if (!string.IsNullOrEmpty(incident.Municipality))
                 {
                     if (address.Length > 0) address.Append(", ");
 
-                    // Preserve the original municipality format including "Δ." and hyphen
                     address.Append(incident.Municipality);
                     _logger.LogDebug("Using complete municipality: {Municipality}", incident.Municipality);
                 }
 
-                // Add region
                 if (!string.IsNullOrEmpty(incident.Region))
                 {
                     if (address.Length > 0) address.Append(", ");
 
-                    // Clean up the region name - remove "ΠΕΡΙΦΕΡΕΙΑ" if present
                     string region = incident.Region;
-                    if (region.StartsWith("ΠΕΡΙΦΕΡΕΙΑ ", StringComparison.OrdinalIgnoreCase))
+                    if (region.StartsWith("ΠΕΡΙΦΕΡΕΙΑ ", StringComparison.OrdinalIgnoreCase)) //Clean up
                     {
                         region = region.Substring("ΠΕΡΙΦΕΡΕΙΑ ".Length);
                     }
@@ -671,16 +633,13 @@ namespace FireIncidents.Services
                     _logger.LogDebug("Using region: {Region}", region);
                 }
 
-                // Always add country
                 if (address.Length > 0) address.Append(", ");
                 address.Append("Greece");
 
-                // Ensure proper UTF-8 encoding for logging
                 string result = address.ToString();
                 byte[] addressBytes = Encoding.UTF8.GetBytes(result);
                 string addressUTF8 = Encoding.UTF8.GetString(addressBytes);
 
-                // Log the final address with proper encoding
                 _logger.LogDebug("Built search address: {Address}", addressUTF8);
 
                 return result;
@@ -688,7 +647,6 @@ namespace FireIncidents.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error building search address");
-                // Return a fallback in case of any error
                 return "Greece";
             }
         }
@@ -696,7 +654,6 @@ namespace FireIncidents.Services
         // Get a unique key for the incident location
         private string GetLocationKey(FireIncident incident)
         {
-            // Create a key that uniquely identifies this location
             if (!string.IsNullOrEmpty(incident.Municipality) && !string.IsNullOrEmpty(incident.Region))
             {
                 return $"{incident.Region}-{incident.Municipality}".ToLowerInvariant();
@@ -713,7 +670,6 @@ namespace FireIncidents.Services
         // Get offset coordinates to avoid overlapping markers
         private (double Lat, double Lon) GetOffsetCoordinates(string locationKey, double lat, double lon)
         {
-            // Check if we already have incidents at this location
             if (!_activeIncidentCoordinates.ContainsKey(locationKey))
             {
                 _activeIncidentCoordinates[locationKey] = new List<(double Lat, double Lon)>();
@@ -721,22 +677,18 @@ namespace FireIncidents.Services
 
             var existingCoordinates = _activeIncidentCoordinates[locationKey];
 
-            // If this is the first incident at this location, use the exact coordinates
             if (existingCoordinates.Count == 0)
             {
                 existingCoordinates.Add((lat, lon));
                 return (lat, lon);
             }
 
-            // Otherwise, offset the coordinates slightly
-            // The offset increases with each additional incident
             double offsetDistance = 0.01 * (existingCoordinates.Count); // about 1km per incident
             double angle = Math.PI * 2 * existingCoordinates.Count / 8; // Distribute in a circle
 
             double offsetLat = lat + offsetDistance * Math.Sin(angle);
             double offsetLon = lon + offsetDistance * Math.Cos(angle);
 
-            // Store the offset coordinates
             existingCoordinates.Add((offsetLat, offsetLon));
 
             return (offsetLat, offsetLon);
@@ -744,7 +696,6 @@ namespace FireIncidents.Services
 
         private string GetCacheKey(string region, string municipality, string location)
         {
-            // Sanitize the values to create a safe cache key
             string sanitized = $"{SanitizeForCacheKey(region)}_{SanitizeForCacheKey(municipality)}_{SanitizeForCacheKey(location)}";
             return $"geocode_{sanitized}";
         }
@@ -773,13 +724,11 @@ namespace FireIncidents.Services
                 string addressUTF8 = Encoding.UTF8.GetString(addressBytes);
                 _logger.LogInformation("Geocoding address: {Address}", addressUTF8);
 
-                // Generate multiple search variations
                 List<string> searchVariations = GenerateSearchVariations(address);
 
-                // Try each search variation until one succeeds
                 foreach (var searchAddress in searchVariations)
                 {
-                    // Ensure we're not sending requests too quickly (Nominatim has rate limits)
+                    // Delay for Nominatim since it has rate limits
                     await Task.Delay(1000);
 
                     if (searchAddress != address)
@@ -964,16 +913,16 @@ namespace FireIncidents.Services
 
                             // Add variations based on parsed components
 
-                            // 1. Just try the specific location with region
+                            // 1.  specific location with region
                             variations.Add($"{specificLocation}, {region}, Greece");
 
-                            // 2. Try municipality without the specific location or "Δ." prefix
+                            // 2. municipality without the specific location or "Δ." prefix
                             variations.Add($"{municipality}, {region}, Greece");
 
-                            // 3. Try both parts without the hyphen and without "Δ." prefix
+                            // 3. both parts without the hyphen and without "Δ." prefix
                             variations.Add($"{municipality} {specificLocation}, {region}, Greece");
 
-                            // 4. Try specific location first, then municipality
+                            // 4. specific location first, then municipality
                             variations.Add($"{specificLocation}, {municipality}, {region}, Greece");
                         }
                     }

@@ -1,4 +1,4 @@
-// Map initialization and incident data handling with translations support
+// Map initialization 
 let map;
 let markers = [];
 let allIncidents = [];
@@ -6,20 +6,18 @@ let incidentModal;
 let markersLayer;
 let isInitialLoad = true;
 
-// Initialize the map when the document is loaded
 document.addEventListener('DOMContentLoaded', function () {
     initMap();
     initModal();
     setupEventListeners();
     loadIncidents();
 
-    // Auto-refresh data every 5 minutes
+    // Auto-refresh every 5 minutes
     setInterval(loadIncidents, 5 * 60 * 1000);
 });
 
 // Listen for language changes to update the map
 document.addEventListener('languageChanged', function () {
-    // Update any visible popups
     markers.forEach(markerObj => {
         if (markerObj.marker && markerObj.marker.getPopup() && markerObj.marker.getPopup().isOpen()) {
             updateMarkerPopup(markerObj.marker, markerObj.incident);
@@ -27,9 +25,8 @@ document.addEventListener('languageChanged', function () {
     });
 });
 
-// Initialize the Leaflet map with better styling
+// Leaflet map
 function initMap() {
-    // Create a markers layer group to manage all markers
     markersLayer = L.layerGroup();
 
     // Center map on Greece
@@ -38,42 +35,36 @@ function initMap() {
         attributionControl: false
     }).setView([38.2, 23.8], 7);
 
-    // Custom zoom control on the right side
     L.control.zoom({
         position: 'topright'
     }).addTo(map);
 
-    // Add attribution with custom styling
     L.control.attribution({
         position: 'bottomright',
         prefix: '<a href="https://leafletjs.com" target="_blank">Leaflet</a>'
     }).addAttribution('© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors').addTo(map);
 
-    // Add OpenStreetMap tile layer with retina support for sharper display
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         detectRetina: true
     }).addTo(map);
 
-    // Add the markers layer to the map
     markersLayer.addTo(map);
 
-    // Add scale control
     L.control.scale({
         imperial: false,
         position: 'bottomleft'
     }).addTo(map);
 }
 
-// Initialize the Bootstrap modal
+// Bootstrap modal
 function initModal() {
     incidentModal = new bootstrap.Modal(document.getElementById('incidentModal'));
 }
 
-// Set up event listeners for filters and refresh button
+// event listeners for filters and refresh button
 function setupEventListeners() {
     document.getElementById('refreshBtn').addEventListener('click', function () {
-        // Add loading animation to button
         const refreshBtn = this;
         const originalText = refreshBtn.innerHTML;
 
@@ -99,7 +90,7 @@ function setupEventListeners() {
     document.getElementById('assistanceCheck').addEventListener('change', filterIncidents);
 }
 
-// Get translation text helper function
+// Get translation text
 function getText(key) {
     return window.translations ? window.translations.getText(key) : key;
 }
@@ -109,7 +100,6 @@ async function loadIncidents() {
     try {
         console.log("Fetching incident data from API...");
 
-        // Show loading indicator
         document.getElementById('lastUpdated').textContent = getText('loading');
         document.getElementById('lastUpdated').classList.add('loading-text');
 
@@ -133,11 +123,8 @@ async function loadIncidents() {
         allIncidents = data;
         console.log(`Received ${allIncidents.length} incidents`);
 
-        // Clear existing markers
         clearMarkers();
 
-        // Apply initial filtering rather than showing all incidents
-        // This ensures we respect the checkbox states on initial load
         filterIncidents();
 
         // Update last updated time
@@ -160,7 +147,6 @@ function addIncidentsToMap(incidents) {
         return;
     }
 
-    // Stagger the addition of markers for a smooth animation effect
     incidents.forEach((incident, index) => {
         // Skip incidents without coordinates
         if (!incident.latitude || !incident.longitude) {
@@ -181,14 +167,13 @@ function addIncidentsToMap(incidents) {
                 createMarker(incident, markerImage);
             } catch (error) {
                 console.error("Error creating marker:", error);
-                // Create fallback marker
                 createMarker(incident, null);
             }
         }, index * 5); // Small delay for each marker
     });
 }
 
-// Get status code for marker image
+// status code for marker image
 function getStatusCode(status) {
     switch (status) {
         case "ΣΕ ΕΞΕΛΙΞΗ": return "ongoing";
@@ -198,7 +183,7 @@ function getStatusCode(status) {
     }
 }
 
-// Get category code for marker image
+// category code for marker image
 function getCategoryCode(category) {
     switch (category) {
         case "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ": return "forest-fire";
@@ -213,44 +198,36 @@ function createMarker(incident, markerImage) {
     let marker;
 
     try {
-        // Create custom icon
         const icon = L.icon({
             iconUrl: `/images/markers/${markerImage}`,
             iconSize: [32, 32],
             iconAnchor: [16, 32],
             popupAnchor: [0, -32],
-            // Add shadow
             shadowUrl: '/images/markers/marker-shadow.png',
             shadowSize: [41, 41],
             shadowAnchor: [13, 41]
         });
 
-        // Create marker with custom icon
         marker = L.marker([incident.latitude, incident.longitude], {
             icon: icon,
             title: `${incident.category} - ${incident.location || getText('unknown')}`,
-            riseOnHover: true, // Raise marker on hover
+            riseOnHover: true, 
             alt: incident.status
         });
     } catch (error) {
         console.warn(`Error creating custom marker: ${error.message}. Using default marker.`);
-        // Create default marker
         marker = L.marker([incident.latitude, incident.longitude], {
             title: `${incident.category} - ${incident.location || getText('unknown')}`,
             riseOnHover: true
         });
     }
 
-    // Add popup with basic info
     updateMarkerPopup(marker, incident);
 
-    // Add click listener to show details modal
     marker.on('click', () => showIncidentDetails(incident));
 
-    // Add to markers layer
     marker.addTo(markersLayer);
 
-    // Add to markers array for later filtering
     markers.push({
         marker: marker,
         incident: incident
@@ -259,12 +236,9 @@ function createMarker(incident, markerImage) {
     return marker;
 }
 
-// Update marker popup with current language
 function updateMarkerPopup(marker, incident) {
-    // Get status class for styling
     const statusClass = getStatusClass(incident.status);
 
-    // Create popup content with translations
     const popupContent = `
         <div class="map-popup">
             <strong>${incident.category}</strong><br>
@@ -273,7 +247,6 @@ function updateMarkerPopup(marker, incident) {
         </div>
     `;
 
-    // Update popup
     marker.bindPopup(popupContent, {
         className: 'custom-popup',
         closeButton: true,
@@ -282,7 +255,7 @@ function updateMarkerPopup(marker, incident) {
     });
 }
 
-// Get CSS class for incident status
+// CSS class for incident status
 function getStatusClass(status) {
     switch (status) {
         case "ΣΕ ΕΞΕΛΙΞΗ": return "status-ongoing";
@@ -297,13 +270,10 @@ function showIncidentDetails(incident) {
     const modalBody = document.getElementById('incidentModalBody');
     const modalTitle = document.getElementById('incidentModalLabel');
 
-    // Set modal title
     modalTitle.textContent = `${incident.category} - ${incident.location || getText('unknown')}`;
 
-    // Get status class for styling
     const statusClass = getStatusClass(incident.status);
 
-    // Create modal content with translations
     modalBody.innerHTML = `
         <div class="incident-detail">
             <span class="incident-label">${getText('status')}:</span> 
@@ -331,7 +301,6 @@ function showIncidentDetails(incident) {
         </div>
     `;
 
-    // Show the modal
     incidentModal.show();
 }
 
@@ -353,7 +322,6 @@ function filterIncidents() {
 
     console.log(`Filtering with status: Ongoing=${ongoingChecked}, Partial=${partialControlChecked}, Full=${fullControlChecked}, Forest=${forestFiresChecked}, Urban=${urbanFiresChecked}, Assistance=${assistanceChecked}`);
 
-    // Clear existing markers
     clearMarkers();
 
     // Filter incidents
@@ -415,7 +383,7 @@ function fitMapToMarkers() {
     });
 }
 
-// Update statistics display with animations
+// Update statistics display
 function updateStatistics(incidents) {
     const totalIncidents = incidents.length;
     const forestFireCount = incidents.filter(i => i.category === "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ").length;
@@ -428,14 +396,12 @@ function updateStatistics(incidents) {
     animateCounter('assistanceCount', assistanceCount);
 }
 
-// Animate counter from current to target value
 function animateCounter(elementId, targetValue) {
     const element = document.getElementById(elementId);
     const currentValue = parseInt(element.textContent) || 0;
     const duration = 750; // Animation duration in ms
     const step = 25; // Update every 25ms
 
-    // If the difference is significant, animate
     if (Math.abs(targetValue - currentValue) > 5) {
         let current = currentValue;
         const increment = (targetValue - currentValue) / (duration / step);
@@ -443,7 +409,6 @@ function animateCounter(elementId, targetValue) {
         const timer = setInterval(() => {
             current += increment;
 
-            // Check if we've reached the target (or close enough)
             if ((increment > 0 && current >= targetValue) ||
                 (increment < 0 && current <= targetValue)) {
                 clearInterval(timer);
@@ -453,7 +418,6 @@ function animateCounter(elementId, targetValue) {
             }
         }, step);
     } else {
-        // Small difference, just set the value
         element.textContent = targetValue;
     }
 }

@@ -1,0 +1,9 @@
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\FireIncidents.exe
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\appsettings.Development.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\appsettings.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\FireIncidents.dll
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\FireIncidents.deps.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\FireIncidents.runtimeconfig.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\FireIncidents.pdb
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\HtmlAgilityPack.dll
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\PubTmp\Out\Newtonsoft.Json.dll
