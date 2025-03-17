@@ -4,7 +4,16 @@
 This web application provides real-time visualization of active incidents throughout Greece. It scrapes data from the official Greek Fire Service website and displays incidents on an interactive map with filtering capabilities.
 
 ## Live Demo
-The application is hosted on Azure and can be accessed [here](https://hfcliveincidents-hkcebcfdefgjcuh8.italynorth-01.azurewebsites.net/).
+The application is hosted and can be accessed at:
+- [https://livefireincidents.gr](https://livefireincidents.gr)
+- [Azure Site](https://hfcliveincidents-hkcebcfdefgjcuh8.italynorth-01.azurewebsites.net/)
+
+The application is currently hosted on both Azure and SmarterASP.NET. This dual-hosting approach was implemented to gain experience with different cloud hosting services and compare their performance characteristics.
+
+### Technical Details
+- Data is automatically refreshed every 5 minutes to conserve server resources. You can manually refresh the data using the Refresh Data (Ανανέωση Δεδομένων) button.
+- To modify the refresh rate, edit the `setInterval` call in the `wwwroot/js/map.js` file (line ~15)
+- The application is deployed on SmarterASP.NET
 
 ### Azure Free Tier Limitations
 Please note that this application is hosted on Azure's Free Tier, which has the following limitations:
@@ -54,6 +63,17 @@ The data displayed may not be completely accurate or up-to-date.
 
 ## License
 This project is provided for educational and informational purposes only.
+
+## Learning Journey
+
+This project has been a great learning experience, providing insights into several areas of web development:
+
+### Technical Skills Acquired
+- **Web Scraping Challenges**: Learned to handle complex HTML parsing, character encoding issues, and dynamic content extraction
+- **Geocoding Implementation**: Developed multi-layered fallback strategies for converting textual addresses to map coordinates
+
+### DevOps & Deployment Insights
+- **Multi-Platform Deployment**: Gained experience deploying to both Azure and SmarterASP.NET
 
 ## Credits
 - Hellenic Fire Service for making incident data publicly available
