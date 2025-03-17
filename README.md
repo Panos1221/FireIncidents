@@ -11,7 +11,7 @@ The application is hosted and can be accessed at:
 The application is currently hosted on both Azure and SmarterASP.NET. This dual-hosting approach was implemented to gain experience with different cloud hosting services and compare their performance characteristics.
 
 ### Technical Details
-- Data is automatically refreshed every 5 minutes to conserve server resources. You can manually refresh the data using the `Refresh Data (Ανανέωση Δεδομένων)` button.
+- Data is automatically refreshed every 5 minutes to conserve server resources. You can manually refresh the data using the `Refresh Data` button.
 - To modify the refresh rate, edit the `setInterval` call in the `wwwroot/js/map.js` file (line ~15)
 - The application is deployed on SmarterASP.NET
 
