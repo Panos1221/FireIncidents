@@ -1,10 +1,28 @@
 # Hellenic Fire Service Live Incidents Map
 
 ## Overview
-This web application provides real-time visualization of active fire incidents throughout Greece. It scrapes data from the official Greek Fire Service website and displays incidents on an interactive map with filtering capabilities.
+This web application provides real-time visualization of active incidents throughout Greece. It scrapes data from the official Greek Fire Service website and displays incidents on an interactive map with filtering capabilities.
 
 ## Live Demo
-The application is hosted on Azure and can be accessed [here](https://hfcliveincidents-hkcebcfdefgjcuh8.italynorth-01.azurewebsites.net/).
+The application is hosted and can be accessed at:
+- [https://livefireincidents.gr](https://livefireincidents.gr)
+- [Azure Site](https://hfcliveincidents-hkcebcfdefgjcuh8.italynorth-01.azurewebsites.net/)
+
+The application is currently hosted on both Azure and SmarterASP.NET. This dual-hosting approach was implemented to gain experience with different cloud hosting services and compare their performance characteristics.
+
+### Technical Details
+- Data is automatically refreshed every 5 minutes to conserve server resources. You can manually refresh the data using the `Refresh Data` button.
+- To modify the refresh rate, edit the `setInterval` call in the `wwwroot/js/map.js` file (line ~15)
+- The application is deployed on SmarterASP.NET
+
+### Azure Free Tier Limitations
+Please note that this application is hosted on Azure's Free Tier, which has the following limitations:
+- The application automatically sleeps after 20 minutes of inactivity
+- Limited to 60 minutes of CPU time per day
+- Shared infrastructure with other free tier applications
+- Cold starts may take 1-2 minutes when the application has been inactive
+
+Due to these limitations, the site may occasionally be unavailable or slow to load, especially during periods of inactivity. If you encounter the default Azure placeholder page or slow loading times, please wait a few minutes and try again as the application may be waking up from sleep mode.
 
 ## Features
 - **Real-time Data**: Scrapes and displays current fire incidents from the Greek Fire Service
@@ -45,6 +63,17 @@ The data displayed may not be completely accurate or up-to-date.
 
 ## License
 This project is provided for educational and informational purposes only.
+
+## Learning Journey
+
+This project has been a great learning experience, providing insights into several areas of web development:
+
+### Technical Skills Acquired
+- **Web Scraping Challenges**: Learned to handle complex HTML parsing, character encoding issues, and dynamic content extraction
+- **Geocoding Implementation**: Developed multi-layered fallback strategies for converting textual addresses to map coordinates
+
+### DevOps & Deployment Insights
+- **Multi-Platform Deployment**: Gained experience deploying to both Azure and SmarterASP.NET
 
 ## Credits
 - Hellenic Fire Service for making incident data publicly available
