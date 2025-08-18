@@ -581,7 +581,7 @@ namespace FireIncidents.Services
                 // terms that should be excluded from search (incident types and generic locations)
                 HashSet<string> excludedTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    "ΥΠΑΙΘΡΟΣ", "ΑΛΛΗ ΠΕΡΙΠΤΩΣΗ", "ΚΤΙΡΙΟ ΚΑΤΟΙΚΙΑΣ", "ΧΩΡΟΣ ΑΠΟΘΗΚΕΥΣΗΣ",
+                    "ΥΠΑΙΘΡΟΣ", "ΑΛΛΗ ΠΕΡΙΠΤΩΣΗ", "ΚΤΙΡΙΟ ΚΑΤΟΙΚΙΑΣ", "ΧΩΡΟΣ ΑΠΟΘΗΚΕΥΣΗΣ", "ΧΩΡΟΣ ΕΜΠΟΡΙΟΥ",
                     "ΔΑΣΟΣ", "ΕΚΤΑΣΗ", "ΔΑΣΙΚΗ ΕΚΤΑΣΗ", "ΓΕΩΡΓΙΚΗ ΕΚΤΑΣΗ", "ΧΟΡΤΟΛΙΒΑΔΙΚΗ ΕΚΤΑΣΗ", "ΥΠΟΛΕΙΜΜΑΤΑ ΚΑΛΛΙΕΡΓΕΙΩΝ",
             
                     "ΤΡΟΧΑΙΟ", "ΠΥΡΚΑΓΙΑ", "ΦΩΤΙΑ", "ΠΥΡΚΑΪΑ", "ΕΓΚΛΩΒΙΣΜΟΣ", "ΔΙΑΣΩΣΗ ΖΩΟΥ", "ΑΝΤΛΗΣΗ", "ΑΦΑΙΡΕΣΗ ΑΝΤΙΚΕΙΜΕΝΟΥ", "ΚΑΤΑΠΛΑΚΩΣΗ",
