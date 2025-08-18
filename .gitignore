@@ -44,4 +44,6 @@ Thumbs.db
 _ReSharper*/
 *.resharper
 
-properties/
+# Misc files
+Properties/
+Logs/
