@@ -1,4 +1,0 @@
-[2025-03-17 21:21:22.646] [Information ] [FireIncidents.Startup] Application starting up
-[2025-03-17 21:21:22.648] [Information ] [FireIncidents.Startup] Running in Production environment
-[2025-03-17 21:21:22.686] [Information ] [FireIncidents.Startup] Application configuration complete
-[2025-03-17 21:21:22.694] [Warning     ] [Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware] The WebRootPath was not found: C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\wwwroot. Static files may be unavailable.

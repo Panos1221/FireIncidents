@@ -2,6 +2,6 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ActiveDebugProfile>https</ActiveDebugProfile>
-    <NameOfLastUsedPublishProfile>C:\Users\pansa\source\repos\FireIncidents\FireIncidents\Properties\PublishProfiles\panos1221-001-site1 - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\pansa\source\repos\FireIncidents\FireIncidents\Properties\PublishProfiles\LinuxRaspBerry.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>
