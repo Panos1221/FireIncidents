@@ -138,12 +138,36 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΑΓΙΑΣ ΠΑΡΑΣΚΕΥΗΣ"] = (38.0113, 23.8195);
             _municipalityCoordinates["ΔΗΜΟΣ ΜΑΝΔΡΑΣ-ΕΙΔΥΛΛΙΑΣ"] = (38.1450, 23.4950);
             _municipalityCoordinates["ΔΗΜΟΣ ΦΥΛΗΣ"] = (38.1240, 23.6700);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΟΣΧΑΤΟΥ-ΤΑΥΡΟΥ"] = (37.9500, 23.7000); // Moschato-Tavros
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΕΤΡΟΥΠΟΛΗΣ"] = (38.0130, 23.6820);     // Petroupoli
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΠΑΤΩΝ-ΑΡΤΕΜΙΔΟΣ"] = (37.9534, 23.9014); // Spata-Artemida
+            _municipalityCoordinates["ΔΗΜΟΣ ΡΑΦΗΝΑΣ-ΠΙΚΕΡΜΙΟΥ"] = (38.0218, 24.0097); // Rafina-Pikermi
+
+            _municipalityCoordinates["ΔΗΜΟΣ ΟΡΩΠΟΥ"] = (38.1667, 23.7667);        // Oropos
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΑΡΑΘΩΝΑ"] = (38.1500, 23.9667);       // Marathon
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΑΡΩΝΙΚΟΥ"] = (37.8000, 23.9000);      // Saronikos
 
             _municipalityCoordinates["ΔΗΜΟΣ ΛΙΒΑΔΕΙΑΣ"] = (38.4333, 23.1778);
             _municipalityCoordinates["ΔΗΜΟΣ ΘΗΒΑΙΩΝ"] = (38.2322, 23.3194);
             _municipalityCoordinates["ΔΗΜΟΣ ΑΡΑΧΟΒΑΣ-ΔΙΣΤΟΜΟΥ"] = (38.4170, 23.3600);
             _municipalityCoordinates["ΔΗΜΟΣ ΛΑΜΙΕΩΝ"] = (38.9023, 22.4323);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΜΦΙΣΣΑΣ"] = (38.5600, 22.2200);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΡΠΕΝΗΣΙΟΥ"] = (38.9170, 21.6167);
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΩΡΙΔΑΣ"] = (38.5833, 22.0167);
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΕΛΦΩΝ"] = (38.4833, 22.5000);
 
+            //Central Greece municipalities
+            _municipalityCoordinates["ΔΗΜΟΣ ΟΡΧΟΜΕΝΟΥ"] = (38.4228, 23.5981);      // Orchomenos
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΛΙΑΡΤΟΥ-ΘΕΣΠΙΕΩΝ"] = (38.3333, 23.3167); // Aliartos-Thespies
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΑΝΑΓΡΑΣ"] = (38.3167, 23.5833);        // Tanagra
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΜΦΙΣΣΑΣ"] = (38.5556, 22.3236);        // Amfissa (Delphi)
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΛΙΜΟΥΝΑΣ"] = (38.5167, 22.3667);       // small area
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΚΑΛΑΣ"] = (38.4500, 22.4500);           // small area
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΓΡΙΝΙΟΥ"] = (38.6167, 21.4000);         // Agrinio (technically Aitoloakarnania, but some border areas)
+
+            // Phocis (Φωκίδα)
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΕΛΦΩΝ"] = (38.4833, 22.5000);          // Delphi
+            _municipalityCoordinates["ΔΗΜΟΣ ΙΤΕΑΣ"] = (38.3500, 22.5167);           // Itea
 
             // THESSALONIKI municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΘΕΣΣΑΛΟΝΙΚΗΣ"] = (40.6401, 22.9444);
@@ -158,10 +182,19 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΠΥΛΑΙΑΣ"] = (40.5964, 22.9817);
             _municipalityCoordinates["ΔΗΜΟΣ ΘΕΡΜΗΣ"] = (40.5236, 23.0128);
 
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΥΚΑΡΠΙΑΣ"] = (40.6333, 22.9000);     // Efkarpia
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΜΠΕΛΟΚΗΠΩΝ-ΜΕΝΕΜΕΝΗΣ"] = (40.6580, 22.9091); // Ampelokipoi-Menemeni
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΕΡΑΙΑΣ"] = (40.5500, 22.9500);       // Peraia
+            _municipalityCoordinates["ΔΗΜΟΣ ΘΕΡΜΑΪΚΟΥ"] = (40.5000, 22.9500);      // Thermaikos
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΙΚΗΤΗ"] = (40.5000, 22.9500);         
+
             // PATRAS municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΠΑΤΡΕΩΝ"] = (38.2466, 21.7359);
             _municipalityCoordinates["ΔΗΜΟΣ ΡΙΟΥ"] = (38.3030, 21.7868);
             _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΙΟΥ"] = (38.2500, 22.0833);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΑΒΡΥΤΩΝ"] = (38.0333, 22.1167);     // Kalavryta
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΥΤΙΚΗΣ ΑΧΑΪΑΣ"] = (38.2000, 21.8000); // West Achaia
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΡΓΑΣΙΑΚΟΥ"] = (38.2500, 21.7333);     
 
             // HERAKLION municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΗΡΑΚΛΕΙΟΥ"] = (35.3387, 25.1442);
@@ -172,6 +205,10 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΛΑΡΙΣΑΙΩΝ"] = (39.6383, 22.4179);
             _municipalityCoordinates["ΔΗΜΟΣ ΒΟΛΟΥ"] = (39.3662, 22.9360);
             _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΚΚΑΙΩΝ"] = (39.5555, 21.7666);
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΟΥΖΑΚΙΟΥ"] = (39.3667, 21.8667);
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΛΑΣΣΟΝΑΣ"] = (39.8667, 22.0667);
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΚΑΛΩΝ"] = (39.5556, 21.7670);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΡΔΙΤΣΑΣ"] = (39.3653, 21.9210);
 
             // WEST GREECE municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΑΡΧΑΙΑΣ ΟΛΥΜΠΙΑΣ"] = (37.6441, 21.6245);
@@ -187,6 +224,9 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΙΩΑΝΝΙΤΩΝ"] = (39.6675, 20.8511);
             _municipalityCoordinates["ΔΗΜΟΣ ΠΡΕΒΕΖΗΣ"] = (38.9597, 20.7517);
             _municipalityCoordinates["ΔΗΜΟΣ ΗΓΟΥΜΕΝΙΤΣΑΣ"] = (39.5070, 20.2656);
+            _municipalityCoordinates["ΔΗΜΟΣ ΖΙΤΣΑΣ"] = (39.7000, 20.8667);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΩΓΩΝΙΟΥ"] = (39.8667, 20.3833);
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΡΑΜΥΘΙΑΣ"] = (39.5833, 20.2167);
 
             // PELOPONNESE municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΦΥΛΙΑΣ"] = (37.1167, 21.5833);
@@ -204,6 +244,27 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΔΕΛΤΑ - ΕΧΕΔΩΡΟΥ"] = (40.6962, 22.7815);
             _municipalityCoordinates["ΔΗΜΟΣ ΜΕΓΑΡΑ"] = (38.0056, 23.3399);
 
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΟΛΟΥ"] = (37.4833, 23.0167);         // Tolo
+            _municipalityCoordinates["ΔΗΜΟΣ ΒΥΤΙΝΑΣ"] = (37.4333, 22.0833);      // Vytina
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΡΥΤΑΙΝΑΣ"] = (37.4500, 22.0333);    // Karytaina
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΟΝΕΜΒΑΣΙΑΣ"] = (36.6961, 23.0469);   // Monemvasia (technically Laconia border)
+            _municipalityCoordinates["ΔΗΜΟΣ ΓΟΡΤΥΝΙΑΣ"] = (37.0650, 22.1000);     // Gortynia (partly Arcadia)
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΟΥΤΡΑΚΙΟΥ-ΠΕΡΑΧΩΡΑΣ"] = (37.9500, 22.9000); // Loutraki-Perachora
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΕΜΕΑΣ"] = (37.8833, 22.7333);        // Nemea
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΙΚΥΩΝΙΩΝ"] = (37.9500, 22.8333);      // Sikyona
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΟΝΕΜΒΑΣΙΑΣ"] = (36.6961, 23.0469);   // Monemvasia
+            _municipalityCoordinates["ΔΗΜΟΣ ΜΑΝΗΣ"] = (36.7000, 22.4000);          // Mani
+            _municipalityCoordinates["ΔΗΜΟΣ ΓΥΘΕΙΟΥ"] = (36.7500, 22.5667);       // Gytheio
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΛΑΦΟΝΗΣΟΥ"] = (36.6333, 22.8833);    // Elafonisos
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΥΠΑΡΙΣΣΙΑΣ"] = (36.9500, 21.7000);   // Kyparissia
+            _municipalityCoordinates["ΔΗΜΟΣ ΟΙΧΑΛΙΑΣ"] = (37.0667, 22.0167);      // Oichalia
+            _municipalityCoordinates["ΔΗΜΟΣ ΦΙΛΙΑΤΡΩΝ"] = (36.9000, 21.7500);     // Filiatra
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΝΔΡΙΤΣΑΙΝΑΣ-ΚΡΕΣΤΕΝΩΝ"] = (37.4896, 21.8798); // exists partially
+
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΑΒΡΥΤΩΝ"] = (38.0333, 22.1167);    // Kalavryta
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΡΙΚΕΑΣ"] = (38.0500, 22.0833);        // Erikea (small area)
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΡΓΑΣΙΑΚΟΥ"] = (38.2500, 21.7333);     // small area
+
             // CRETE municipalities 
             _municipalityCoordinates["ΔΗΜΟΣ ΑΡΧΑΝΩΝ"] = (35.1917, 25.1539);
             _municipalityCoordinates["ΔΗΜΟΣ ΒΙΑΝΝΟΥ"] = (35.0539, 25.4058);
@@ -216,6 +277,8 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΦΑΙΣΤΟΥ"] = (35.0644, 24.8069);
             _municipalityCoordinates["ΔΗΜΟΣ ΑΓΙΟΥ ΝΙΚΟΛΑΟΥ"] = (35.1900, 25.7200);
             _municipalityCoordinates["ΔΗΜΟΣ ΑΠΟΚΟΡΩΝΟΥ"] = (35.4000, 24.2000);
+            _municipalityCoordinates["ΔΗΜΟΣ ΑΡΧΑΝΩΝ-ΑΣΚΛΗΠΙΟΥ"] = (35.1917, 25.1539);
+
 
             // Argolis (Άργολίδα)
             _municipalityCoordinates["ΔΗΜΟΣ ΑΡΓΟΥ"] = (37.6333, 22.7333);   // Argos
@@ -239,6 +302,8 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΒΑΘΟΥ"] = (37.7547, 26.9569);       // Vathy, Samos
             _municipalityCoordinates["ΔΗΜΟΣ ΑΙΚΑΡΙΑΣ"] = (37.8586, 26.3900);     // Agios Kirykos, Ikaria
             _municipalityCoordinates["ΔΗΜΟΣ ΜΥΡΙΝΑΣ"] = (39.9667, 25.9167);      // Myrina, Lemnos
+            _municipalityCoordinates["ΔΗΜΟΣ ΛΗΜΝΟΥ"] = (39.9167, 25.2333);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΑΜΟΥ"] = (37.7547, 26.9769);
 
             // Aegean Sea municipalities (Cyclades)
             _municipalityCoordinates["ΔΗΜΟΣ ΜΥΚΟΝΟΥ"] = (37.4468, 25.3289);     // Mykonos
@@ -263,6 +328,8 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΒΕΡΩΝ"] = (40.5230, 22.1990);   // Veria
             _municipalityCoordinates["ΔΗΜΟΣ ΚΙΛΚΙΣ"] = (40.9400, 22.8800);   // Kilkis
             _municipalityCoordinates["ΔΗΜΟΣ ΣΕΡΡΩΝ"] = (41.0873, 23.5471);   // Serres
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΑΟΥΣΑΣ"] = (40.6333, 22.0167);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΤΕΡΙΝΗΣ"] = (40.2680, 22.5020);
 
             // North Greece - Western Macedonia
             _municipalityCoordinates["ΔΗΜΟΣ ΚΟΖΑΝΗΣ"] = (40.3000, 21.7850);    // Kozani
@@ -270,11 +337,15 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΦΛΩΡΙΝΑΣ"] = (40.7811, 21.4069);     // Florina
             _municipalityCoordinates["ΔΗΜΟΣ ΓΡΕΒΕΝΩΝ"] = (40.1861, 21.4097);      // Grevena
             _municipalityCoordinates["ΔΗΜΟΣ ΠΤΟΛΕΜΑΪΔΑΣ"] = (40.6081, 21.5900);   // Ptolemaida
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΙΑΤΙΣΤΑΣ"] = (40.2833, 21.6333);
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΕΣΤΟΥ"] = (40.7500, 21.6667);
 
             // North Greece - Eastern Macedonia and Thrace
             _municipalityCoordinates["ΔΗΜΟΣ ΑΛΕΞΑΝΔΡΟΥΠΟΛΗΣ"] = (40.8457, 25.8739); // Alexandroupoli
             _municipalityCoordinates["ΔΗΜΟΣ ΚΟΜΟΤΗΝΗΣ"] = (41.1224, 25.4066);       // Komotini
             _municipalityCoordinates["ΔΗΜΟΣ ΞΑΝΘΗΣ"] = (41.1517, 24.8822);          // Xanthi
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΡΑΜΑΣ"] = (41.1500, 24.1500);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΒΑΛΑΣ"] = (40.9369, 24.4067);
 
             // Ionian Islands municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΚΕΡΚΥΡΑΣ"] = (39.6243, 19.9217);   // Corfu
@@ -299,6 +370,10 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΛΕΡΟΥ"] = (37.0758, 27.1826);   // Leros
             _municipalityCoordinates["ΔΗΜΟΣ ΚΑΡΠΑΘΟΥ"] = (35.4760, 27.1480);   // Karpathos
             _municipalityCoordinates["ΔΗΜΟΣ ΚΑΣΤΕΛΛΟΡΙΖΟΥ"] = (36.1378, 29.5583);   // Kastellorizo
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΤΜΟΥ"] = (37.3056, 26.5392);
+            _municipalityCoordinates["ΔΗΜΟΣ ΝΙΣΥΡΟΥ"] = (36.5667, 27.2167);
+            _municipalityCoordinates["ΔΗΜΟΣ ΚΑΣΟΥ"] = (35.4200, 26.8667);
+            _municipalityCoordinates["ΔΗΜΟΣ ΣΥΜΗΣ"] = (36.5767, 27.9350);
 
             // Sporades municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΣΚΙΑΘΟΥ"] = (39.1667, 23.4833);   // Skiathos
@@ -315,6 +390,22 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΜΑΝΤΟΥΔΙ-ΛΙΜΝΙΟΥ-ΑΓΙΑΣ ΑΝΝΑΣ"] = (38.1667, 23.6833); // Mantoudi-Limni-Agia Anna municipality (central-west Evia)
 
 
+            // Others (I add here cases where no match is found)
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΑΞΩΝ"] = (39.2167, 20.2167);
+
+            // Epirus
+            _municipalityCoordinates["ΔΗΜΟΣ ΒΟΒΟΥΣΗΣ"] = (39.7500, 20.7167); // approximate
+            _municipalityCoordinates["ΔΗΜΟΣ ΠΡΕΒΕΖΑΣ"] = (38.9597, 20.7517); // already partially exists as ΔΗΜΟΣ ΠΡΕΒΕΖΗΣ
+
+            // West Greece
+            _municipalityCoordinates["ΔΗΜΟΣ ΓΑΣΤΟΥΝΗΣ"] = (37.9167, 21.3833); // Gastouni
+            _municipalityCoordinates["ΔΗΜΟΣ ΤΡΑΓΑΝΟΥ"] = (37.8500, 21.4500); // Traganou
+            _municipalityCoordinates["ΔΗΜΟΣ ΙΕΡΑΣ ΠΟΛΗΣ ΜΕΣΟΛΟΓΓΙΟΥ - ΑΙΤΩΛΙΚΟΥ"] = (38.3750, 21.3167); // Messolonghi-Aitoliko
+
+            // North Aegean
+            _municipalityCoordinates["ΔΗΜΟΣ ΧΙΟΥ - ΑΜΑΝΗΣ"] = (38.3000, 25.0667); // Amanis, Chios
+
+            _municipalityCoordinates["ΔΗΜΟΣ ΩΡΩΠΟΥ - ΑΥΛΩΝΟΣ"] = (38.2167, 23.8333); // Oropos - Avlonas, Attica
             // Add more as needed
 
             // keys for region-municipality combinations
