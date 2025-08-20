@@ -138,12 +138,18 @@
             </div>
         </div>
 
-        <!-- Map Container -->
         <div class="col-md-9">
             <div class="card map-card">
                 <div class="card-body p-0">
                     <div id="map"></div>
                 </div>
+            </div>
+            <!-- Fire Risk Map -->
+            <div class="d-flex justify-content-center my-3">
+                <button id="btnShowMap" class="btn btn-primary">
+                    <i class="fas fa-map me-1"></i>
+                    <span data-translate="civilmap">Show Latest Civil Protection Map</span>
+                </button>
             </div>
         </div>
     </div>
@@ -167,8 +173,57 @@
     </div>
 </div>
 
+<!-- Modal for Civil Protection Map -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel" data-translate="civilmap">Civil Protection Map</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="mapImage" src="" alt="Civil Protection Map" style="max-width:100%; max-height:70vh;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/map.js" asp-append-version="true"></script>
+
+    <!--Fire Risk Map-->
+    <script>
+        const btnShowMap = document.getElementById('btnShowMap');
+        const btnTextSpan = btnShowMap.querySelector('span[data-translate="civilmap"]');
+
+        btnShowMap.addEventListener('click', async function () {
+            btnShowMap.disabled = true;
+            btnTextSpan.setAttribute('data-translate', 'loading');
+            if (typeof applyTranslations === 'function') {
+                applyTranslations();
+            }             
+
+            try {
+                const response = await fetch('@Url.Action("GetLatestMapImageUrl", "CivilProtectionMap")');
+                const data = await response.json();
+
+                if (data.imageUrl) {
+                    document.getElementById('mapImage').src = data.imageUrl;
+                    var modal = new bootstrap.Modal(document.getElementById('mapModal'));
+                    modal.show();
+                } else {
+                    alert('Failed to load the civil protection map image.');
+                }
+            } catch (e) {
+                alert('Error loading map image.');
+            }
+
+            btnShowMap.disabled = false;
+            btnTextSpan.setAttribute('data-translate', 'civilmap');
+            if (typeof applyTranslations === 'function') applyTranslations();
+        });
+    </script>
 }

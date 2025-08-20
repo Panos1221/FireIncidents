@@ -67,6 +67,9 @@
         "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service.",
         "locationDisclaimer": "All locations are approximate, as there are no official addresses or coordinates, only the municipality.",
 
+        //Civil Protection Daily Map
+        "civilmap": "Fire Risk Map",
+
         // Theme
         "darkMode": "Dark Mode",
         "lightMode": "Light Mode"
@@ -139,6 +142,8 @@
         "disclaimer": "Αυτή είναι μια ανεπίσημη εφαρμογή που δεν συνδέεται, δεν υποστηρίζεται και δεν έχει σχέση με το Πυροσβεστικό Σώμα Ελλάδος.",
         "locationDisclaimer": "Όλες οι τοποθεσίες είναι κατά προσέγγιση, καθώς δεν υπάρχουν επίσημες διευθύνσεις ή συντεταγμένες, μόνο ο δήμος.",
 
+        //Civil Protection Daily Map
+        "civilmap": "Χάρτης Πρόβλεψης Κινδύνου Πυρκαγιάς",
         // Theme
         "darkMode": "Σκούρο Θέμα",
         "lightMode": "Φωτεινό Θέμα"
