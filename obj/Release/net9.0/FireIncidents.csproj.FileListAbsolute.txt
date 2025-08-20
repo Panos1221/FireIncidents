@@ -100,5 +100,5 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjims
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmcshtml.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.build.json.cache
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\c2nfk42ev8-vf05gvxmt5.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\xajcyjls62-om8insz8cw.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\c2nfk42ev8-e8wov7tmsk.gz

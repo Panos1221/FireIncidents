@@ -1,3 +1,4 @@
+wwwroot\css\site.css
 wwwroot\favicon.ico
 wwwroot\images\fire-dept-icon.png
 wwwroot\images\markers\assistance-controlled.png
@@ -19,6 +20,7 @@ wwwroot\images\markers\urban-fire-partial.png
 wwwroot\js\map.js
 wwwroot\js\site.js
 wwwroot\js\theme.js
+wwwroot\js\translations.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -79,12 +81,14 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\css\site.css
-wwwroot\js\translations.js
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\LICENSE.txt
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\css\site.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\favicon.ico
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\js\map.js
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\js\site.js
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\jquery.slim.min.map
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\js\theme.js
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\js\translations.js
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -142,7 +146,3 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\jquery.min.map
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\jquery.slim.js
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\jquery.slim.min.js
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\dist\jquery.slim.min.map
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\lib\jquery\LICENSE.txt
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\css\site.css
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\wwwroot\js\translations.js
