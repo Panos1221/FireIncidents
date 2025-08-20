@@ -65,6 +65,7 @@
         // Footer
         "footer": "Fire Incidents Map - Hellenic Fire Service",
         "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service.",
+        "locationDisclaimer": "All locations are approximate, as there are no official addresses or coordinates, only the municipality.",
 
         // Theme
         "darkMode": "Dark Mode",
@@ -136,6 +137,7 @@
         // Footer
         "footer": "Χάρτης Πυρκαγιών - Δεδομένα Πυροσβεστικού Σώματος Ελλάδος",
         "disclaimer": "Αυτή είναι μια ανεπίσημη εφαρμογή που δεν συνδέεται, δεν υποστηρίζεται και δεν έχει σχέση με το Πυροσβεστικό Σώμα Ελλάδος.",
+        "locationDisclaimer": "Όλες οι τοποθεσίες είναι κατά προσέγγιση, καθώς δεν υπάρχουν επίσημες διευθύνσεις ή συντεταγμένες, μόνο ο δήμος.",
 
         // Theme
         "darkMode": "Σκούρο Θέμα",
@@ -144,7 +146,7 @@
 };
 
 // Current lang
-let currentLanguage = localStorage.getItem('preferredLanguage') || 'gr';
+let currentLanguage = localStorage.getItem('preferredLanguage') || 'el';
 
 // change language
 function setLanguage(lang) {

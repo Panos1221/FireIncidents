@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b6a9eb3d65ef4207eee6e7cfd0b79867ec826e73")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2f9b76ec314eb6bb5017294c8f92a8722f264634")]
 [assembly: System.Reflection.AssemblyProductAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

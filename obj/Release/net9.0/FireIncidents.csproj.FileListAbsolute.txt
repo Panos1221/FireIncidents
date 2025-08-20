@@ -1,4 +1,3 @@
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\appsettings.Development.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\appsettings.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\FireIncidents.staticwebassets.runtime.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\FireIncidents.staticwebassets.endpoints.json
@@ -96,10 +95,10 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\refin
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.pdb
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.genruntimeconfig.cache
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\ref\FireIncidents.dll
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\xajcyjls62-vgxdknbz0f.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\hhu6cz8n9g-q1dtisze6f.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rpswa.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjimswa.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmcshtml.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.build.json.cache
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\xajcyjls62-0l13js367i.gz
