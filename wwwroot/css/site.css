@@ -767,3 +767,42 @@ html, body {
 [data-theme="dark"] .disclaimer {
     opacity: 0.9;
 }
+
+/* Docked antenna in footer, bottom right */
+.fire-status {
+    position: absolute;
+    left: 24px;
+    bottom: 12px;
+    z-index: 10;
+    cursor: pointer;
+    user-select: none;
+    transition: filter 0.2s;
+}
+
+    .fire-status:hover {
+        filter: brightness(1.2);
+    }
+
+footer {
+    position: relative;
+}
+
+.status-light {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ccc;
+    box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+    .status-light.online {
+        background: #28a745;
+        box-shadow: 0 0 8px #28a745aa;
+    }
+
+    .status-light.offline {
+        background: #dc3545;
+        box-shadow: 0 0 8px #dc3545aa;
+    }

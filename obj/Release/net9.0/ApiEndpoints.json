@@ -19,5 +19,15 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FireIncidents.Controllers.StatusController",
+    "Method": "CheckFireServiceStatus",
+    "RelativePath": "Status/CheckFireServiceStatus",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
   }
 ]

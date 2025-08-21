@@ -9,6 +9,7 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\FireI
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\HtmlAgilityPack.dll
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\Newtonsoft.Json.dll
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.csproj.AssemblyReference.cache
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rpswa.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.AssemblyInfoInputs.cache
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.AssemblyInfo.cs
@@ -17,12 +18,17 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireI
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.RazorAssemblyInfo.cache
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.RazorAssemblyInfo.cs
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.sourcelink.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjimswa.dswa.cache.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmrazor.dswa.cache.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmcshtml.dswa.cache.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\scopedcss\bundle\FireIncidents.styles.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\scopedcss\projectbundle\FireIncidents.bundle.scp.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\9oyaj0wmqx-61n19gt1b8.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\hhu6cz8n9g-q1dtisze6f.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\g9y5runz5c-b3evy44epu.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\w4qxfa2i2m-1bgkcytdz3.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\xajcyjls62-om8insz8cw.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\m9pdclz0vf-bqjiyaj88i.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\2k579cqpq0-c2jlpeoesf.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\n9iroo1rgy-erw9l3u2r3.gz
@@ -85,6 +91,7 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compr
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\a3b82ewbim-uo6180gjdo.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\e2llnxyw7t-uo6180gjdo.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.build.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.build.json.cache
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.development.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.build.endpoints.json
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.upToDateCheck.txt
@@ -94,11 +101,4 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\refin
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.pdb
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.genruntimeconfig.cache
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\ref\FireIncidents.dll
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\hhu6cz8n9g-q1dtisze6f.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rpswa.dswa.cache.json
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjimswa.dswa.cache.json
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmrazor.dswa.cache.json
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\rjsmcshtml.dswa.cache.json
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\staticwebassets.build.json.cache
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\xajcyjls62-om8insz8cw.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\c2nfk42ev8-e8wov7tmsk.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\c2nfk42ev8-m639vj8zny.gz

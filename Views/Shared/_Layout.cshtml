@@ -61,6 +61,9 @@
                             All locations are approximate, as there are no official addresses or coordinates, only the municipality.
                         </small>
                     </p>
+                    <div id="fireAntennaStatus" class="fire-status" title="Checking status...">
+                        <span class="status-light" id="antennaStatusLight"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,5 +73,29 @@
     <script src="~/js/translations.js" asp-append-version="true"></script>
     <script src="~/js/theme.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        const antennaStatusLight = document.getElementById('antennaStatusLight');
+        const antennaDiv = document.getElementById('fireAntennaStatus');
+
+        async function checkAntennaStatus() {
+            try {
+                const response = await fetch('/Status/CheckFireServiceStatus');
+                const data = await response.json();
+                if (data.status === "up") {
+                   antennaStatusLight.className = "status-light online";
+                   antennaDiv.title = "The official Hellenic Fire Service Incidents Page is Online";
+                } else {
+                   antennaStatusLight.className = "status-light offline";
+                   antennaDiv.title = "The official Hellenic Fire Service Incidents Page is DOWN";
+                }
+            } catch {
+                antennaStatusLight.setAttribute('fill', '#dc3545'); // red
+                antennaDiv.title = "The official Hellenic Fire Service Incidents Page is DOWN";
+            }
+        }
+        checkAntennaStatus(); 
+        setInterval(checkAntennaStatus, 60000);
+    </script>
 </body>
 </html>
