@@ -303,6 +303,9 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΜΕΣΣΗΝΗΣ - ΙΘΩΜΗΣ"] = (37.05507163581724, 22.008241198125248);       // Messini
             _municipalityCoordinates["ΜΕΣΣΗΝΗΣ"] = (37.05507163581724, 22.008241198125248);       // Messini
             _municipalityCoordinates["ΙΘΩΜΗΣ"] = (37.05507163581724, 22.008241198125248);       // Messini
+            _municipalityCoordinates["Δ. ΜΕΣΣΗΝΗΣ - ΙΘΩΜΗΣ, ΠΕΛΟΠΟΝΝΗΣΟΥ, Greece"] = (37.05507163581724, 22.008241198125248);       // Messini
+            _municipalityCoordinates["Δ. ΜΕΣΣΗΝΗΣ - ΙΘΩΜΗΣ"] = (37.05507163581724, 22.008241198125248);       // Messini
+
 
             // Aegean Sea municipalities (North Aegean)
             _municipalityCoordinates["ΔΗΜΟΣ ΜΥΤΙΛΗΝΗΣ"] = (39.1100, 26.5547); // Mytilene, Lesvos

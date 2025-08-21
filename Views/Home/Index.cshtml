@@ -84,6 +84,10 @@
                             <span class="stat-label" data-translate="assistanceCount">Assistance:</span>
                             <span class="stat-value" id="assistanceCount">0</span>
                         </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-translate="warningsCount">112 Warnings:</span>
+                            <span class="stat-value warning-stat" id="warningsCount">0</span>
+                        </div>
                         <div class="stat-item last-updated">
                             <span class="stat-label" data-translate="lastUpdated">Last Updated:</span>
                             <span class="stat-value" id="lastUpdated">Never</span>
@@ -133,6 +137,17 @@
                     <div class="legend-item">
                         <img src="~/images/markers/assistance-controlled.png" width="24" height="24" />
                         <span data-translate="assistanceControlled">Assistance - Full Control</span>
+                    </div>
+                    <div class="legend-separator">
+                        <hr><strong data-translate="emergencyWarnings">Emergency Warnings</strong>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/112warning_red.png" width="24" height="24" />
+                        <span data-translate="warning112Active">112 Warning - Active (0-12h)</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/112warning_yellow.png" width="24" height="24" />
+                        <span data-translate="warning112Expiring">112 Warning - Expiring (12-24h)</span>
                     </div>
                 </div>
             </div>

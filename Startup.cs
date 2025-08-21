@@ -19,12 +19,15 @@ namespace FireIncidents
 
             services.AddHttpClient("FireService");
             services.AddHttpClient("Nominatim");
+            services.AddHttpClient("TwitterScraper");
 
             services.AddMemoryCache();
 
             // Register services
             services.AddScoped<FireServiceScraperService>();
             services.AddScoped<GeocodingService>();
+            services.AddScoped<TwitterScraperService>();
+            services.AddScoped<Warning112Service>();
 
             // Configure logging
             services.AddLogging(logging =>

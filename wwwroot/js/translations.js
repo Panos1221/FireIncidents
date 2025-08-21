@@ -34,12 +34,27 @@
         "assistancePartial": "Assistance - Partial Control",
         "assistanceControlled": "Assistance - Full Control",
         
+        // 112 Warnings
+        "emergencyWarnings": "Emergency Warnings",
+        "warning112Active": "112 Warning - Active (0-12h)",
+        "warning112Expiring": "112 Warning - Expiring (12-24h)",
+        "warningType": "Warning Type",
+        "locations": "Locations",
+        "alertTime": "Alert Time",
+        "activeWarning": "Active",
+        "expiredWarning": "Expiring Soon",
+        "message": "Message",
+        "noContentAvailable": "No content available",
+        "clickForDetails": "Click for details",
+        "source": "Source",
+        
         // Statistics
         "statistics": "Statistics",
         "totalIncidents": "Total Incidents",
         "forestFireCount": "Forest Fires",
         "urbanFireCount": "Urban Fires",
         "assistanceCount": "Assistance",
+        "warningsCount": "112 Warnings",
         
         // Incident details
         "incidentDetails": "Incident Details",
@@ -109,12 +124,27 @@
         "assistancePartial": "Παροχή Βοήθειας - Μερικός Έλεγχος",
         "assistanceControlled": "Παροχή Βοήθειας - Πλήρης Έλεγχος",
         
+        // 112 Warnings
+        "emergencyWarnings": "Προειδοποιήσεις Έκτακτης Ανάγκης",
+        "warning112Active": "Προειδοποίηση 112 - Ενεργή (0-12ω)",
+        "warning112Expiring": "Προειδοποίηση 112 - Λήγει (12-24ω)",
+        "warningType": "Τύπος Προειδοποίησης",
+        "locations": "Τοποθεσίες",
+        "alertTime": "Χρόνος Συναγερμού",
+        "activeWarning": "Ενεργή",
+        "expiredWarning": "Λήγει Σύντομα",
+        "message": "Μήνυμα",
+        "noContentAvailable": "Δεν υπάρχει διαθέσιμο περιεχόμενο",
+        "clickForDetails": "Κάντε κλικ για λεπτομέρειες",
+        "source": "Πηγή",
+        
         // Statistics
         "statistics": "Στατιστικά",
         "totalIncidents": "Συνολικά Περιστατικά",
         "forestFireCount": "Δασικές Πυρκαγιές",
         "urbanFireCount": "Αστικές Πυρκαγιές",
         "assistanceCount": "Παροχές Βοήθειας",
+        "warningsCount": "Προειδοποιήσεις 112",
         
         // Incident details
         "incidentDetails": "Λεπτομέρειες Περιστατικού",
