@@ -194,7 +194,9 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΑΙΓΙΟΥ"] = (38.2500, 22.0833);
             _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΑΒΡΥΤΩΝ"] = (38.0333, 22.1167);     // Kalavryta
             _municipalityCoordinates["ΔΗΜΟΣ ΔΥΤΙΚΗΣ ΑΧΑΪΑΣ"] = (38.2000, 21.8000); // West Achaia
-            _municipalityCoordinates["ΔΗΜΟΣ ΕΡΓΑΣΙΑΚΟΥ"] = (38.2500, 21.7333);     
+            _municipalityCoordinates["ΔΗΜΟΣ ΕΡΓΑΣΙΑΚΟΥ"] = (38.2500, 21.7333);
+            _municipalityCoordinates["ΔΥΜΗΣ"] = (38.133697371302084, 21.550266484711308);
+
 
             // HERAKLION municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΗΡΑΚΛΕΙΟΥ"] = (35.3387, 25.1442);
@@ -227,6 +229,9 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΖΙΤΣΑΣ"] = (39.7000, 20.8667);
             _municipalityCoordinates["ΔΗΜΟΣ ΠΩΓΩΝΙΟΥ"] = (39.8667, 20.3833);
             _municipalityCoordinates["ΔΗΜΟΣ ΠΑΡΑΜΥΘΙΑΣ"] = (39.5833, 20.2167);
+            _municipalityCoordinates["ΒΟΒΟΥΣΗΣ"] = (39.93779124127118, 21.047165770126973);
+            _municipalityCoordinates["ΖΑΓΟΡΙΟΥ - ΒΟΒΟΥΣΗΣ"] = (39.93779124127118, 21.047165770126973);
+            _municipalityCoordinates["ΔΗΜΟΣ ΖΑΓΟΡΙΟΥ - ΔΗΜΟΤΙΚΗ ΕΝΟΤΗΤΑ ΒΟΒΟΥΣΑΣ"] = (39.93779124127118, 21.047165770126973);
 
             // PELOPONNESE municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΦΥΛΙΑΣ"] = (37.1167, 21.5833);
@@ -295,6 +300,9 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΚΑΛΑΜΑΤΑΣ"] = (37.0389, 22.1142);     // Kalamata
             _municipalityCoordinates["ΔΗΜΟΣ ΠΥΛΗΣ"] = (36.9000, 21.8000);          // Pylos
             _municipalityCoordinates["ΔΗΜΟΣ ΜΕΣΗΝΙΑΣ"] = (37.1333, 21.7833);       // Messini
+            _municipalityCoordinates["ΜΕΣΣΗΝΗΣ - ΙΘΩΜΗΣ"] = (37.05507163581724, 22.008241198125248);       // Messini
+            _municipalityCoordinates["ΜΕΣΣΗΝΗΣ"] = (37.05507163581724, 22.008241198125248);       // Messini
+            _municipalityCoordinates["ΙΘΩΜΗΣ"] = (37.05507163581724, 22.008241198125248);       // Messini
 
             // Aegean Sea municipalities (North Aegean)
             _municipalityCoordinates["ΔΗΜΟΣ ΜΥΤΙΛΗΝΗΣ"] = (39.1100, 26.5547); // Mytilene, Lesvos

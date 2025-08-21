@@ -772,7 +772,7 @@ html, body {
 .fire-status {
     position: absolute;
     left: 24px;
-    bottom: 12px;
+    bottom: 60px;
     z-index: 10;
     cursor: pointer;
     user-select: none;
