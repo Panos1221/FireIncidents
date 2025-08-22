@@ -36,6 +36,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/pansa/source/repos/FireIncidents/FireIncidents/Views/Twitter/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHdpdHRlclxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/pansa/source/repos/FireIncidents/FireIncidents/Views/Twitter/Raw.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHdpdHRlclxSYXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/pansa/source/repos/FireIncidents/FireIncidents/Views/Twitter/TestData.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHdpdHRlclxUZXN0RGF0YS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/pansa/source/repos/FireIncidents/FireIncidents/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

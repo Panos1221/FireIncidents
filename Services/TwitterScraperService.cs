@@ -10,43 +10,37 @@ namespace FireIncidents.Services
     {
         private readonly ILogger<TwitterScraperService> _logger;
         private readonly HttpClient _httpClient;
+        private readonly JavaScriptRendererService _jsRenderer;
         
-        private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/iframe/25590424";
+        // Use the live Twitter widget page - JavaScript renderer will execute JS to get rendered content
+        private readonly string _widget112Url = "https://dev.livefireincidents.gr/twitter";
         
-        // Direct feed (if iframe doesn't work)
-        // private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/25590424";
+        // SociableKit URLs don't work without JavaScript execution:
+        // private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/iframe/25590789";
         
-        // Last option: Scrape my own page if nothing works.
-        // private readonly string _widget112Url = "http://dev.livefireincidents.gr";
+        // Previous SociableKit URLs (different embed ID):
+        // private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/25590424";        
+        // private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/iframe/25590424";
         
 
         
-        public TwitterScraperService(ILogger<TwitterScraperService> logger, IHttpClientFactory httpClientFactory)
+        public TwitterScraperService(ILogger<TwitterScraperService> logger, IHttpClientFactory httpClientFactory, JavaScriptRendererService jsRenderer)
         {
             _logger = logger;
             _httpClient = httpClientFactory.CreateClient("TwitterScraper");
-            _httpClient.Timeout = TimeSpan.FromMinutes(2);
-            
-            // Configure headers to mimic browser behavior
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", 
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-            _httpClient.DefaultRequestHeaders.Add("Accept", 
-                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-            _httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
-            _httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
-            _httpClient.DefaultRequestHeaders.Add("DNT", "1");
-            _httpClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
+            _jsRenderer = jsRenderer;
+            // HttpClient is now configured in Startup.cs with automatic decompression
+            // Additional headers can be added here if needed
             _httpClient.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
         }
 
-        public async Task<List<Warning112>> ScrapeWarningsAsync()
+        public async Task<List<Warning112>> ScrapeWarningsAsync(int daysBack = 7)
         {
             var warnings = new List<Warning112>();
             
             try
             {
-                _logger.LogInformation("Starting to scrape 112Greece warnings from SociableKit widget...");
+                _logger.LogInformation($"Starting to scrape 112Greece warnings from SociableKit widget (last {daysBack} days)...");
                 
                 string html = await GetWidgetHtmlAsync();
                 
@@ -61,7 +55,7 @@ namespace FireIncidents.Services
                 await File.WriteAllTextAsync(debugPath, html, Encoding.UTF8);
                 _logger.LogInformation($"Saved widget HTML to {debugPath} for debugging");
                 
-                warnings = ParseWarningsFromHtml(html);
+                warnings = ParseWarningsFromHtml(html, daysBack);
                 
                 _logger.LogInformation($"Successfully scraped {warnings.Count} 112 warnings");
                 
@@ -83,36 +77,42 @@ namespace FireIncidents.Services
         {
             try
             {
-                _logger.LogInformation($"Fetching widget HTML from: {_widget112Url}");
+                _logger.LogInformation($"🚀 Using JavaScript renderer to get fully rendered content from: {_widget112Url}");
                 
-                var response = await _httpClient.GetAsync(_widget112Url);
+                // Use JavaScript renderer to execute the SociableKit widget and get rendered content
+                var renderedHtml = await _jsRenderer.GetRenderedHtmlAsync(_widget112Url, timeoutSeconds: 45);
                 
-                _logger.LogInformation($"Widget response status: {response.StatusCode}");
-                _logger.LogInformation($"Response headers: {string.Join(", ", response.Headers.Select(h => $"{h.Key}={string.Join(",", h.Value)}"))}");
+                _logger.LogInformation($"✅ Retrieved {renderedHtml.Length} characters of rendered HTML");
+                _logger.LogDebug($"Content preview: {renderedHtml.Substring(0, Math.Min(200, renderedHtml.Length))}...");
                 
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogError($"Failed to fetch widget. Status: {response.StatusCode}, Reason: {response.ReasonPhrase}");
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError($"Error response body: {errorContent.Substring(0, Math.Min(500, errorContent.Length))}");
-                    return null;
-                }
-                
-                var contentBytes = await response.Content.ReadAsByteArrayAsync();
-                var content = Encoding.UTF8.GetString(contentBytes);
-                
-                _logger.LogDebug($"Retrieved {content.Length} characters from widget");
-                
-                return content;
+                return renderedHtml;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching widget HTML");
-                return null;
+                _logger.LogError(ex, "Error getting rendered widget HTML");
+                
+                // Fallback to direct HTTP request (will get empty container but won't crash)
+                _logger.LogWarning("⚠️ Falling back to direct HTTP request (may not contain tweets)");
+                try
+                {
+                    var response = await _httpClient.GetAsync(_widget112Url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var fallbackContent = await response.Content.ReadAsStringAsync();
+                        _logger.LogInformation($"Fallback: Retrieved {fallbackContent.Length} characters");
+                        return fallbackContent;
+                    }
+                }
+                catch (Exception fallbackEx)
+                {
+                    _logger.LogError(fallbackEx, "Fallback HTTP request also failed");
+                }
+                
+                return string.Empty;
             }
         }
 
-        private List<Warning112> ParseWarningsFromHtml(string html)
+        private List<Warning112> ParseWarningsFromHtml(string html, int daysBack = 7)
         {
             var warnings = new List<Warning112>();
             
@@ -121,17 +121,16 @@ namespace FireIncidents.Services
                 var doc = new HtmlDocument();
                 doc.LoadHtml(html);
                 
-                // Look for tweet containers in the SociableKit widget
-                // The exact selectors may need adjustment based on the actual widget structure
-                var tweetNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'sk-ww-twitter-feed-item')] | //div[contains(@class, 'tweet')] | //article | //div[contains(@data-testid, 'tweet')]");
+                // Look for tweet containers - specifically target the sk-post-item class from the real HTML structure
+                var tweetNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'sk-post-item')]");
                 
                 if (tweetNodes == null || !tweetNodes.Any())
                 {
                     _logger.LogWarning("No tweet nodes found in widget HTML. Trying alternative selectors...");
                     _logger.LogInformation($"HTML sample (first 1000 chars): {html.Substring(0, Math.Min(1000, html.Length))}");
                     
-                    // Try alternative selectors
-                    tweetNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'sk-ww')] | //div[contains(text(), '⚠️')] | //*[contains(text(), 'Activation')]");
+                    // Try alternative selectors for SociableKit content and general emergency indicators
+                    tweetNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'sk-ww')] | //div[contains(@class, 'sk-post')] | //div[contains(text(), '⚠️')] | //*[contains(text(), 'Activation')] | //*[contains(text(), 'Ενεργοποίηση')]");
                 }
                 
                 if (tweetNodes == null || !tweetNodes.Any())
@@ -147,7 +146,7 @@ namespace FireIncidents.Services
                 {
                     try
                     {
-                        var warning = ParseSingleTweet(tweetNode);
+                        var warning = ParseSingleTweet(tweetNode, daysBack);
                         if (warning != null)
                         {
                             warnings.Add(warning);
@@ -171,7 +170,7 @@ namespace FireIncidents.Services
             }
         }
 
-        private Warning112 ParseSingleTweet(HtmlNode tweetNode)
+        private Warning112? ParseSingleTweet(HtmlNode tweetNode, int daysBack = 7)
         {
             try
             {
@@ -197,12 +196,14 @@ namespace FireIncidents.Services
                 
                 var tweetDate = ExtractTweetDate(tweetNode);
                 
-                // Skip tweets older than 7 days should lower it?
-                if (DateTime.UtcNow - tweetDate > TimeSpan.FromDays(7))
+                // Skip tweets older than specified days back
+                if (DateTime.UtcNow - tweetDate > TimeSpan.FromDays(daysBack))
                 {
-                    _logger.LogInformation($"Skipping old tweet from {tweetDate} (older than 7 days)");
+                    _logger.LogInformation($"Skipping old tweet from {tweetDate:yyyy-MM-dd HH:mm} (older than {daysBack} days)");
                     return null;
                 }
+                
+                _logger.LogInformation($"✅ Including tweet from {tweetDate:yyyy-MM-dd HH:mm} (within {daysBack} days)");
                 
                 var warning = new Warning112
                 {
@@ -240,20 +241,41 @@ namespace FireIncidents.Services
 
         private string ExtractTweetText(HtmlNode tweetNode)
         {
-            // Try multiple selectors to extract tweet text
+            // Target the 'sk-post-body-full' div for the main tweet content (from real HTML structure)
+            var textNode = tweetNode.SelectSingleNode(".//div[contains(@class, 'sk-post-body-full')]");
+            if (textNode != null)
+            {
+                // Decode HTML entities and clean up text (e.g., remove emoji images, extra spaces)
+                string text = HttpUtility.HtmlDecode(textNode.InnerHtml); // Use InnerHtml to preserve structure for cleaning
+                
+                // Remove image tags for emojis, keeping their alt text if available
+                text = Regex.Replace(text, @"<img[^>]*alt=""([^""]*)""[^>]*>", "$1");
+                text = Regex.Replace(text, @"<img[^>]*>", ""); // Remove any remaining img tags
+                
+                // Replace <br> with newlines
+                text = Regex.Replace(text, @"<br\s*\/?>", "\n", RegexOptions.IgnoreCase);
+                
+                // Remove other HTML tags like <span>, <div>, <a>, <p> but keep their inner text
+                text = Regex.Replace(text, @"<[^>]*>", "");
+                
+                return text.Trim();
+            }
+            
+            // Fallback: try other common selectors
             var textSelectors = new[]
             {
+                ".//div[@class='tweet-text']",                    // Our test data structure
                 ".//div[contains(@class, 'tweet-text')] | .//p | .//div[contains(@class, 'text')] | .//span[contains(@class, 'text')]",
                 ".//div[contains(@data-testid, 'tweetText')]",
-                ".//div[contains(@class, 'sk-ww-twitter-feed-item-text')]"
+                ".//div[contains(@class, 'sk-ww-twitter-feed-item-text')]"  // Other SociableKit structure
             };
             
             foreach (var selector in textSelectors)
             {
-                var textNode = tweetNode.SelectSingleNode(selector);
-                if (textNode != null)
+                var fallbackNode = tweetNode.SelectSingleNode(selector);
+                if (fallbackNode != null)
                 {
-                    string text = HttpUtility.HtmlDecode(textNode.InnerText?.Trim());
+                    string? text = HttpUtility.HtmlDecode(fallbackNode.InnerText?.Trim());
                     if (!string.IsNullOrWhiteSpace(text))
                     {
                         return text;
@@ -261,9 +283,9 @@ namespace FireIncidents.Services
                 }
             }
             
-            // Fallback: get all text from the node
-            string fallbackText = HttpUtility.HtmlDecode(tweetNode.InnerText?.Trim());
-            return fallbackText;
+            // Final fallback: get all text from the node
+            string? fallbackText = HttpUtility.HtmlDecode(tweetNode.InnerText?.Trim());
+            return fallbackText ?? string.Empty;
         }
 
         private bool IsValid112Tweet(string tweetText)
@@ -271,9 +293,13 @@ namespace FireIncidents.Services
             if (string.IsNullOrWhiteSpace(tweetText))
                 return false;
                 
-            // Check for 112 activation pattern
-            return tweetText.Contains("⚠️") && 
-                   (tweetText.Contains("Activation 1⃣1⃣2⃣") || tweetText.Contains("Ενεργοποίηση 1⃣1⃣2⃣"));
+            // Check for 112 activation pattern or general emergency indicators
+            return (tweetText.Contains("⚠️") && 
+                   (tweetText.Contains("Activation 1⃣1⃣2⃣") || tweetText.Contains("Ενεργοποίηση 1⃣1⃣2⃣"))) ||
+                   (tweetText.Contains("🆘") && 
+                   (tweetText.Contains("Wildfire") || tweetText.Contains("Δασική πυρκαγιά"))) ||
+                   (tweetText.Contains("‼️") && 
+                   (tweetText.Contains("move away") || tweetText.Contains("απομακρυνθείτε")));
         }
 
         private bool IsGreekTweet(string tweetText)
@@ -375,7 +401,14 @@ namespace FireIncidents.Services
         {
             try
             {
-                // Try to find timestamp in various formats
+                // Target the 'sk-post-dateposted' p element for date (from real HTML structure)
+                var dateNode = tweetNode.SelectSingleNode(".//p[contains(@class, 'sk-post-dateposted')]");
+                if (dateNode != null && DateTime.TryParse(dateNode.InnerText, out var date))
+                {
+                    return date;
+                }
+                
+                // Fallback: try to find timestamp in various formats
                 var timeNode = tweetNode.SelectSingleNode(".//time | .//span[contains(@class, 'time')] | .//div[contains(@class, 'date')]");
                 
                 if (timeNode != null)
@@ -394,6 +427,7 @@ namespace FireIncidents.Services
             }
             
             // Fallback to current time
+            _logger.LogWarning("Could not extract tweet date, defaulting to UtcNow.");
             return DateTime.UtcNow;
         }
 
@@ -401,7 +435,14 @@ namespace FireIncidents.Services
         {
             try
             {
-                // Try to find the tweet URL
+                // Target the 'sk-post-link' div with an a tag for the tweet URL (from real HTML structure)
+                var urlNode = tweetNode.SelectSingleNode(".//div[contains(@class, 'sk-post-link')]/a");
+                if (urlNode != null)
+                {
+                    return urlNode.GetAttributeValue("href", "");
+                }
+                
+                // Fallback: try to find any tweet URL
                 var linkNode = tweetNode.SelectSingleNode(".//a[contains(@href, 'twitter.com') or contains(@href, 'x.com')]");
                 
                 if (linkNode != null)

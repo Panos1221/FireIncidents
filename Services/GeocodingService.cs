@@ -164,6 +164,12 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΑΛΙΜΟΥΝΑΣ"] = (38.5167, 22.3667);       // small area
             _municipalityCoordinates["ΔΗΜΟΣ ΣΚΑΛΑΣ"] = (38.4500, 22.4500);           // small area
             _municipalityCoordinates["ΔΗΜΟΣ ΑΓΡΙΝΙΟΥ"] = (38.6167, 21.4000);         // Agrinio (technically Aitoloakarnania, but some border areas)
+            _municipalityCoordinates["ΠΕΡΙΦΕΡΕΙΑ ΣΤΕΡΕΑΣ ΕΛΛΑΔΑΣ-Δ. ΔΟΜΟΚΟΥ - ΞΥΝΙΑΔΟΣ"] = (39.07288671912797, 22.213581770475724);
+            _municipalityCoordinates["ΔΟΜΟΚΟΥ - ΞΥΝΙΑΔΟΣ"] = (39.07288671912797, 22.213581770475724);
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΟΜΟΚΟΥ - ΞΥΝΙΑΔΟΣ"] = (39.07288671912797, 22.213581770475724);
+            _municipalityCoordinates["ΔΗΜΟΣ ΞΥΝΙΑΔΟΣ"] = (39.07288671912797, 22.213581770475724);
+            _municipalityCoordinates["ΔΗΜΟΣ ΔΟΜΟΚΟΥ "] = (39.12924467759778, 22.297960797566027);
+
 
             // Phocis (Φωκίδα)
             _municipalityCoordinates["ΔΗΜΟΣ ΔΕΛΦΩΝ"] = (38.4833, 22.5000);          // Delphi
@@ -231,7 +237,8 @@ namespace FireIncidents.Services
             _municipalityCoordinates["ΔΗΜΟΣ ΠΑΡΑΜΥΘΙΑΣ"] = (39.5833, 20.2167);
             _municipalityCoordinates["ΒΟΒΟΥΣΗΣ"] = (39.93779124127118, 21.047165770126973);
             _municipalityCoordinates["ΖΑΓΟΡΙΟΥ - ΒΟΒΟΥΣΗΣ"] = (39.93779124127118, 21.047165770126973);
-            _municipalityCoordinates["ΔΗΜΟΣ ΖΑΓΟΡΙΟΥ - ΔΗΜΟΤΙΚΗ ΕΝΟΤΗΤΑ ΒΟΒΟΥΣΑΣ"] = (39.93779124127118, 21.047165770126973);
+            _municipalityCoordinates["ΔΗΜΟΣ ΖΑΓΟΡΙΟΥ - ΔΗΜΟΤΙΚΗ ΕΝΟΤΗΤΑ ΒΟΒΟΥΣΑΣ"] = (39.93779124127118, 21.047165770126973);           
+            _municipalityCoordinates["ΠΕΡΙΦΕΡΕΙΑ ΗΠΕΙΡΟΥ-Δ.ΖΑΓΟΡΙΟΥ - ΒΟΒΟΥΣΗΣ"] = (39.93779124127118, 21.047165770126973);
 
             // PELOPONNESE municipalities
             _municipalityCoordinates["ΔΗΜΟΣ ΤΡΙΦΥΛΙΑΣ"] = (37.1167, 21.5833);

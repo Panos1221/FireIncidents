@@ -19,13 +19,28 @@ namespace FireIncidents
 
             services.AddHttpClient("FireService");
             services.AddHttpClient("Nominatim");
-            services.AddHttpClient("TwitterScraper");
+            
+            // Configure TwitterScraper HttpClient with automatic decompression
+            services.AddHttpClient("TwitterScraper", client =>
+            {
+                client.Timeout = TimeSpan.FromMinutes(2);
+                client.DefaultRequestHeaders.Add("User-Agent", 
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+                client.DefaultRequestHeaders.Add("Accept", 
+                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+                client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+            });
 
             services.AddMemoryCache();
 
             // Register services
             services.AddScoped<FireServiceScraperService>();
             services.AddScoped<GeocodingService>();
+            services.AddScoped<JavaScriptRendererService>();
             services.AddScoped<TwitterScraperService>();
             services.AddScoped<Warning112Service>();
 

@@ -25,10 +25,8 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\scope
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\scopedcss\bundle\FireIncidents.styles.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\scopedcss\projectbundle\FireIncidents.bundle.scp.css
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\9oyaj0wmqx-61n19gt1b8.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\hhu6cz8n9g-q1dtisze6f.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\g9y5runz5c-b3evy44epu.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\w4qxfa2i2m-1bgkcytdz3.gz
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\xajcyjls62-om8insz8cw.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\m9pdclz0vf-bqjiyaj88i.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\2k579cqpq0-c2jlpeoesf.gz
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\n9iroo1rgy-erw9l3u2r3.gz
@@ -101,4 +99,7 @@ C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\refin
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.pdb
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\FireIncidents.genruntimeconfig.cache
 C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\ref\FireIncidents.dll
-C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\c2nfk42ev8-m639vj8zny.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\bin\Release\net9.0\Fire_Incidents_112_Warnings_API.postman_collection.json
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\xajcyjls62-j1vp1vpcjf.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\c2nfk42ev8-57q9pjcxg6.gz
+C:\Users\pansa\source\repos\FireIncidents\FireIncidents\obj\Release\net9.0\compressed\hhu6cz8n9g-gii37y2gdc.gz

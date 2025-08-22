@@ -229,6 +229,41 @@ namespace FireIncidents.Controllers
             }
         }
 
+        [HttpPost("test-tweet-content")]
+        public async Task<ActionResult<GeocodedWarning112>> TestTweetContent([FromBody] TestTweetContentRequest request)
+        {
+            try
+            {
+                _logger.LogInformation($"API request received to test tweet content geocoding");
+                
+                // Use Warning112Service to extract locations and geocode them
+                var warning = await _warning112Service.CreateWarningFromTweetContentAsync(request.TweetContent);
+                
+                if (warning == null)
+                {
+                    return BadRequest(new { 
+                        error = "Could not create warning from tweet content", 
+                        reasons = new[] {
+                            "Tweet may not be a valid 112 activation tweet",
+                            "No locations could be extracted from hashtags",
+                            "Geocoding failed for all extracted locations"
+                        }
+                    });
+                }
+
+                _logger.LogInformation($"Created test warning from tweet content with {warning.GeocodedLocations?.Count ?? 0} geocoded locations");
+                return Ok(warning);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error testing tweet content");
+                return StatusCode(500, new { 
+                    error = "Internal server error", 
+                    message = ex.Message 
+                });
+            }
+        }
+
         public class CreateTestWarningRequest
         {
             public string Municipality { get; set; } = "TestMunicipality";
@@ -239,18 +274,24 @@ namespace FireIncidents.Controllers
             public string? GreekContent { get; set; }
         }
 
+        public class TestTweetContentRequest
+        {
+            public string TweetContent { get; set; } = "";
+        }
+
         [HttpGet("test")]
-        public async Task<ActionResult> TestTwitterScraping()
+        public async Task<ActionResult> TestTwitterScraping([FromQuery] int? daysBack = null)
         {
             try
             {
-                _logger.LogInformation("API request received to test Twitter scraping");
+                _logger.LogInformation($"API request received to test Twitter scraping (daysBack: {daysBack})");
 
-                var warnings = await _warning112Service.ScrapeAndProcessWarningsAsync();
+                var warnings = await _warning112Service.ScrapeAndProcessWarningsAsync(daysBack);
 
                 return Ok(new
                 {
                     message = "Twitter scraping test completed",
+                    daysBack = daysBack ?? 7,
                     warningsFound = warnings.Count,
                     warnings = warnings.Select(w => new
                     {
@@ -266,13 +307,65 @@ namespace FireIncidents.Controllers
                         geocodedLocationsCount = w.GeocodedLocations?.Count ?? 0,
                         isActive = w.IsActive,
                         iconType = w.IconType,
-                        warningType = w.WarningType
+                        warningType = w.WarningType,
+                        tweetDate = w.TweetDate
                     }).ToList()
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Twitter scraping test");
+                return StatusCode(500, new
+                {
+                    error = "Internal server error",
+                    message = ex.Message,
+                    details = ex.ToString()
+                });
+            }
+        }
+
+        [HttpGet("test-extended")]
+        public async Task<ActionResult> TestTwitterScrapingExtended([FromQuery] int daysBack = 30)
+        {
+            try
+            {
+                _logger.LogInformation($"API request received to test Twitter scraping with extended range: {daysBack} days");
+
+                var warnings = await _warning112Service.ScrapeAndProcessWarningsAsync(daysBack);
+
+                return Ok(new
+                {
+                    message = $"Extended Twitter scraping test completed ({daysBack} days back)",
+                    daysBack = daysBack,
+                    warningsFound = warnings.Count,
+                    dateRange = new 
+                    {
+                        from = DateTime.UtcNow.AddDays(-daysBack).ToString("yyyy-MM-dd"),
+                        to = DateTime.UtcNow.ToString("yyyy-MM-dd")
+                    },
+                    warnings = warnings.Select(w => new
+                    {
+                        id = w.Id,
+                        tweetDate = w.TweetDate.ToString("yyyy-MM-dd HH:mm"),
+                        englishContent = !string.IsNullOrEmpty(w.EnglishContent) && w.EnglishContent.Length > 150 
+                            ? w.EnglishContent.Substring(0, 150) + "..." 
+                            : w.EnglishContent,
+                        greekContent = !string.IsNullOrEmpty(w.GreekContent) && w.GreekContent.Length > 150 
+                            ? w.GreekContent.Substring(0, 150) + "..." 
+                            : w.GreekContent,
+                        locationsCount = w.Locations?.Count ?? 0,
+                        locations = w.Locations,
+                        geocodedLocationsCount = w.GeocodedLocations?.Count ?? 0,
+                        isActive = w.IsActive,
+                        iconType = w.IconType,
+                        warningType = w.WarningType,
+                        primaryLanguage = !string.IsNullOrEmpty(w.GreekContent) ? "Greek" : "English"
+                    }).OrderByDescending(w => w.tweetDate).ToList()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in extended Twitter scraping test");
                 return StatusCode(500, new
                 {
                     error = "Internal server error",
