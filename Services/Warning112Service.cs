@@ -16,6 +16,15 @@ namespace FireIncidents.Services
         // Cache keys
         private const string ACTIVE_WARNINGS_CACHE_KEY = "active_112_warnings";
         private const string TEST_WARNINGS_CACHE_KEY = "test_112_warnings";
+        
+        // Geocoding cache
+        private static readonly Dictionary<string, List<GeocodedWarning112.WarningLocation>> _geocodingCache = new();
+        private static readonly object _cacheLock = new object();
+        
+        // Rate limiting for Nominatim API calls
+        private static readonly SemaphoreSlim _nominatimRateLimiter = new SemaphoreSlim(1, 1); // Only 1 concurrent request
+        private static DateTime _lastNominatimRequest = DateTime.MinValue;
+        private static readonly TimeSpan _nominatimDelay = TimeSpan.FromMilliseconds(1100); // 1.1 second delay between requests
 
         // Time-based constants
         private readonly TimeSpan _warningActiveTime = TimeSpan.FromHours(24);
@@ -281,39 +290,8 @@ namespace FireIncidents.Services
                 // Geocode danger zones and fire locations (these are what we show on map)
                 var locationsToGeocode = evacuationInfo.DangerZones.Concat(evacuationInfo.FireLocations).Distinct().ToList();
 
-                var geocodingTasks = locationsToGeocode.Select(async locationName =>
-                {
-                    try
-                    {
-                        _logger.LogInformation($"Starting geocoding for: {locationName}");
-                        var geocodedLocation = await GeocodeLocationAsync(locationName, evacuationInfo.RegionalContext);
-
-                        if (geocodedLocation != null)
-                        {
-                            _logger.LogInformation($"✅ Successfully geocoded '{locationName}' to {geocodedLocation.Latitude:F6}, {geocodedLocation.Longitude:F6}");
-                            return geocodedLocation;
-                        }
-                        else
-                        {
-                            _logger.LogWarning($"❌ Failed to geocode location: {locationName}");
-                            return null;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, $"💥 Error geocoding location '{locationName}'");
-                        return null;
-                    }
-                }).ToArray();
-
-                // Wait for all geocoding attempts to complete
-                var geocodingResults = await Task.WhenAll(geocodingTasks);
-
-                // Add successful results to warning
-                foreach (var result in geocodingResults.Where(r => r != null))
-                {
-                    geocodedWarning.GeocodedLocations.Add(result);
-                }
+                // Process locations with parallel processing while maintaining proximity analysis
+                await ProcessLocationsWithParallelGeocodingAsync(locationsToGeocode, evacuationInfo.RegionalContext, geocodedWarning);
 
                 // Log evacuation info for debugging
                 _logger.LogInformation($"Warning {warning.Id} - Danger zones: [{string.Join(", ", evacuationInfo.DangerZones)}], " +
@@ -345,7 +323,7 @@ namespace FireIncidents.Services
                         {
                             try
                             {
-                                var safeLocation = await GeocodeLocationAsync(safeZone, evacuationInfo.RegionalContext);
+                                var safeLocation = await GeocodeLocationAsync(safeZone, evacuationInfo.RegionalContext, geocodedWarning.GeocodedLocations.ToList());
                                 if (safeLocation != null)
                                 {
                                     // Mark this as a safe zone location for different map treatment
@@ -677,7 +655,7 @@ namespace FireIncidents.Services
                    tweetContent.Contains("απομακρυνθείτε");
         }
 
-        private async Task<GeocodedWarning112.WarningLocation> GeocodeLocationAsync(string locationName, string regionalContext = null)
+        private async Task<GeocodedWarning112.WarningLocation> GeocodeLocationAsync(string locationName, string regionalContext = null, List<GeocodedWarning112.WarningLocation> existingLocations = null)
         {
             try
             {
@@ -685,10 +663,11 @@ namespace FireIncidents.Services
                     return null;
 
                 _logger.LogInformation($"Geocoding location: '{locationName}'" +
-                    (regionalContext != null ? $" in regional context: {regionalContext}" : ""));
+                    (regionalContext != null ? $" in regional context: {regionalContext}" : "") +
+                    (existingLocations?.Any() == true ? $" with {existingLocations.Count} existing locations for proximity analysis" : ""));
 
                 // Use multiple geocoding strategies
-                var result = await TryGeocodeWithMultipleStrategies(locationName, regionalContext);
+                var result = await TryGeocodeWithMultipleStrategies(locationName, regionalContext, existingLocations);
 
                 if (result != null)
                 {
@@ -706,9 +685,9 @@ namespace FireIncidents.Services
             }
         }
 
-        private async Task<GeocodedWarning112.WarningLocation> TryGeocodeWithMultipleStrategies(string locationName, string regionalContext = null)
+        private async Task<GeocodedWarning112.WarningLocation> TryGeocodeWithMultipleStrategies(string locationName, string regionalContext = null, List<GeocodedWarning112.WarningLocation> existingLocations = null)
         {
-            var strategies = new List<(string Description, Func<Task<GeocodedWarning112.WarningLocation>> Strategy)>();
+            var strategies = new List<(string Description, Func<Task<GeocodedWarning112.WarningLocation>> Strategy, int Priority)>();
 
             // If we have regional context, prioritize searches within that context
             if (!string.IsNullOrEmpty(regionalContext))
@@ -717,134 +696,431 @@ namespace FireIncidents.Services
 
                 foreach (var variant in regionalVariants)
                 {
+                    // Prioritize more specific context searches that are likely to disambiguate locations
                     strategies.Add(($"Context: {locationName}, {variant}, Greece",
-                        () => GeocodeWithNominatim($"{locationName}, {variant}, Greece", $"Context search: {variant}")));
+                        () => GeocodeWithNominatim($"{locationName}, {variant}, Greece", $"Context search: {variant}"), 120));
 
                     strategies.Add(($"Context village: {locationName} village, {variant}, Greece",
-                        () => GeocodeWithNominatim($"{locationName} village, {variant}, Greece", $"Context village: {variant}")));
+                        () => GeocodeWithNominatim($"{locationName} village, {variant}, Greece", $"Context village: {variant}"), 110));
 
                     strategies.Add(($"Context town: {locationName} town, {variant}, Greece",
-                        () => GeocodeWithNominatim($"{locationName} town, {variant}, Greece", $"Context town: {variant}")));
+                        () => GeocodeWithNominatim($"{locationName} town, {variant}, Greece", $"Context town: {variant}"), 110));
 
                     strategies.Add(($"Context settlement: {locationName} settlement, {variant}, Greece",
-                        () => GeocodeWithNominatim($"{locationName} settlement, {variant}, Greece", $"Context settlement: {variant}")));
+                        () => GeocodeWithNominatim($"{locationName} settlement, {variant}, Greece", $"Context settlement: {variant}"), 105));
                 }
             }
 
-            // Add general strategies with more variations
-            strategies.AddRange(new (string, Func<Task<GeocodedWarning112.WarningLocation>>)[]
+            // Add general strategies with lower priority to avoid wrong matches
+            strategies.AddRange(new (string, Func<Task<GeocodedWarning112.WarningLocation>>, int)[]
             {
-                ("Direct search", () => GeocodeWithNominatim(locationName, "Direct search")),
-                ("Greece context", () => GeocodeWithNominatim($"{locationName}, Greece", "Greece context")),
-                ("Village search", () => GeocodeWithNominatim($"{locationName} village, Greece", "Village search")),
-                ("Town search", () => GeocodeWithNominatim($"{locationName} town, Greece", "Town search")),
-                ("Settlement search", () => GeocodeWithNominatim($"{locationName} settlement, Greece", "Settlement search")),
-                ("Municipality search", () => GeocodeWithNominatim($"{locationName} municipality, Greece", "Municipality search")),
-                ("Hamlet search", () => GeocodeWithNominatim($"{locationName} hamlet, Greece", "Hamlet search")),
-                ("Neighbourhood search", () => GeocodeWithNominatim($"{locationName} neighbourhood, Greece", "Neighbourhood search")),
-                ("Greek village", () => GeocodeWithNominatim($"{locationName} χωριό, Ελλάδα", "Greek village search")),
-                ("FireIncident fallback", () => GeocodeUsingFireIncidentService(locationName))
+                ("Direct search", () => GeocodeWithNominatim(locationName, "Direct search"), 60),
+                ("Greece context", () => GeocodeWithNominatim($"{locationName}, Greece", "Greece context"), 55),
+                ("Village search", () => GeocodeWithNominatim($"{locationName} village, Greece", "Village search"), 50),
+                ("Town search", () => GeocodeWithNominatim($"{locationName} town, Greece", "Town search"), 50),
+                ("Settlement search", () => GeocodeWithNominatim($"{locationName} settlement, Greece", "Settlement search"), 45),
+                ("Greek village", () => GeocodeWithNominatim($"{locationName} χωριό, Ελλάδα", "Greek village search"), 40),
+                ("Municipality search", () => GeocodeWithNominatim($"{locationName} municipality, Greece", "Municipality search"), 35),
+                ("Hamlet search", () => GeocodeWithNominatim($"{locationName} hamlet, Greece", "Hamlet search"), 30),
+                ("Neighbourhood search", () => GeocodeWithNominatim($"{locationName} neighbourhood, Greece", "Neighbourhood search"), 30),
+                ("FireIncident fallback", () => GeocodeUsingFireIncidentService(locationName), 25)
             });
 
             // If we have regional context but no results, try approximate location
             if (!string.IsNullOrEmpty(regionalContext))
             {
-                strategies.Add(("Regional center approximation", () => GetRegionalCenterApproximation(locationName, regionalContext)));
+                strategies.Add(("Regional center approximation", () => GetRegionalCenterApproximation(locationName, regionalContext), 10));
             }
 
-            GeocodedWarning112.WarningLocation bestResult = null;
+            var candidateResults = new List<(GeocodedWarning112.WarningLocation Result, string Description, int Priority, int Score)>();
 
-            foreach (var (description, strategy) in strategies)
+            // Tiered approach: Try high-priority strategies first, then progressively lower priority
+            var contextStrategies = strategies.Where(s => s.Description.Contains("Context") && s.Priority >= 100).OrderByDescending(s => s.Priority).ToList();
+            var generalStrategies = strategies.Where(s => !s.Description.Contains("Context") && !s.Description.Contains("FireIncident") && !s.Description.Contains("approximation") && s.Priority >= 40).OrderByDescending(s => s.Priority).ToList();
+            var fallbackStrategies = strategies.Where(s => s.Description.Contains("FireIncident") || s.Description.Contains("approximation") || s.Priority < 40).OrderByDescending(s => s.Priority).ToList();
+            
+            // Tier 1: Context-based strategies (highest priority)
+            if (contextStrategies.Any())
             {
-                try
+                _logger.LogInformation($"🎯 Tier 1: Trying {contextStrategies.Count} context-based strategies");
+                foreach (var (description, strategy, priority) in contextStrategies)
                 {
-                    _logger.LogInformation($"🔍 Trying: {description}");
-                    var result = await strategy();
+                    var earlyTermination = await TryStrategy(description, strategy, priority, candidateResults, regionalContext, existingLocations, locationName);
+                    if (earlyTermination) // Score >= 180, return immediately
+                    {
+                        var bestResult = candidateResults.OrderByDescending(c => c.Score).First();
+                        return bestResult.Result;
+                    }
+                    
+                    // Check if we have a good enough result to skip remaining tiers
+                    if (candidateResults.Any() && candidateResults.Max(c => c.Score) >= 150)
+                    {
+                        var bestResult = candidateResults.OrderByDescending(c => c.Score).First();
+                        _logger.LogInformation($"🏆 High confidence context result found (Score: {bestResult.Score}), skipping remaining tiers");
+                        return bestResult.Result;
+                    }
+                }
+            }
+            
+            // Tier 2: General strategies (only if no good context results)
+            if (!candidateResults.Any() || candidateResults.Max(c => c.Score) < 120)
+            {
+                _logger.LogInformation($"🔍 Tier 2: Trying {Math.Min(generalStrategies.Count, 3)} general strategies"); // Limit to top 3
+                foreach (var (description, strategy, priority) in generalStrategies.Take(3)) // Limit API calls
+                {
+                    var earlyTermination = await TryStrategy(description, strategy, priority, candidateResults, regionalContext, existingLocations, locationName);
+                    if (earlyTermination) // Score >= 180, return immediately
+                    {
+                        var bestResult = candidateResults.OrderByDescending(c => c.Score).First();
+                        return bestResult.Result;
+                    }
+                    
+                    // Check if we have a good enough result to skip fallbacks
+                    if (candidateResults.Any() && candidateResults.Max(c => c.Score) >= 130)
+                    {
+                        var bestResult = candidateResults.OrderByDescending(c => c.Score).First();
+                        _logger.LogInformation($"🏆 Good confidence general result found (Score: {bestResult.Score}), skipping fallbacks");
+                        return bestResult.Result;
+                    }
+                }
+            }
+            
+            // Tier 3: Fallback strategies (only if no acceptable results)
+            if (!candidateResults.Any() || candidateResults.Max(c => c.Score) < 80)
+            {
+                _logger.LogInformation($"🚨 Tier 3: Trying {fallbackStrategies.Count} fallback strategies");
+                foreach (var (description, strategy, priority) in fallbackStrategies)
+                {
+                    var earlyTermination = await TryStrategy(description, strategy, priority, candidateResults, regionalContext, existingLocations, locationName);
+                    if (earlyTermination) // Score >= 180, return immediately
+                    {
+                        var bestResult = candidateResults.OrderByDescending(c => c.Score).First();
+                        return bestResult.Result;
+                    }
+                }
+            }
 
-                    // Validate coordinates are in Greece (rough bounds check)
+            // Select the best result based on score
+            if (candidateResults.Any())
+            {
+                var bestCandidate = candidateResults.OrderByDescending(c => c.Score).First();
+                _logger.LogInformation($"🏆 Selected best result: {bestCandidate.Description} (Score: {bestCandidate.Score}, Priority: {bestCandidate.Priority})");
+                
+                // Log all candidates for debugging
+                foreach (var candidate in candidateResults.OrderByDescending(c => c.Score))
+                {
+                    _logger.LogInformation($"📊 Candidate: {candidate.Description} - Score: {candidate.Score}, Priority: {candidate.Priority}");
+                }
+                
+                return bestCandidate.Result;
+            }
+
+            return null;
+        }
+
+        private async Task<bool> TryStrategy(string description, Func<Task<GeocodedWarning112.WarningLocation>> strategy, int priority, 
+            List<(GeocodedWarning112.WarningLocation Result, string Description, int Priority, int Score)> candidateResults, 
+            string regionalContext, List<GeocodedWarning112.WarningLocation> existingLocations, string locationName)
+        {
+            try
+            {
+                _logger.LogInformation($"🔍 Trying: {description} (Priority: {priority})");
+                
+                // Extract query from the strategy description for multiple candidate search
+                string query = "";
+                if (description.StartsWith("Context:"))
+                {
+                    var parts = description.Split("Context: ")[1];
+                    query = parts;
+                }
+                else if (description.Contains("search"))
+                {
+                    // Extract the query pattern from common search types
+                    if (description == "Direct search") query = locationName;
+                    else if (description == "Greece context") query = $"{locationName}, Greece";
+                    else if (description == "Village search") query = $"{locationName} village, Greece";
+                    else if (description == "Town search") query = $"{locationName} town, Greece";
+                    else if (description == "Settlement search") query = $"{locationName} settlement, Greece";
+                    else if (description == "Municipality search") query = $"{locationName} municipality, Greece";
+                    else if (description == "Hamlet search") query = $"{locationName} hamlet, Greece";
+                    else if (description == "Neighbourhood search") query = $"{locationName} neighbourhood, Greece";
+                    else if (description == "Greek village") query = $"{locationName} χωριό, Ελλάδα";
+                }
+                
+                if (!string.IsNullOrEmpty(query))
+                {
+                    var candidates = await GeocodeWithNominatimMultiple(query, description);
+                    foreach (var candidate in candidates)
+                    {
+                        var score = CalculateGeocodingScore(candidate, regionalContext, description, priority, existingLocations);
+                        candidateResults.Add((candidate, description, priority, score));
+                        
+                        _logger.LogInformation($"✅ CANDIDATE: {description} → {candidate.Latitude:F6}, {candidate.Longitude:F6} (Score: {score})");
+                        
+                        // Early termination for very high confidence results
+                        if (score >= 180)
+                        {
+                            _logger.LogInformation($"🎯 High confidence result found (Score: {score}), terminating search early");
+                            return true; // Signal early termination
+                        }
+                    }
+                    return candidates.Any();
+                }
+                else
+                {
+                    // Fallback to single result for complex strategies
+                    var result = await strategy();
                     if (result != null && result.Latitude != 0 && result.Longitude != 0 &&
                         result.Latitude >= 34.0 && result.Latitude <= 42.0 &&
                         result.Longitude >= 19.0 && result.Longitude <= 30.0)
                     {
-                        _logger.LogInformation($"✅ SUCCESS: {description} → {result.Latitude:F6}, {result.Longitude:F6}");
-
-                        // For context searches, prefer them over general searches
-                        if (description.Contains("Context"))
+                        var score = CalculateGeocodingScore(result, regionalContext, description, priority, existingLocations);
+                        candidateResults.Add((result, description, priority, score));
+                        
+                        _logger.LogInformation($"✅ SUCCESS: {description} → {result.Latitude:F6}, {result.Longitude:F6} (Score: {score})");
+                        
+                        // Early termination for very high confidence results
+                        if (score >= 180)
                         {
-                            _logger.LogInformation($"🎯 Using context result immediately: {description}");
-                            return result;
+                            _logger.LogInformation($"🎯 High confidence result found (Score: {score}), terminating search early");
+                            return true; // Signal early termination
                         }
-
-                        // Store first valid result as backup
-                        if (bestResult == null)
-                        {
-                            bestResult = result;
-                            _logger.LogInformation($"📌 Storing as best result: {description}");
-                        }
+                        return true;
                     }
-                    else if (result != null)
-                    {
-                        _logger.LogWarning($"❌ Result outside Greece bounds: {description} → {result.Latitude:F6}, {result.Longitude:F6}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"💥 Strategy failed: {description}");
                 }
             }
-
-            return bestResult;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"💥 Strategy failed: {description}");
+            }
+            return false;
         }
 
-        private async Task<GeocodedWarning112.WarningLocation> GeocodeWithNominatim(string query, string sourceDescription = "Nominatim")
+        private int CalculateGeocodingScore(GeocodedWarning112.WarningLocation result, string regionalContext, string description, int basePriority, List<GeocodedWarning112.WarningLocation> existingLocations = null)
         {
+            var score = basePriority;
+            
+            // Bonus for regional context match
+            if (!string.IsNullOrEmpty(regionalContext) && !string.IsNullOrEmpty(result.Region))
+            {
+                var regionalVariants = GetRegionalUnitVariants(regionalContext);
+                var regionMatches = regionalVariants.Any(variant => 
+                    result.Region.Contains(variant, StringComparison.OrdinalIgnoreCase) ||
+                    result.Municipality.Contains(variant, StringComparison.OrdinalIgnoreCase));
+                    
+                if (regionMatches)
+                {
+                    score += 50;
+                    _logger.LogDebug($"🎯 Regional context match bonus: +50 (Region: {result.Region}, Municipality: {result.Municipality})");
+                }
+            }
+            
+            // Proximity bonus: locations in the same warning should be geographically close
+            if (existingLocations != null && existingLocations.Any())
+            {
+                var proximityBonus = CalculateProximityBonus(result, existingLocations);
+                score += proximityBonus;
+                if (proximityBonus > 0)
+                {
+                    _logger.LogDebug($"📍 Proximity bonus: +{proximityBonus} (close to other warning locations)");
+                }
+            }
+            
+            // Municipality consistency bonus: prefer locations in the same municipality as other warning locations
+            if (existingLocations != null && existingLocations.Any() && !string.IsNullOrEmpty(result.Municipality))
+            {
+                var sameMusicipalityCount = existingLocations.Count(loc => 
+                    !string.IsNullOrEmpty(loc.Municipality) && 
+                    loc.Municipality.Equals(result.Municipality, StringComparison.OrdinalIgnoreCase));
+                    
+                if (sameMusicipalityCount > 0)
+                {
+                    var municipalityBonus = sameMusicipalityCount * 15;
+                    score += municipalityBonus;
+                    _logger.LogDebug($"🏛️ Municipality consistency bonus: +{municipalityBonus} ({sameMusicipalityCount} locations in {result.Municipality})");
+                }
+            }
+            
+            // Bonus for context-based searches
+            if (description.Contains("Context"))
+            {
+                score += 30;
+            }
+            
+            // Penalty for approximations
+            if (description.Contains("approximation") || result.GeocodingSource.Contains("approximation"))
+            {
+                score -= 20;
+            }
+            
+            // Bonus for having detailed municipality information
+            if (!string.IsNullOrEmpty(result.Municipality) && result.Municipality != "Greece")
+            {
+                score += 10;
+            }
+            
+            // Penalty for very generic region names
+            if (result.Region == "Greece" || string.IsNullOrEmpty(result.Region))
+            {
+                score -= 5;
+            }
+            
+            return score;
+        }
+        
+        private int CalculateProximityBonus(GeocodedWarning112.WarningLocation candidate, List<GeocodedWarning112.WarningLocation> existingLocations)
+        {
+            if (!existingLocations.Any()) return 0;
+            
+            var distances = existingLocations.Select(existing => CalculateDistance(candidate.Latitude, candidate.Longitude, existing.Latitude, existing.Longitude)).ToList();
+            var averageDistance = distances.Average();
+            var minDistance = distances.Min();
+            
+            // Bonus based on proximity (closer locations get higher bonus)
+            if (minDistance <= 5) // Within 5km
+                return 25;
+            else if (minDistance <= 15) // Within 15km
+                return 15;
+            else if (minDistance <= 30) // Within 30km
+                return 10;
+            else if (averageDistance <= 50) // Average distance within 50km
+                return 5;
+            else
+                return 0; // Too far, no bonus
+        }
+        
+        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            // Haversine formula for calculating distance between two points on Earth
+            const double R = 6371; // Earth's radius in kilometers
+            
+            var dLat = ToRadians(lat2 - lat1);
+            var dLon = ToRadians(lon2 - lon1);
+            
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+                    
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            
+            return R * c;
+        }
+        
+        private double ToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180;
+        }
+
+        private async Task<List<GeocodedWarning112.WarningLocation>> GeocodeWithNominatimMultiple(string query, string sourceDescription = "Nominatim")
+        {
+            // Check cache first
+            lock (_cacheLock)
+            {
+                if (_geocodingCache.TryGetValue(query, out var cachedResults))
+                {
+                    _logger.LogDebug($"🎯 Cache hit for query: {query} ({cachedResults.Count} results)");
+                    return cachedResults.Select(r => new GeocodedWarning112.WarningLocation
+                    {
+                        LocationName = r.LocationName,
+                        Latitude = r.Latitude,
+                        Longitude = r.Longitude,
+                        Municipality = r.Municipality,
+                        Region = r.Region,
+                        GeocodingSource = r.GeocodingSource
+                    }).ToList();
+                }
+            }
+            
+            var candidates = new List<GeocodedWarning112.WarningLocation>();
+            
             try
             {
+                // Apply rate limiting for Nominatim API
+                await _nominatimRateLimiter.WaitAsync();
+                string response = null;
+            try
+            {
+                // Ensure minimum delay between requests
+                var timeSinceLastRequest = DateTime.UtcNow - _lastNominatimRequest;
+                if (timeSinceLastRequest < _nominatimDelay)
+                {
+                    var delayNeeded = _nominatimDelay - timeSinceLastRequest;
+                    _logger.LogDebug($"⏱️ Rate limiting: waiting {delayNeeded.TotalMilliseconds:F0}ms before Nominatim request");
+                    await Task.Delay(delayNeeded);
+                }
+                
+                _lastNominatimRequest = DateTime.UtcNow;
+                
                 using var httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(10); // Set reasonable timeout
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "FireIncidents/1.0 (emergency-warnings)");
 
                 var encodedQuery = Uri.EscapeDataString(query);
-                var url = $"https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=3&countrycodes=gr&q={encodedQuery}";
+                var url = $"https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=gr&q={encodedQuery}";
 
                 _logger.LogDebug($"🌐 Nominatim query: {query}");
 
-                var response = await httpClient.GetStringAsync(url);
-                var results = JsonSerializer.Deserialize<JsonElement[]>(response);
+                response = await httpClient.GetStringAsync(url);
+            }
+            finally
+            {
+                _nominatimRateLimiter.Release();
+            }
+            
+            if (response == null)
+                return candidates;
+                
+            var results = JsonSerializer.Deserialize<JsonElement[]>(response);
 
                 if (results != null && results.Length > 0)
                 {
-                    var bestResult = results[0];
-
-                    if (bestResult.TryGetProperty("lat", out var latElement) &&
-                        bestResult.TryGetProperty("lon", out var lonElement) &&
-                        double.TryParse(latElement.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
-                        double.TryParse(lonElement.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var lon))
+                    _logger.LogDebug($"🌐 Nominatim returned {results.Length} results for '{query}'");
+                    
+                    foreach (var result in results)
                     {
-                        string municipality = "";
-                        string region = "Greece";
-
-                        if (bestResult.TryGetProperty("address", out var addressElement))
+                        if (result.TryGetProperty("lat", out var latElement) &&
+                            result.TryGetProperty("lon", out var lonElement) &&
+                            double.TryParse(latElement.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
+                            double.TryParse(lonElement.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var lon))
                         {
-                            if (addressElement.TryGetProperty("municipality", out var munElement))
-                                municipality = munElement.GetString() ?? "";
-                            else if (addressElement.TryGetProperty("city", out var cityElement))
-                                municipality = cityElement.GetString() ?? "";
-                            else if (addressElement.TryGetProperty("town", out var townElement))
-                                municipality = townElement.GetString() ?? "";
+                            // Validate coordinates are within Greece bounds
+                            if (lat < 34 || lat > 42 || lon < 19 || lon > 30)
+                                continue;
+                                
+                            string municipality = "";
+                            string region = "Greece";
+                            string displayName = "";
 
-                            if (addressElement.TryGetProperty("state", out var stateElement))
-                                region = stateElement.GetString() ?? "Greece";
+                            if (result.TryGetProperty("address", out var addressElement))
+                            {
+                                if (addressElement.TryGetProperty("municipality", out var munElement))
+                                    municipality = munElement.GetString() ?? "";
+                                else if (addressElement.TryGetProperty("city", out var cityElement))
+                                    municipality = cityElement.GetString() ?? "";
+                                else if (addressElement.TryGetProperty("town", out var townElement))
+                                    municipality = townElement.GetString() ?? "";
+                                else if (addressElement.TryGetProperty("village", out var villageElement))
+                                    municipality = villageElement.GetString() ?? "";
+
+                                if (addressElement.TryGetProperty("state", out var stateElement))
+                                    region = stateElement.GetString() ?? "Greece";
+                            }
+                            
+                            if (result.TryGetProperty("display_name", out var displayElement))
+                                displayName = displayElement.GetString() ?? "";
+
+                            _logger.LogDebug($"🌐 Candidate: {lat:F6}, {lon:F6} - Municipality: {municipality}, Region: {region}, Display: {displayName}");
+
+                            candidates.Add(new GeocodedWarning112.WarningLocation
+                            {
+                                LocationName = query.Split(',')[0].Trim(),
+                                Latitude = lat,
+                                Longitude = lon,
+                                Municipality = municipality,
+                                Region = region,
+                                GeocodingSource = sourceDescription
+                            });
                         }
-
-                        return new GeocodedWarning112.WarningLocation
-                        {
-                            LocationName = query.Split(',')[0].Trim(),
-                            Latitude = lat,
-                            Longitude = lon,
-                            Municipality = municipality,
-                            Region = region,
-                            GeocodingSource = sourceDescription
-                        };
                     }
                 }
             }
@@ -853,7 +1129,23 @@ namespace FireIncidents.Services
                 _logger.LogDebug(ex, $"Nominatim search failed for '{query}'");
             }
 
-            return null;
+            // Cache successful results
+            if (candidates.Any())
+            {
+                lock (_cacheLock)
+                {
+                    _geocodingCache[query] = candidates.ToList();
+                    _logger.LogDebug($"🎯 Cached {candidates.Count} results for query: {query}");
+                }
+            }
+
+            return candidates;
+        }
+        
+        private async Task<GeocodedWarning112.WarningLocation> GeocodeWithNominatim(string query, string sourceDescription = "Nominatim")
+        {
+            var candidates = await GeocodeWithNominatimMultiple(query, sourceDescription);
+            return candidates.FirstOrDefault();
         }
 
         private async Task<GeocodedWarning112.WarningLocation> GeocodeUsingFireIncidentService(string locationName)
@@ -1269,6 +1561,68 @@ namespace FireIncidents.Services
                 ["EvacuationWarnings"] = warnings.Count(w => w.WarningType == "Evacuation Warning"),
                 ["WildfireWarnings"] = warnings.Count(w => w.WarningType == "Wildfire Warning")
             };
+        }
+
+        private async Task ProcessLocationsWithParallelGeocodingAsync(List<string> locationsToGeocode, string? regionalContext, GeocodedWarning112 geocodedWarning)
+        {
+            const int maxConcurrency = 3; // Limit concurrent API calls to avoid rate limiting
+            const int batchSize = 2; // Process in small batches to maintain some proximity analysis
+
+            _logger.LogInformation($"Starting parallel geocoding for {locationsToGeocode.Count} locations with max concurrency: {maxConcurrency}");
+
+            // Process locations in batches to balance speed and proximity analysis
+            for (int i = 0; i < locationsToGeocode.Count; i += batchSize)
+            {
+                var batch = locationsToGeocode.Skip(i).Take(batchSize).ToList();
+                _logger.LogInformation($"Processing batch {(i / batchSize) + 1}: [{string.Join(", ", batch)}]");
+
+                // Create semaphore to limit concurrent operations
+                using var semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+
+                // Process batch in parallel
+                var tasks = batch.Select(async locationName =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        _logger.LogInformation($"Starting geocoding for: {locationName}");
+                        
+                        // Pass existing geocoded locations for proximity analysis
+                        var existingLocations = geocodedWarning.GeocodedLocations.ToList();
+                        var geocodedLocation = await GeocodeLocationAsync(locationName, regionalContext, existingLocations);
+
+                        if (geocodedLocation != null)
+                        {
+                            _logger.LogInformation($"✅ Successfully geocoded '{locationName}' to {geocodedLocation.Latitude:F6}, {geocodedLocation.Longitude:F6}");
+                            
+                            // Thread-safe addition to the collection
+                            lock (geocodedWarning.GeocodedLocations)
+                            {
+                                geocodedWarning.GeocodedLocations.Add(geocodedLocation);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"❌ Failed to geocode location: {locationName}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"💥 Error geocoding location '{locationName}'");
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                });
+
+                // Wait for current batch to complete before starting next batch
+                await Task.WhenAll(tasks);
+                
+                _logger.LogInformation($"Completed batch {(i / batchSize) + 1}, total geocoded so far: {geocodedWarning.GeocodedLocations.Count}");
+            }
+
+            _logger.LogInformation($"✅ Parallel geocoding completed. Successfully geocoded {geocodedWarning.GeocodedLocations.Count} out of {locationsToGeocode.Count} locations");
         }
     }
 }
