@@ -915,18 +915,8 @@ namespace FireIncidents.Services
                 }
             }
             
-            // Proximity bonus: locations in the same warning should be geographically close
-            if (existingLocations != null && existingLocations.Any())
-            {
-                var proximityBonus = CalculateProximityBonus(result, existingLocations);
-                score += proximityBonus;
-                if (proximityBonus > 0)
-                {
-                    _logger.LogDebug($"📍 Proximity bonus: +{proximityBonus} (close to other warning locations)");
-                }
-            }
-            
             // Municipality consistency bonus: prefer locations in the same municipality as other warning locations
+            // This is now calculated BEFORE proximity to give it higher priority for disambiguation
             if (existingLocations != null && existingLocations.Any() && !string.IsNullOrEmpty(result.Municipality))
             {
                 var sameMusicipalityCount = existingLocations.Count(loc => 
@@ -935,9 +925,21 @@ namespace FireIncidents.Services
                     
                 if (sameMusicipalityCount > 0)
                 {
-                    var municipalityBonus = sameMusicipalityCount * 15;
+                    // Increased bonus for municipality consistency - this is critical for disambiguation
+                    var municipalityBonus = sameMusicipalityCount * 40; // Increased from 15 to 40
                     score += municipalityBonus;
                     _logger.LogDebug($"🏛️ Municipality consistency bonus: +{municipalityBonus} ({sameMusicipalityCount} locations in {result.Municipality})");
+                }
+            }
+            
+            // Proximity bonus: locations in the same warning should be geographically close
+            if (existingLocations != null && existingLocations.Any())
+            {
+                var proximityBonus = CalculateProximityBonus(result, existingLocations);
+                score += proximityBonus;
+                if (proximityBonus > 0)
+                {
+                    _logger.LogDebug($"📍 Proximity bonus: +{proximityBonus} (close to other warning locations)");
                 }
             }
             
@@ -976,15 +978,17 @@ namespace FireIncidents.Services
             var averageDistance = distances.Average();
             var minDistance = distances.Min();
             
-            // Bonus based on proximity (closer locations get higher bonus)
-            if (minDistance <= 5) // Within 5km
-                return 25;
-            else if (minDistance <= 15) // Within 15km
-                return 15;
-            else if (minDistance <= 30) // Within 30km
-                return 10;
-            else if (averageDistance <= 50) // Average distance within 50km
-                return 5;
+            // Enhanced proximity bonus with stronger penalties for distant locations
+            if (minDistance <= 5) // Within 5km - very close
+                return 35; // Increased from 25
+            else if (minDistance <= 15) // Within 15km - close
+                return 25; // Increased from 15
+            else if (minDistance <= 30) // Within 30km - nearby
+                return 15; // Increased from 10
+            else if (averageDistance <= 50) // Average distance within 50km - same region
+                return 8; // Increased from 5
+            else if (minDistance > 200) // Very far away - likely wrong location
+                return -30; // Strong penalty for very distant locations
             else
                 return 0; // Too far, no bonus
         }
