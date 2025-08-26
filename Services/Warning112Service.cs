@@ -12,15 +12,15 @@ namespace FireIncidents.Services
         private readonly TwitterScraperService _twitterScraperService;
         private readonly GeocodingService _geocodingService;
         private readonly IMemoryCache _cache;
-        
+
         // Cache keys
         private const string ACTIVE_WARNINGS_CACHE_KEY = "active_112_warnings";
         private const string TEST_WARNINGS_CACHE_KEY = "test_112_warnings";
-        
+
         // Time-based constants
         private readonly TimeSpan _warningActiveTime = TimeSpan.FromHours(24);
         private readonly TimeSpan _redIconTime = TimeSpan.FromHours(12);
-        
+
         public Warning112Service(
             ILogger<Warning112Service> logger,
             TwitterScraperService twitterScraperService,
@@ -38,14 +38,14 @@ namespace FireIncidents.Services
             try
             {
                 _logger.LogInformation("Getting active 112 warnings...");
-                
+
                 var allWarnings = new List<GeocodedWarning112>();
-                
+
                 // Get test warnings first
                 var testWarnings = GetTestWarnings();
                 allWarnings.AddRange(testWarnings);
                 _logger.LogInformation($"Found {testWarnings.Count} test warnings");
-                
+
                 // Check cache for scraped warnings
                 if (_cache.TryGetValue(ACTIVE_WARNINGS_CACHE_KEY, out List<GeocodedWarning112>? cachedWarnings) && cachedWarnings != null)
                 {
@@ -57,19 +57,19 @@ namespace FireIncidents.Services
                 {
                     // Scrape fresh warnings (use default 7 days for active warnings)
                     var scrapedWarnings = await ScrapeAndProcessWarningsAsync();
-                    
+
                     // Cache the results for 5 minutes
                     _cache.Set(ACTIVE_WARNINGS_CACHE_KEY, scrapedWarnings, TimeSpan.FromMinutes(5));
-                    
+
                     var activeScrapedWarnings = scrapedWarnings.Where(w => w.IsActive).ToList();
                     allWarnings.AddRange(activeScrapedWarnings);
                     _logger.LogInformation($"Found {activeScrapedWarnings.Count} fresh scraped warnings");
                 }
-                
+
                 // Filter out expired warnings from the combined list
                 var activeWarnings = allWarnings.Where(w => w.IsActive).ToList();
                 _logger.LogInformation($"Returning {activeWarnings.Count} total active warnings");
-                
+
                 return activeWarnings;
             }
             catch (Exception ex)
@@ -85,24 +85,24 @@ namespace FireIncidents.Services
             {
                 var effectiveDaysBack = daysBack ?? 7;
                 _logger.LogInformation($"Scraping and processing 112 warnings (last {effectiveDaysBack} days)...");
-                
+
                 // Scrape warnings from Twitter with flexible date range
                 var rawWarnings = await _twitterScraperService.ScrapeWarningsAsync(effectiveDaysBack);
-                
+
                 if (!rawWarnings.Any())
                 {
                     _logger.LogWarning($"No warnings found from Twitter scraping in the last {effectiveDaysBack} days");
                     return new List<GeocodedWarning112>();
                 }
-                
+
                 _logger.LogInformation($"Found {rawWarnings.Count} raw warnings from Twitter");
-                
+
                 // Pair English and Greek versions of the same warning
                 var pairedWarnings = PairWarningsByContent(rawWarnings);
-                
+
                 // Process and geocode the warnings
                 var geocodedWarnings = new List<GeocodedWarning112>();
-                
+
                 foreach (var warning in pairedWarnings)
                 {
                     try
@@ -122,9 +122,9 @@ namespace FireIncidents.Services
                         _logger.LogError(ex, $"Error processing warning: {warning.Id}");
                     }
                 }
-                
+
                 _logger.LogInformation($"Successfully processed {geocodedWarnings.Count} geocoded warnings from {rawWarnings.Count} raw warnings");
-                
+
                 return geocodedWarnings;
             }
             catch (Exception ex)
@@ -139,21 +139,21 @@ namespace FireIncidents.Services
             try
             {
                 _logger.LogInformation($"Pairing {warnings.Count} warnings by content similarity...");
-                
+
                 var pairedWarnings = new List<Warning112>();
                 var usedWarnings = new HashSet<string>();
-                
+
                 foreach (var englishWarning in warnings.Where(w => !string.IsNullOrEmpty(w.EnglishContent)))
                 {
                     if (usedWarnings.Contains(englishWarning.Id))
                         continue;
-                        
+
                     // Look for corresponding Greek warning
                     var greekWarning = warnings
-                        .Where(w => !string.IsNullOrEmpty(w.GreekContent) && 
+                        .Where(w => !string.IsNullOrEmpty(w.GreekContent) &&
                                    !usedWarnings.Contains(w.Id))
                         .FirstOrDefault(w => AreWarningsSimilar(englishWarning, w));
-                    
+
                     var pairedWarning = new Warning112
                     {
                         Id = englishWarning.Id,
@@ -164,17 +164,17 @@ namespace FireIncidents.Services
                         SourceUrl = englishWarning.SourceUrl,
                         CreatedAt = englishWarning.CreatedAt
                     };
-                    
+
                     pairedWarnings.Add(pairedWarning);
                     usedWarnings.Add(englishWarning.Id);
-                    
+
                     if (greekWarning != null)
                     {
                         usedWarnings.Add(greekWarning.Id);
                         _logger.LogDebug($"Paired English warning {englishWarning.Id} with Greek warning {greekWarning.Id}");
                     }
                 }
-                
+
                 // Add unpaired Greek warnings
                 foreach (var greekWarning in warnings.Where(w => !string.IsNullOrEmpty(w.GreekContent) && !usedWarnings.Contains(w.Id)))
                 {
@@ -188,12 +188,12 @@ namespace FireIncidents.Services
                         SourceUrl = greekWarning.SourceUrl,
                         CreatedAt = greekWarning.CreatedAt
                     };
-                    
+
                     pairedWarnings.Add(pairedWarning);
                 }
-                
+
                 _logger.LogInformation($"Paired warnings result: {pairedWarnings.Count} paired warnings from {warnings.Count} original");
-                
+
                 return pairedWarnings;
             }
             catch (Exception ex)
@@ -207,17 +207,17 @@ namespace FireIncidents.Services
         {
             // 112Greece posts Greek and English versions of the same incident within minutes
             // Check if warnings are about the same incident based on:
-            // 1. Similar time (within 30 minutes) - 112Greece posts both versions quickly
+            // 1. Similar time (within 5 minutes) - 112Greece posts both versions quickly
             // 2. Similar location count (should be roughly the same)
             // 3. Both should be valid 112 activation tweets
-            
+
             var timeDiff = Math.Abs((warning1.TweetDate - warning2.TweetDate).TotalMinutes);
-            if (timeDiff > 30)
+            if (timeDiff > 5)
             {
                 _logger.LogDebug($"Time difference too large: {timeDiff:F1} minutes");
                 return false;
             }
-                
+
             // Allow some flexibility in location count (hashtags might differ slightly)
             if (Math.Abs(warning1.Locations.Count - warning2.Locations.Count) > 3)
             {
@@ -234,15 +234,15 @@ namespace FireIncidents.Services
             try
             {
                 _logger.LogInformation($"Processing warning {warning.Id}");
-                
+
                 // STRATEGY: 112Greece posts 2 tweets per incident (Greek + English)
                 // 1. Use Greek content for location extraction (more accurate Greek location names)
                 // 2. Keep English content for display (better UX for international users)
                 // 3. If only one language available, use what we have
-                
+
                 var hasGreek = !string.IsNullOrEmpty(warning.GreekContent);
                 var hasEnglish = !string.IsNullOrEmpty(warning.EnglishContent);
-                
+
                 if (!hasGreek && !hasEnglish)
                 {
                     _logger.LogWarning($"Warning {warning.Id} has no content to process");
@@ -252,14 +252,14 @@ namespace FireIncidents.Services
                 // For location extraction, prefer Greek (more accurate location names)
                 var contentForLocationExtraction = hasGreek ? warning.GreekContent : warning.EnglishContent;
                 var extractionLanguage = hasGreek ? "Greek" : "English";
-                
+
                 _logger.LogInformation($"🔍 Using {extractionLanguage} content for location extraction, " +
                                      $"English: {(hasEnglish ? "available" : "missing")}, " +
                                      $"Greek: {(hasGreek ? "available" : "missing")}");
 
                 // Parse the warning to extract evacuation patterns
                 var evacuationInfo = ParseEvacuationPattern(contentForLocationExtraction);
-                
+
                 if (!evacuationInfo.DangerZones.Any() && !evacuationInfo.FireLocations.Any())
                 {
                     _logger.LogWarning($"No danger zones or fire locations found in warning {warning.Id}");
@@ -267,27 +267,27 @@ namespace FireIncidents.Services
                 }
 
                 // Create geocoded warning
-            var geocodedWarning = new GeocodedWarning112
-            {
-                Id = warning.Id,
-                EnglishContent = warning.EnglishContent,
-                GreekContent = warning.GreekContent,
+                var geocodedWarning = new GeocodedWarning112
+                {
+                    Id = warning.Id,
+                    EnglishContent = warning.EnglishContent,
+                    GreekContent = warning.GreekContent,
                     Locations = evacuationInfo.DangerZones.Concat(evacuationInfo.FireLocations).ToList(),
-                TweetDate = warning.TweetDate,
-                SourceUrl = warning.SourceUrl,
-                CreatedAt = warning.CreatedAt
-            };
-            
+                    TweetDate = warning.TweetDate,
+                    SourceUrl = warning.SourceUrl,
+                    CreatedAt = warning.CreatedAt
+                };
+
                 // Geocode danger zones and fire locations (these are what we show on map)
                 var locationsToGeocode = evacuationInfo.DangerZones.Concat(evacuationInfo.FireLocations).Distinct().ToList();
-                
+
                 var geocodingTasks = locationsToGeocode.Select(async locationName =>
                 {
                     try
                     {
                         _logger.LogInformation($"Starting geocoding for: {locationName}");
                         var geocodedLocation = await GeocodeLocationAsync(locationName, evacuationInfo.RegionalContext);
-                        
+
                         if (geocodedLocation != null)
                         {
                             _logger.LogInformation($"✅ Successfully geocoded '{locationName}' to {geocodedLocation.Latitude:F6}, {geocodedLocation.Longitude:F6}");
@@ -305,46 +305,46 @@ namespace FireIncidents.Services
                         return null;
                     }
                 }).ToArray();
-                
+
                 // Wait for all geocoding attempts to complete
                 var geocodingResults = await Task.WhenAll(geocodingTasks);
-                
+
                 // Add successful results to warning
                 foreach (var result in geocodingResults.Where(r => r != null))
                 {
                     geocodedWarning.GeocodedLocations.Add(result);
                 }
-                
+
                 // Log evacuation info for debugging
                 _logger.LogInformation($"Warning {warning.Id} - Danger zones: [{string.Join(", ", evacuationInfo.DangerZones)}], " +
                                      $"Safe zones: [{string.Join(", ", evacuationInfo.SafeZones)}], " +
                                      $"Fire locations: [{string.Join(", ", evacuationInfo.FireLocations)}], " +
                                      $"Regional context: {evacuationInfo.RegionalContext}");
-                
+
                 _logger.LogInformation($"✅ Successfully geocoded {geocodedWarning.GeocodedLocations.Count} out of {locationsToGeocode.Count} locations for warning {warning.Id}");
-                
+
                 // For emergency situations, be more tolerant of partial failures
                 if (geocodedWarning.GeocodedLocations.Any())
                 {
                     var approximateCount = geocodedWarning.GeocodedLocations.Count(l => l.GeocodingSource.Contains("approximation"));
                     var exactCount = geocodedWarning.GeocodedLocations.Count - approximateCount;
-                    
+
                     _logger.LogInformation($"✅ Created warning with {exactCount} exact + {approximateCount} approximate locations");
-                return geocodedWarning;
-            }
+                    return geocodedWarning;
+                }
                 else
                 {
                     _logger.LogError($"❌ No locations were successfully geocoded for warning {warning.Id}");
-                    
+
                     // As a last resort for emergencies, try to geocode the safe zone for evacuation guidance
                     if (evacuationInfo.SafeZones.Any())
                     {
                         _logger.LogInformation($"🚨 EMERGENCY: Attempting to geocode safe zones for evacuation guidance");
-                        
+
                         foreach (var safeZone in evacuationInfo.SafeZones)
-        {
-            try
-            {
+                        {
+                            try
+                            {
                                 var safeLocation = await GeocodeLocationAsync(safeZone, evacuationInfo.RegionalContext);
                                 if (safeLocation != null)
                                 {
@@ -359,15 +359,15 @@ namespace FireIncidents.Services
                                 _logger.LogError(ex, $"Failed to geocode safe zone '{safeZone}'");
                             }
                         }
-                        
+
                         if (geocodedWarning.GeocodedLocations.Any())
                         {
                             _logger.LogInformation($"🚨 EMERGENCY: Created warning with {geocodedWarning.GeocodedLocations.Count} safe zone locations for evacuation guidance");
                             return geocodedWarning;
                         }
                     }
-                    
-                return null;
+
+                    return null;
                 }
             }
             catch (Exception ex)
@@ -380,36 +380,36 @@ namespace FireIncidents.Services
         private EvacuationInfo ParseEvacuationPattern(string tweetContent)
         {
             var info = new EvacuationInfo();
-            
+
             try
             {
                 _logger.LogInformation($"Parsing evacuation pattern from: {tweetContent.Substring(0, Math.Min(100, tweetContent.Length))}...");
-                
+
                 // Determine language
                 var isGreek = IsGreekTweet(tweetContent);
-                
+
                 // Extract regional context first
                 info.RegionalContext = ExtractRegionalContext(tweetContent, isGreek);
-                
+
                 // Always try to parse fire location first
                 var hasFireLocation = ParseFireLocationPattern(tweetContent, isGreek, info);
                 if (hasFireLocation)
                 {
                     _logger.LogInformation("Found fire location pattern");
                 }
-                
+
                 // Then try evacuation instructions
                 var hasEvacuationInstruction = ParseEvacuationInstruction(tweetContent, isGreek, info);
                 if (hasEvacuationInstruction)
                 {
                     _logger.LogInformation("Found evacuation instruction pattern");
                 }
-                
+
                 // Handle special case: "If you are in the area" refers to fire location
                 if (hasEvacuationInstruction && !info.DangerZones.Any() && info.FireLocations.Any())
                 {
                     var areaPattern = isGreek ? @"Αν βρίσκεστε στ[ηιοαί]*?\s*περιοχ[ηέάές]*?\s" : @"If you are in(?:\s+the)?\s+area\s";
-                    
+
                     if (Regex.IsMatch(tweetContent, areaPattern, RegexOptions.IgnoreCase))
                     {
                         _logger.LogInformation("'The area' detected - using fire locations as danger zones");
@@ -417,19 +417,19 @@ namespace FireIncidents.Services
                         info.FireLocations.Clear(); // Move fire locations to danger zones
                     }
                 }
-                
+
                 // If still no specific patterns found, use fallback
                 if (!hasFireLocation && !hasEvacuationInstruction)
                 {
                     _logger.LogWarning("No recognized pattern found, using fallback hashtag extraction");
                     info.DangerZones = ExtractHashtagLocations(tweetContent);
                 }
-                
+
                 // Filter out regional units from danger zones
                 info.DangerZones = FilterOutRegionalUnits(info.DangerZones);
                 info.SafeZones = FilterOutRegionalUnits(info.SafeZones);
                 info.FireLocations = FilterOutRegionalUnits(info.FireLocations);
-                
+
                 _logger.LogInformation($"Final parsing result - Danger: [{string.Join(", ", info.DangerZones)}], " +
                                      $"Safe: [{string.Join(", ", info.SafeZones)}], " +
                                      $"Fire: [{string.Join(", ", info.FireLocations)}], " +
@@ -439,14 +439,14 @@ namespace FireIncidents.Services
             {
                 _logger.LogError(ex, "Error parsing evacuation pattern");
             }
-            
+
             return info;
         }
 
         private bool ParseEvacuationInstruction(string tweetContent, bool isGreek, EvacuationInfo info)
+        {
+            try
             {
-                try
-                {
                 // Define evacuation patterns
                 var patterns = isGreek ? new[]
                 {
@@ -466,7 +466,7 @@ namespace FireIncidents.Services
                     if (match.Success)
                     {
                         _logger.LogInformation($"Matched evacuation pattern: {pattern}");
-                        
+
                         // Extract parts based on pattern structure
                         if (isGreek)
                         {
@@ -482,10 +482,10 @@ namespace FireIncidents.Services
                             if (match.Groups.Count > 2 && !string.IsNullOrEmpty(match.Groups[2].Value))
                             {
                                 info.RouteLocations = ExtractHashtagLocations(match.Groups[2].Value);
+                            }
                         }
-                    }
-                    else
-                    {
+                        else
+                        {
                             // For English: Group 1 = danger areas, Group 2 = via route (optional), Group 3 = safe zone
                             if (match.Groups.Count > 1 && !string.IsNullOrEmpty(match.Groups[1].Value))
                             {
@@ -500,7 +500,7 @@ namespace FireIncidents.Services
                                 info.RouteLocations = ExtractHashtagLocations(match.Groups[2].Value);
                             }
                         }
-                        
+
                         _logger.LogInformation($"Extracted - Danger: [{string.Join(", ", info.DangerZones)}], " +
                                              $"Safe: [{string.Join(", ", info.SafeZones)}], " +
                                              $"Route: [{string.Join(", ", info.RouteLocations)}]");
@@ -512,7 +512,7 @@ namespace FireIncidents.Services
             {
                 _logger.LogError(ex, "Error parsing evacuation instruction");
             }
-            
+
             return false;
         }
 
@@ -539,7 +539,7 @@ namespace FireIncidents.Services
                     {
                         _logger.LogInformation($"Matched fire pattern: {pattern}");
                         _logger.LogInformation($"Fire pattern captured: '{match.Groups[1]?.Value}'");
-                        
+
                         if (match.Groups.Count > 1 && !string.IsNullOrEmpty(match.Groups[1].Value))
                         {
                             var capturedText = match.Groups[1].Value.Trim();
@@ -552,7 +552,7 @@ namespace FireIncidents.Services
                             info.FireLocations = ExtractHashtagLocations(tweetContent);
                             _logger.LogInformation($"Fire locations from full tweet (area pattern): [{string.Join(", ", info.FireLocations)}]");
                         }
-                        
+
                         _logger.LogInformation($"Final extracted fire locations: [{string.Join(", ", info.FireLocations)}]");
                         return true;
                     }
@@ -562,25 +562,25 @@ namespace FireIncidents.Services
             {
                 _logger.LogError(ex, "Error parsing fire location pattern");
             }
-            
+
             return false;
         }
 
         private List<string> ExtractHashtagLocations(string text)
         {
             var locations = new List<string>();
-            
+
             try
             {
                 // Pattern for hashtags with Greek and Latin characters
                 var pattern = @"#([Α-Ωα-ωάέήίόύώΐΰΆΈΉΊΌΎΏA-Za-z0-9_]+)";
-                
+
                 var matches = Regex.Matches(text, pattern, RegexOptions.IgnoreCase);
-                
+
                 foreach (Match match in matches)
                 {
                     var hashtag = match.Groups[1].Value;
-                    
+
                     // Filter out common non-location hashtags
                     if (IsLocationHashtag(hashtag))
                     {
@@ -592,7 +592,7 @@ namespace FireIncidents.Services
             {
                 _logger.LogError(ex, "Error extracting hashtag locations");
             }
-            
+
             return locations.Distinct().ToList();
         }
 
@@ -604,7 +604,7 @@ namespace FireIncidents.Services
                 "112", "Fire", "Wildfire", "Emergency", "Evacuation", "Alert", "Warning",
                 "Φωτιά", "Εκκένωση", "Κίνδυνος", "Προειδοποίηση", "Δασική", "Πυρκαγιά"
             };
-            
+
             return !nonLocationHashtags.Contains(hashtag) && hashtag.Length > 1;
         }
 
@@ -648,13 +648,13 @@ namespace FireIncidents.Services
         private List<string> FilterOutRegionalUnits(List<string> locations)
         {
             var filtered = new List<string>();
-            
+
             // Use the same regional unit mappings from GetRegionalUnitVariants
             // to dynamically determine what should be filtered out
             foreach (var location in locations)
             {
                 var regionalVariants = GetRegionalUnitVariants(location);
-                
+
                 // If this location expands to multiple regional variants (meaning it's a regional unit),
                 // and it's not just returning itself, then it's likely a regional unit to filter
                 if (regionalVariants.Count > 1 && !regionalVariants.All(v => v.Equals(location, StringComparison.OrdinalIgnoreCase)))
@@ -666,13 +666,13 @@ namespace FireIncidents.Services
                     filtered.Add(location);
                 }
             }
-            
+
             return filtered;
         }
 
         private bool IsGreekTweet(string tweetContent)
         {
-            return tweetContent.Any(c => c >= '\u0370' && c <= '\u03FF') || 
+            return tweetContent.Any(c => c >= '\u0370' && c <= '\u03FF') ||
                    tweetContent.Contains("Ενεργοποίηση") ||
                    tweetContent.Contains("απομακρυνθείτε");
         }
@@ -684,18 +684,18 @@ namespace FireIncidents.Services
                 if (string.IsNullOrWhiteSpace(locationName))
                     return null;
 
-                _logger.LogInformation($"Geocoding location: '{locationName}'" + 
+                _logger.LogInformation($"Geocoding location: '{locationName}'" +
                     (regionalContext != null ? $" in regional context: {regionalContext}" : ""));
-                
+
                 // Use multiple geocoding strategies
                 var result = await TryGeocodeWithMultipleStrategies(locationName, regionalContext);
-                
+
                 if (result != null)
                 {
                     _logger.LogInformation($"Successfully geocoded '{locationName}' to {result.Latitude:F6}, {result.Longitude:F6}");
                     return result;
                 }
-                
+
                 _logger.LogWarning($"All geocoding strategies failed for: '{locationName}'");
                 return null;
             }
@@ -714,19 +714,19 @@ namespace FireIncidents.Services
             if (!string.IsNullOrEmpty(regionalContext))
             {
                 var regionalVariants = GetRegionalUnitVariants(regionalContext);
-                
+
                 foreach (var variant in regionalVariants)
                 {
-                    strategies.Add(($"Context: {locationName}, {variant}, Greece", 
+                    strategies.Add(($"Context: {locationName}, {variant}, Greece",
                         () => GeocodeWithNominatim($"{locationName}, {variant}, Greece", $"Context search: {variant}")));
-                    
-                    strategies.Add(($"Context village: {locationName} village, {variant}, Greece", 
+
+                    strategies.Add(($"Context village: {locationName} village, {variant}, Greece",
                         () => GeocodeWithNominatim($"{locationName} village, {variant}, Greece", $"Context village: {variant}")));
-                    
-                    strategies.Add(($"Context town: {locationName} town, {variant}, Greece", 
+
+                    strategies.Add(($"Context town: {locationName} town, {variant}, Greece",
                         () => GeocodeWithNominatim($"{locationName} town, {variant}, Greece", $"Context town: {variant}")));
-                        
-                    strategies.Add(($"Context settlement: {locationName} settlement, {variant}, Greece", 
+
+                    strategies.Add(($"Context settlement: {locationName} settlement, {variant}, Greece",
                         () => GeocodeWithNominatim($"{locationName} settlement, {variant}, Greece", $"Context settlement: {variant}")));
                 }
             }
@@ -745,7 +745,7 @@ namespace FireIncidents.Services
                 ("Greek village", () => GeocodeWithNominatim($"{locationName} χωριό, Ελλάδα", "Greek village search")),
                 ("FireIncident fallback", () => GeocodeUsingFireIncidentService(locationName))
             });
-            
+
             // If we have regional context but no results, try approximate location
             if (!string.IsNullOrEmpty(regionalContext))
             {
@@ -760,21 +760,21 @@ namespace FireIncidents.Services
                 {
                     _logger.LogInformation($"🔍 Trying: {description}");
                     var result = await strategy();
-                    
+
                     // Validate coordinates are in Greece (rough bounds check)
-                    if (result != null && result.Latitude != 0 && result.Longitude != 0 && 
-                        result.Latitude >= 34.0 && result.Latitude <= 42.0 && 
+                    if (result != null && result.Latitude != 0 && result.Longitude != 0 &&
+                        result.Latitude >= 34.0 && result.Latitude <= 42.0 &&
                         result.Longitude >= 19.0 && result.Longitude <= 30.0)
                     {
                         _logger.LogInformation($"✅ SUCCESS: {description} → {result.Latitude:F6}, {result.Longitude:F6}");
-                        
+
                         // For context searches, prefer them over general searches
                         if (description.Contains("Context"))
                         {
                             _logger.LogInformation($"🎯 Using context result immediately: {description}");
                             return result;
                         }
-                        
+
                         // Store first valid result as backup
                         if (bestResult == null)
                         {
@@ -786,13 +786,13 @@ namespace FireIncidents.Services
                     {
                         _logger.LogWarning($"❌ Result outside Greece bounds: {description} → {result.Latitude:F6}, {result.Longitude:F6}");
                     }
-            }
-            catch (Exception ex)
-            {
+                }
+                catch (Exception ex)
+                {
                     _logger.LogError(ex, $"💥 Strategy failed: {description}");
                 }
             }
-            
+
             return bestResult;
         }
 
@@ -802,27 +802,27 @@ namespace FireIncidents.Services
             {
                 using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "FireIncidents/1.0 (emergency-warnings)");
-                
+
                 var encodedQuery = Uri.EscapeDataString(query);
                 var url = $"https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=3&countrycodes=gr&q={encodedQuery}";
-                
+
                 _logger.LogDebug($"🌐 Nominatim query: {query}");
-                
+
                 var response = await httpClient.GetStringAsync(url);
                 var results = JsonSerializer.Deserialize<JsonElement[]>(response);
-                
+
                 if (results != null && results.Length > 0)
                 {
                     var bestResult = results[0];
-                    
-                    if (bestResult.TryGetProperty("lat", out var latElement) && 
+
+                    if (bestResult.TryGetProperty("lat", out var latElement) &&
                         bestResult.TryGetProperty("lon", out var lonElement) &&
                         double.TryParse(latElement.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
                         double.TryParse(lonElement.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var lon))
                     {
                         string municipality = "";
                         string region = "Greece";
-                        
+
                         if (bestResult.TryGetProperty("address", out var addressElement))
                         {
                             if (addressElement.TryGetProperty("municipality", out var munElement))
@@ -831,11 +831,11 @@ namespace FireIncidents.Services
                                 municipality = cityElement.GetString() ?? "";
                             else if (addressElement.TryGetProperty("town", out var townElement))
                                 municipality = townElement.GetString() ?? "";
-                            
+
                             if (addressElement.TryGetProperty("state", out var stateElement))
                                 region = stateElement.GetString() ?? "Greece";
                         }
-                        
+
                         return new GeocodedWarning112.WarningLocation
                         {
                             LocationName = query.Split(',')[0].Trim(),
@@ -852,7 +852,7 @@ namespace FireIncidents.Services
             {
                 _logger.LogDebug(ex, $"Nominatim search failed for '{query}'");
             }
-            
+
             return null;
         }
 
@@ -861,12 +861,12 @@ namespace FireIncidents.Services
             try
             {
                 _logger.LogDebug($"🔥 Trying FireIncident service for: {locationName}");
-                
+
                 var tempIncident = new FireIncident
                 {
                     Location = locationName,
-                    Municipality = "", 
-                    Region = "Greece", 
+                    Municipality = "",
+                    Region = "Greece",
                     Status = "ΣΕ ΕΞΕΛΙΞΗ",
                     Category = "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ",
                     StartDate = DateTime.Now.ToString(),
@@ -874,11 +874,11 @@ namespace FireIncidents.Services
                 };
 
                 var geocodedIncident = await _geocodingService.GeocodeIncidentAsync(tempIncident);
-                
+
                 // Reject default/fallback coordinates for life-saving accuracy
                 var isDefaultCoordinates = (Math.Abs(geocodedIncident.Latitude - 38.2) < 0.1 && Math.Abs(geocodedIncident.Longitude - 23.8) < 0.1) ||
                                           (geocodedIncident.Latitude == 0 && geocodedIncident.Longitude == 0);
-                
+
                 if (geocodedIncident.IsGeocoded && !isDefaultCoordinates)
                 {
                     _logger.LogInformation($"🔥 FireIncident service found accurate coordinates: {geocodedIncident.Latitude:F6}, {geocodedIncident.Longitude:F6}");
@@ -901,7 +901,7 @@ namespace FireIncidents.Services
             {
                 _logger.LogDebug(ex, $"FireIncident service failed for '{locationName}'");
             }
-            
+
             return null;
         }
 
@@ -910,18 +910,18 @@ namespace FireIncidents.Services
             try
             {
                 _logger.LogInformation($"🎯 Attempting regional center approximation for '{locationName}' in {regionalContext}");
-                
+
                 // Try to geocode the regional unit center and use that as an approximation
                 var regionalVariants = GetRegionalUnitVariants(regionalContext);
-                
+
                 foreach (var variant in regionalVariants)
                 {
                     var result = await GeocodeWithNominatim($"{variant}, Greece", $"Regional center: {variant}");
-                    if (result != null && result.Latitude >= 34.0 && result.Latitude <= 42.0 && 
+                    if (result != null && result.Latitude >= 34.0 && result.Latitude <= 42.0 &&
                         result.Longitude >= 19.0 && result.Longitude <= 30.0)
                     {
                         _logger.LogInformation($"🎯 Using regional center approximation: {variant} → {result.Latitude:F6}, {result.Longitude:F6}");
-                        
+
                         // Create approximation with clear indication
                         return new GeocodedWarning112.WarningLocation
                         {
@@ -934,7 +934,7 @@ namespace FireIncidents.Services
                         };
                     }
                 }
-                
+
                 _logger.LogWarning($"🎯 Regional center approximation failed for {regionalContext}");
                 return null;
             }
@@ -948,7 +948,7 @@ namespace FireIncidents.Services
         private List<string> GetRegionalUnitVariants(string regionalUnit)
         {
             var variants = new List<string>();
-            
+
             // Regional unit translations (Greek ↔ English)
             var regionalUnitMappings = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1086,7 +1086,7 @@ namespace FireIncidents.Services
 
             // Add the original term
             variants.Add(regionalUnit);
-            
+
             // Look for mapped variants
             if (regionalUnitMappings.TryGetValue(regionalUnit, out var mappedVariants))
             {
@@ -1114,12 +1114,12 @@ namespace FireIncidents.Services
         public async Task<List<GeocodedWarning112>> GetWarningsForLocationAsync(string? region = null, string? municipality = null)
         {
             var allWarnings = await GetActiveWarningsAsync();
-            
+
             if (string.IsNullOrEmpty(region) && string.IsNullOrEmpty(municipality))
                 return allWarnings;
-                
-            return allWarnings.Where(w => 
-                w.GeocodedLocations.Any(l => 
+
+            return allWarnings.Where(w =>
+                w.GeocodedLocations.Any(l =>
                     (string.IsNullOrEmpty(region) || l.Region?.Contains(region, StringComparison.OrdinalIgnoreCase) == true) &&
                     (string.IsNullOrEmpty(municipality) || l.Municipality?.Contains(municipality, StringComparison.OrdinalIgnoreCase) == true)
                 )
@@ -1139,10 +1139,10 @@ namespace FireIncidents.Services
             {
                 var testWarnings = GetTestWarnings();
                 testWarnings.Add(warning);
-                
+
                 // Store test warnings for 1 hour
                 _cache.Set(TEST_WARNINGS_CACHE_KEY, testWarnings, TimeSpan.FromHours(1));
-                
+
                 _logger.LogInformation($"Added test warning {warning.Id} for {warning.Locations?.FirstOrDefault()}");
             }
             catch (Exception ex)
@@ -1179,15 +1179,15 @@ namespace FireIncidents.Services
                 if (isGreek)
                 {
                     warning.GreekContent = tweetContent;
-                    }
-                    else
-                    {
+                }
+                else
+                {
                     warning.EnglishContent = tweetContent;
                 }
 
                 // Process the warning
                 var geocodedWarning = await ProcessWarningAsync(warning);
-                
+
                 if (geocodedWarning == null || !geocodedWarning.HasGeocodedLocations)
                 {
                     _logger.LogWarning("Processing failed for tweet content");
@@ -1219,7 +1219,7 @@ namespace FireIncidents.Services
                 "Ενεργοποίηση 1️⃣1️⃣2️⃣",
                 "Ενεργοποίηση 112"
             };
-            
+
             return activationPatterns.Any(pattern => tweetText.Contains(pattern, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -1231,16 +1231,16 @@ namespace FireIncidents.Services
                 {
                     // Filter out expired test warnings
                     var activeTestWarnings = testWarnings.Where(w => w.IsActive).ToList();
-                    
+
                     // Update cache if we filtered out expired warnings
                     if (activeTestWarnings.Count != testWarnings.Count)
                     {
                         _cache.Set(TEST_WARNINGS_CACHE_KEY, activeTestWarnings, TimeSpan.FromHours(1));
                     }
-                    
+
                     return activeTestWarnings;
                 }
-                
+
                 return new List<GeocodedWarning112>();
             }
             catch (Exception ex)
@@ -1259,7 +1259,7 @@ namespace FireIncidents.Services
         public async Task<Dictionary<string, int>> GetWarningsStatisticsAsync()
         {
             var warnings = await GetActiveWarningsAsync();
-            
+
             return new Dictionary<string, int>
             {
                 ["TotalActive"] = warnings.Count,
