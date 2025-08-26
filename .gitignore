@@ -1,0 +1,52 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code settings
+.vscode/
+
+# ASP.NET Core secrets
+secrets.json
+
+# Logs
+log/
+logs/
+*.log
+
+# NuGet packages
+*.nupkg
+packages/
+*.snupkg
+
+# Publish output
+publish/
+out/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Rider IDE files
+.idea/
+
+# Dotnet tools
+*.dotnet-tools.json
+
+# Others
+*.vspscc
+*.vssscc
+_ReSharper*/
+*.resharper
+
+# Misc files
+Properties/
+Logs/
+debug_html.txt
+debug_twitter_widget.html
+debug_html.txt

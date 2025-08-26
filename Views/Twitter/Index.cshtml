@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "112 Greece Twitter Feed";
+    Layout = null; // No layout for scraping
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>112 Greece Twitter Feed</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .widget-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <h2>112 Greece Emergency Warnings</h2>
+        <div class="loading">Loading tweets...</div>
+        
+        <!-- SociableKit Twitter Widget - Updated embed ID -->
+        <div class='sk-ww-twitter-feed' data-embed-id='25590789'></div>
+        <script src='https://widgets.sociablekit.com/twitter-feed/widget.js' async defer></script>
+        
+        <!-- Fallback: Direct embed attempt -->
+        <script>
+            // Wait for widget to load, then try to make content visible
+            setTimeout(function() {
+                var loadingDiv = document.querySelector('.loading');
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'none';
+                }
+                
+                // Log for debugging
+                console.log('Widget container:', document.querySelector('.sk-ww-twitter-feed'));
+                console.log('Widget content loaded');
+            }, 5000);
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1047 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+		"name": "Warning112 API - Complete Testing Collection",
+		"description": "Comprehensive test collection for the 112 Greece Emergency Warning API with precise evacuation pattern testing. LANGUAGE STRATEGY: Greek content used for accurate location extraction, English content preserved for display. 112Greece posts dual-language tweets for each incident.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Basic API Operations",
+			"item": [
+				{
+					"name": "Get All Active Warnings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Warnings by Region",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112?region=Preveza",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112"
+							],
+							"query": [
+								{
+									"key": "region",
+									"value": "Preveza"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Warnings by Municipality",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112?municipality=Chios",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112"
+							],
+							"query": [
+								{
+									"key": "municipality",
+									"value": "Chios"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Warning Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"statistics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Warnings Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Warning by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/{{warning_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"{{warning_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cache Operations",
+			"item": [
+				{
+					"name": "Refresh Warnings (Force Scraping)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Cache",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/cache",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"cache"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Tweet Parsing - English Patterns",
+			"item": [
+				{
+					"name": "Test Pattern: Move Away To (Single Location)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in #Romia of the regional unit of #Preveza\\n\\n‼️ If you are in the area move away to #Filippiada\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Pattern: Move Away Via To (Route Specified)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Gorgomilos #Gimnotopos and #Tsagaropoulos of the regional unit of #Preveza move away via #Kampia to #5_Pigadia\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Pattern: Multiple Danger Zones",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Stamna #Aitololoakarnanias move away to #Mesologi\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Pattern: Fire Location Only",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in #Romia of the regional unit of #Preveza\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Pattern: Fire + Area Evacuation (Fixed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in #Romia of the regional unit of #Preveza\\n\\n‼️ If you are in the area move away to #Filippiada\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Small Villages + Via Route (Emergency Fallback)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Gorgomilos #Gimnotopos and #Tsagaropoulos of the regional unit of #Preveza move away via #Kampia to #5_Pigadia\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Tweet Parsing - Greek Patterns",
+			"item": [
+				{
+					"name": "Test Greek Pattern: Simple Evacuation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n\\n🆘  Δασική πυρκαγιά στην περιοχή σας\\n\\n‼️ Αν βρίσκεστε στην περιοχή #Στάμνα #Αιτωλοακαρνανίας απομακρυνθείτε προς #Μεσολόγγι\\n\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Greek Pattern: Via Route Evacuation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n\\n🆘 Δασική πυρκαγιά στην περιοχή σας\\n\\n‼️ Αν βρίσκεστε στις περιοχες #Αγιάσματα #Λεπτόποδα #Εγρηγόρος #Αφροδίσια #Κέραμος και #Κουρούνια απομακρυνθείτε μέσω #Καμπία προς #Χίο\\n\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Greek Pattern: Multiple Danger Zones with Regional Unit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n\\n🆘 Δασική πυρκαγιά στην περιοχή #Ρωμιά της Περιφερειακής Ενότητας #Πρεβέζης\\n\\n‼️ Αν βρίσκεστε στις περιοχές #Γοργόμυλος #Γυμνότοπος και #Τσαγκαρόπουλο της Περιφερειακής Ενότητας #Πρεβέζης απομακρυνθείτε προς #5_Πηγάδια\\n\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Greek Pattern: Fire Location Only",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n\\n🆘 Δασική πυρκαγιά στην περιοχή #Ρωμιά της Περιφερειακής Ενότητας #Πρεβέζης\\n\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Complex Regional Context",
+			"item": [
+				{
+					"name": "Test Chios Regional Context",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Agiasma #Leptopoda #Egrigoros #Afrodisia #Keramos and #Kourounia of the regional unit of #Chios move away via #Kampia to #Chios_Port\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Ilia Regional Context",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in #Pyrgos of the regional unit of #Ilia\\n\\n‼️ If you are in #Olympia #Krestena move away to #Amaliada\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Aitoloakarnania Regional Context",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n\\n🆘 Δασική πυρκαγιά στην περιοχή #Στάμνα της Περιφερειακής Ενότητας #Αιτωλοακαρνανίας\\n\\n‼️ Αν βρίσκεστε στην περιοχή απομακρυνθείτε προς #Μεσολόγγι\\n\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Edge Cases",
+			"item": [
+				{
+					"name": "Test Invalid Tweet (No 112 Activation)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"Just a regular tweet about #Fire in #Greece. No emergency activation here.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test No Hashtag Locations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Mixed Language (English + Greek hashtags)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Καλαμάτα move away to #Μεσσήνη\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Very Long Location Names",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Agios_Konstantinos_Phthiotis move away to #Lamia_Central_Square\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Custom Warning Creation",
+			"item": [
+				{
+					"name": "Create Simple Test Warning",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"municipality\": \"Kalamata\",\n    \"region\": \"Messenia\",\n    \"latitude\": 37.0394,\n    \"longitude\": 22.1144,\n    \"englishContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n🆘 Test wildfire warning for Kalamata\\n‼️ If you are in #Kalamata area, stay alert\\n‼️ Follow the instructions of the Authorities\",\n    \"greekContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n🆘 Δοκιμαστική προειδοποίηση πυρκαγιάς για Καλαμάτα\\n‼️ Αν βρίσκεστε στην περιοχή #Καλαμάτα, παραμείνετε σε ετοιμότητα\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/create-test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"create-test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Test Warning - Chios",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"municipality\": \"Chios\",\n    \"region\": \"North Aegean\",\n    \"latitude\": 38.3736,\n    \"longitude\": 26.1361,\n    \"englishContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n🆘 Test wildfire warning for Chios\\n‼️ If you are in #Chios_Town area, stay alert\\n‼️ Follow the instructions of the Authorities\",\n    \"greekContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n🆘 Δοκιμαστική προειδοποίηση πυρκαγιάς για Χίο\\n‼️ Αν βρίσκεστε στην περιοχή #Χίος_Πόλη, παραμείνετε σε ετοιμότητα\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/create-test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"create-test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Test Warning - Preveza",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"municipality\": \"Preveza\",\n    \"region\": \"Epirus\",\n    \"latitude\": 38.9589,\n    \"longitude\": 20.7506,\n    \"englishContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n🆘 Test wildfire warning for Preveza\\n‼️ If you are in #Preveza_Center area, stay alert\\n‼️ Follow the instructions of the Authorities\",\n    \"greekContent\": \"⚠️ Ενεργοποίηση 1⃣1⃣2⃣\\n🆘 Δοκιμαστική προειδοποίηση πυρκαγιάς για Πρέβεζα\\n‼️ Αν βρίσκεστε στην περιοχή #Πρέβεζα_Κέντρο, παραμείνετε σε ετοιμότητα\\n‼️ Ακολουθείτε τις οδηγίες των Αρχών\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/create-test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"create-test"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Twitter Scraping Test",
+			"item": [
+				{
+					"name": "Test Live Twitter Scraping (Default 7 days)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Twitter Scraping (Custom Days Back)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test?daysBack=30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test"
+							],
+							"query": [
+								{
+									"key": "daysBack",
+									"value": "30",
+									"description": "Number of days back to search for tweets (e.g., 30 for last month)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Extended Twitter Scraping (Last Month)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-extended?daysBack=30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-extended"
+							],
+							"query": [
+								{
+									"key": "daysBack",
+									"value": "30",
+									"description": "Extended test with detailed date information"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test August 16th Tweets (60 days back)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-extended?daysBack=60",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-extended"
+							],
+							"query": [
+								{
+									"key": "daysBack",
+									"value": "60",
+									"description": "Should capture August 16th tweets from your widget"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Validation Tests",
+			"item": [
+				{
+					"name": "Test Real-World Example 1 - Chios Evacuation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Agiasma #Leptopoda #Egrigoros #Afrodisia #Keramos and #Kourounia of the regional unit of #Chios move away via #Kampia to #Chios\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Real-World Example 2 - Preveza Fire",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in #Romia of the regional unit of #Preveza\\n\\n‼️ If you are in #Gorgomilos #Gimnotopos and #Tsagaropoulos of the regional unit of #Preveza move away to #5_Pigadia\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Real-World Example 3 - Aitoloakarnania",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tweetContent\": \"⚠️ Activation 1⃣1⃣2⃣\\n\\n🆘 Wildfire in your area\\n\\n‼️ If you are in #Stamna #Aitololoakarnanias move away to #Mesologi\\n\\n‼️ Follow the instructions of the Authorities\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/warnings112/test-tweet-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warnings112",
+								"test-tweet-content"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set current timestamp for unique test IDs",
+					"pm.globals.set(\"timestamp\", Date.now());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script for all requests",
+					"",
+					"// Test that response time is reasonable",
+					"pm.test(\"Response time is less than 10 seconds\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+					"});",
+					"",
+					"// Test that we don't get server errors (5xx)",
+					"pm.test(\"No server errors\", function () {",
+					"    pm.expect(pm.response.code).to.be.below(500);",
+					"});",
+					"",
+					"// For successful responses, test JSON structure",
+					"if (pm.response.code === 200) {",
+					"    pm.test(\"Response is valid JSON\", function () {",
+					"        pm.response.to.be.json;",
+					"    });",
+					"    ",
+					"    // For warning list responses",
+					"    if (pm.request.url.path.includes('warnings112') && !pm.request.url.path.includes('test') && !pm.request.url.path.includes('statistics') && !pm.request.url.path.includes('count')) {",
+					"        pm.test(\"Response contains warning data structure\", function () {",
+					"            const responseJson = pm.response.json();",
+					"            if (Array.isArray(responseJson) && responseJson.length > 0) {",
+					"                pm.expect(responseJson[0]).to.have.property('id');",
+					"                pm.expect(responseJson[0]).to.have.property('geocodedLocations');",
+					"                pm.expect(responseJson[0]).to.have.property('isActive');",
+					"            }",
+					"        });",
+					"    }",
+					"    ",
+					"    // For test-tweet-content responses",
+					"    if (pm.request.url.path.includes('test-tweet-content')) {",
+					"        pm.test(\"Tweet content processed successfully\", function () {",
+					"            const responseJson = pm.response.json();",
+					"            pm.expect(responseJson).to.have.property('id');",
+					"            pm.expect(responseJson).to.have.property('geocodedLocations');",
+					"            pm.expect(responseJson.geocodedLocations).to.be.an('array');",
+					"            ",
+					"            // Check that we have valid geocoded locations",
+					"            if (responseJson.geocodedLocations.length > 0) {",
+					"                const location = responseJson.geocodedLocations[0];",
+					"                pm.expect(location).to.have.property('latitude');",
+					"                pm.expect(location).to.have.property('longitude');",
+					"                pm.expect(location).to.have.property('locationName');",
+					"                pm.expect(location.latitude).to.be.a('number');",
+					"                pm.expect(location.longitude).to.be.a('number');",
+					"            }",
+					"        });",
+					"    }",
+					"}",
+					"",
+					"// Log key response data for debugging",
+					"console.log(`${pm.request.method} ${pm.request.url} -> ${pm.response.code} (${pm.response.responseTime}ms)`);",
+					"if (pm.response.code !== 200) {",
+					"    console.log('Response body:', pm.response.text());",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://localhost:7059",
+			"type": "string",
+			"description": "Base URL for the FireIncidents API. Change this to match your local development server or production URL."
+		},
+		{
+			"key": "warning_id",
+			"value": "test-warning-id",
+			"type": "string",
+			"description": "Warning ID for testing individual warning retrieval. This should be set to an actual warning ID from your system."
+		}
+	]
+}
