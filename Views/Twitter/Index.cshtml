@@ -32,13 +32,13 @@
         <h2>112 Greece Emergency Warnings</h2>
         <div class="loading">Loading tweets...</div>
         
-        <!-- SociableKit Twitter Widget - Updated embed ID -->
-        <div class='sk-ww-twitter-feed' data-embed-id='25590789'></div>
-        <script src='https://widgets.sociablekit.com/twitter-feed/widget.js' async defer></script>
+        <!-- RSS.app Twitter Widget -->
+        <rssapp-feed id="bcgxFnQk0mKozyCv"></rssapp-feed>
+        <script src="https://widget.rss.app/v1/feed.js" type="text/javascript" async></script>
         
         <!-- Fallback: Direct embed attempt -->
         <script>
-            // Wait for widget to load, then try to make content visible
+            // Wait for RSS.app widget to load, then try to make content visible
             setTimeout(function() {
                 var loadingDiv = document.querySelector('.loading');
                 if (loadingDiv) {
@@ -46,8 +46,7 @@
                 }
                 
                 // Log for debugging
-                console.log('Widget container:', document.querySelector('.sk-ww-twitter-feed'));
-                console.log('Widget content loaded');
+                console.log('RSS.app widget content loaded');
             }, 5000);
         </script>
     </div>

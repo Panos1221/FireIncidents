@@ -56,20 +56,20 @@ namespace FireIncidents.Services
                     Timeout = timeoutSeconds * 1000
                 });
 
-                _logger.LogInformation("Page loaded, waiting for SociableKit widget to render...");
+                _logger.LogInformation("Page loaded, waiting for RSS.app widget to render...");
 
-                // Wait for the SociableKit widget to load and render tweets
+                // Wait for the RSS.app widget to load and render tweets
                 try
                 {
-                    await page.WaitForSelectorAsync(".sk-post-item", new WaitForSelectorOptions
+                    await page.WaitForSelectorAsync("rssapp-feed", new WaitForSelectorOptions
                     {
                         Timeout = timeoutSeconds * 1000
                     });
-                    _logger.LogInformation("✅ SociableKit tweets detected");
+                    _logger.LogInformation("✅ RSS.app widget detected");
                 }
                 catch (WaitTaskTimeoutException)
                 {
-                    _logger.LogWarning("⚠️ Timeout waiting for tweets to load, but continuing...");
+                    _logger.LogWarning("⚠️ Timeout waiting for RSS.app widget to load, but continuing...");
                 }
 
                 // Additional wait to ensure all tweets are loaded
@@ -80,9 +80,9 @@ namespace FireIncidents.Services
                 
                 _logger.LogInformation($"✅ Retrieved {html.Length} characters of rendered HTML");
                 
-                // Check if we got any tweets
-                var tweetCount = await page.EvaluateExpressionAsync<int>("document.querySelectorAll('.sk-post-item').length");
-                _logger.LogInformation($"Found {tweetCount} tweet elements in rendered page");
+                // Check if we got any RSS.app content
+                var widgetCount = await page.EvaluateExpressionAsync<int>("document.querySelectorAll('rssapp-feed').length");
+                _logger.LogInformation($"Found {widgetCount} RSS.app widget elements in rendered page");
 
                 return html;
             }

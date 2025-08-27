@@ -16,8 +16,8 @@ namespace FireIncidents.Controllers
         {
             _logger.LogInformation("Twitter widget page accessed for scraping");
             
-            // For now, return a page with test tweet data since SociableKit requires JavaScript
-            // TODO: Replace with actual tweets when we find a server-side solution
+            // Returns a page with RSS.app widget for displaying Twitter feed
+            // RSS.app provides both widget and JSON API access
             return View();
         }
 

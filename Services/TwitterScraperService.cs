@@ -1,8 +1,8 @@
-using HtmlAgilityPack;
 using FireIncidents.Models;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Web;
+using System.Text.Json;
 
 namespace FireIncidents.Services
 {
@@ -10,28 +10,19 @@ namespace FireIncidents.Services
     {
         private readonly ILogger<TwitterScraperService> _logger;
         private readonly HttpClient _httpClient;
-        private readonly JavaScriptRendererService _jsRenderer;
-        
-        // Use the live Twitter widget page - JavaScript renderer will execute JS to get rendered content
-        private readonly string _widget112Url = "https://dev.livefireincidents.gr/twitter";
-        
-        // SociableKit URLs don't work without JavaScript execution:
-        // private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/iframe/25590789";
-        
-        // Previous SociableKit URLs (different embed ID):
-        // private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/25590424";        
-        // private readonly string _widget112Url = "https://widgets.sociablekit.com/twitter-feed/iframe/25590424";
+        // RSS.app JSON feed URL for 112 Greece Twitter feed
+        private readonly string _rssAppFeedUrl = "https://rss.app/feeds/v1.1/bcgxFnQk0mKozyCv.json";
         
 
         
-        public TwitterScraperService(ILogger<TwitterScraperService> logger, IHttpClientFactory httpClientFactory, JavaScriptRendererService jsRenderer)
+        public TwitterScraperService(ILogger<TwitterScraperService> logger, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _httpClient = httpClientFactory.CreateClient("TwitterScraper");
-            _jsRenderer = jsRenderer;
             // HttpClient is now configured in Startup.cs with automatic decompression
             // Additional headers can be added here if needed
-            _httpClient.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
+            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "FireIncidents/1.0");
         }
 
         public async Task<List<Warning112>> ScrapeWarningsAsync(int daysBack = 7)
@@ -40,22 +31,22 @@ namespace FireIncidents.Services
             
             try
             {
-                _logger.LogInformation($"Starting to scrape 112Greece warnings from SociableKit widget (last {daysBack} days)...");
+                _logger.LogInformation($"Starting to scrape 112Greece warnings from RSS.app feed (last {daysBack} days)...");
                 
-                string html = await GetWidgetHtmlAsync();
+                string jsonContent = await GetRssAppFeedAsync();
                 
-                if (string.IsNullOrEmpty(html))
+                if (string.IsNullOrEmpty(jsonContent))
                 {
-                    _logger.LogWarning("No HTML content retrieved from widget");
+                    _logger.LogWarning("No JSON content retrieved from RSS.app feed");
                     return warnings;
                 }
 
-                // for debugging purposes, save the HTML to a file
-                var debugPath = Path.Combine(Directory.GetCurrentDirectory(), "debug_twitter_widget.html");
-                await File.WriteAllTextAsync(debugPath, html, Encoding.UTF8);
-                _logger.LogInformation($"Saved widget HTML to {debugPath} for debugging");
+                // for debugging purposes, save the JSON to a file
+                var debugPath = Path.Combine(Directory.GetCurrentDirectory(), "debug_rss_feed.json");
+                await File.WriteAllTextAsync(debugPath, jsonContent, Encoding.UTF8);
+                _logger.LogInformation($"Saved RSS feed JSON to {debugPath} for debugging");
                 
-                warnings = ParseWarningsFromHtml(html, daysBack);
+                warnings = ParseWarningsFromJson(jsonContent, daysBack);
                 
                 _logger.LogInformation($"Successfully scraped {warnings.Count} 112 warnings");
                 
@@ -73,80 +64,57 @@ namespace FireIncidents.Services
             }
         }
 
-        private async Task<string> GetWidgetHtmlAsync()
+        private async Task<string> GetRssAppFeedAsync()
         {
             try
             {
-                _logger.LogInformation($"🚀 Using JavaScript renderer to get fully rendered content from: {_widget112Url}");
+                _logger.LogInformation($"🚀 Fetching RSS.app JSON feed from: {_rssAppFeedUrl}");
                 
-                // Use JavaScript renderer to execute the SociableKit widget and get rendered content
-                var renderedHtml = await _jsRenderer.GetRenderedHtmlAsync(_widget112Url, timeoutSeconds: 45);
+                var response = await _httpClient.GetAsync(_rssAppFeedUrl);
                 
-                _logger.LogInformation($"✅ Retrieved {renderedHtml.Length} characters of rendered HTML");
-                _logger.LogDebug($"Content preview: {renderedHtml.Substring(0, Math.Min(200, renderedHtml.Length))}...");
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"Failed to fetch RSS.app feed. Status: {response.StatusCode}, Reason: {response.ReasonPhrase}");
+                    return string.Empty;
+                }
                 
-                return renderedHtml;
+                var jsonContent = await response.Content.ReadAsStringAsync();
+                
+                _logger.LogInformation($"✅ Retrieved {jsonContent.Length} characters of JSON content");
+                _logger.LogDebug($"Content preview: {jsonContent.Substring(0, Math.Min(200, jsonContent.Length))}...");
+                
+                return jsonContent;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting rendered widget HTML");
-                
-                // Fallback to direct HTTP request (will get empty container but won't crash)
-                _logger.LogWarning("⚠️ Falling back to direct HTTP request (may not contain tweets)");
-                try
-                {
-                    var response = await _httpClient.GetAsync(_widget112Url);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var fallbackContent = await response.Content.ReadAsStringAsync();
-                        _logger.LogInformation($"Fallback: Retrieved {fallbackContent.Length} characters");
-                        return fallbackContent;
-                    }
-                }
-                catch (Exception fallbackEx)
-                {
-                    _logger.LogError(fallbackEx, "Fallback HTTP request also failed");
-                }
-                
+                _logger.LogError(ex, "Error getting RSS.app feed JSON");
                 return string.Empty;
             }
         }
 
-        private List<Warning112> ParseWarningsFromHtml(string html, int daysBack = 7)
+        private List<Warning112> ParseWarningsFromJson(string jsonContent, int daysBack = 7)
         {
             var warnings = new List<Warning112>();
             
             try
             {
-                var doc = new HtmlDocument();
-                doc.LoadHtml(html);
+                using var document = JsonDocument.Parse(jsonContent);
+                var root = document.RootElement;
                 
-                // Look for tweet containers - specifically target the sk-post-item class from the real HTML structure
-                var tweetNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'sk-post-item')]");
-                
-                if (tweetNodes == null || !tweetNodes.Any())
+                if (!root.TryGetProperty("items", out var itemsElement))
                 {
-                    _logger.LogWarning("No tweet nodes found in widget HTML. Trying alternative selectors...");
-                    _logger.LogInformation($"HTML sample (first 1000 chars): {html.Substring(0, Math.Min(1000, html.Length))}");
-                    
-                    // Try alternative selectors for SociableKit content and general emergency indicators
-                    tweetNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'sk-ww')] | //div[contains(@class, 'sk-post')] | //div[contains(text(), '⚠️')] | //*[contains(text(), 'Activation')] | //*[contains(text(), 'Ενεργοποίηση')]");
-                }
-                
-                if (tweetNodes == null || !tweetNodes.Any())
-                {
-                    _logger.LogWarning("No tweet content found with any selector");
-                    _logger.LogInformation($"Full HTML content: {html}");
+                    _logger.LogWarning("No 'items' property found in RSS.app JSON feed");
                     return warnings;
                 }
                 
-                _logger.LogInformation($"Found {tweetNodes.Count} potential tweet nodes");
+                var items = itemsElement.EnumerateArray().ToList();
+                _logger.LogInformation($"Found {items.Count} items in RSS.app feed");
                 
-                foreach (var tweetNode in tweetNodes)
+                foreach (var item in items)
                 {
                     try
                     {
-                        var warning = ParseSingleTweet(tweetNode, daysBack);
+                        var warning = ParseSingleJsonItem(item, daysBack);
                         if (warning != null)
                         {
                             warnings.Add(warning);
@@ -154,7 +122,7 @@ namespace FireIncidents.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error parsing individual tweet node");
+                        _logger.LogError(ex, "Error parsing individual JSON item");
                     }
                 }
                 
@@ -165,16 +133,22 @@ namespace FireIncidents.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error parsing warnings from HTML");
+                _logger.LogError(ex, "Error parsing warnings from JSON");
                 return warnings;
             }
         }
 
-        private Warning112? ParseSingleTweet(HtmlNode tweetNode, int daysBack = 7)
+        private Warning112? ParseSingleJsonItem(JsonElement item, int daysBack = 7)
         {
             try
             {
-                string tweetText = ExtractTweetText(tweetNode);
+                // Extract tweet text from content_text field
+                if (!item.TryGetProperty("content_text", out var contentTextElement))
+                {
+                    return null;
+                }
+                
+                string tweetText = contentTextElement.GetString() ?? string.Empty;
                 
                 if (string.IsNullOrWhiteSpace(tweetText))
                 {
@@ -194,7 +168,7 @@ namespace FireIncidents.Services
                 // Determine if this is English or Greek version
                 bool isGreek = IsGreekTweet(tweetText);
                 
-                var tweetDate = ExtractTweetDate(tweetNode);
+                var tweetDate = ExtractTweetDateFromJson(item);
                 
                 // Skip tweets older than specified days back
                 if (DateTime.UtcNow - tweetDate > TimeSpan.FromDays(daysBack))
@@ -208,7 +182,7 @@ namespace FireIncidents.Services
                 var warning = new Warning112
                 {
                     TweetDate = tweetDate,
-                    SourceUrl = ExtractTweetUrl(tweetNode)
+                    SourceUrl = ExtractTweetUrlFromJson(item)
                 };
                 
                 if (isGreek)
@@ -234,58 +208,9 @@ namespace FireIncidents.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error parsing single tweet");
+                _logger.LogError(ex, "Error parsing single JSON item");
                 return null;
             }
-        }
-
-        private string ExtractTweetText(HtmlNode tweetNode)
-        {
-            // Target the 'sk-post-body-full' div for the main tweet content (from real HTML structure)
-            var textNode = tweetNode.SelectSingleNode(".//div[contains(@class, 'sk-post-body-full')]");
-            if (textNode != null)
-            {
-                // Decode HTML entities and clean up text (e.g., remove emoji images, extra spaces)
-                string text = HttpUtility.HtmlDecode(textNode.InnerHtml); // Use InnerHtml to preserve structure for cleaning
-                
-                // Remove image tags for emojis, keeping their alt text if available
-                text = Regex.Replace(text, @"<img[^>]*alt=""([^""]*)""[^>]*>", "$1");
-                text = Regex.Replace(text, @"<img[^>]*>", ""); // Remove any remaining img tags
-                
-                // Replace <br> with newlines
-                text = Regex.Replace(text, @"<br\s*\/?>", "\n", RegexOptions.IgnoreCase);
-                
-                // Remove other HTML tags like <span>, <div>, <a>, <p> but keep their inner text
-                text = Regex.Replace(text, @"<[^>]*>", "");
-                
-                return text.Trim();
-            }
-            
-            // Fallback: try other common selectors
-            var textSelectors = new[]
-            {
-                ".//div[@class='tweet-text']",                    // Our test data structure
-                ".//div[contains(@class, 'tweet-text')] | .//p | .//div[contains(@class, 'text')] | .//span[contains(@class, 'text')]",
-                ".//div[contains(@data-testid, 'tweetText')]",
-                ".//div[contains(@class, 'sk-ww-twitter-feed-item-text')]"  // Other SociableKit structure
-            };
-            
-            foreach (var selector in textSelectors)
-            {
-                var fallbackNode = tweetNode.SelectSingleNode(selector);
-                if (fallbackNode != null)
-                {
-                    string? text = HttpUtility.HtmlDecode(fallbackNode.InnerText?.Trim());
-                    if (!string.IsNullOrWhiteSpace(text))
-                    {
-                        return text;
-                    }
-                }
-            }
-            
-            // Final fallback: get all text from the node
-            string? fallbackText = HttpUtility.HtmlDecode(tweetNode.InnerText?.Trim());
-            return fallbackText ?? string.Empty;
         }
 
         private bool IsValid112Tweet(string tweetText)
@@ -397,62 +322,57 @@ namespace FireIncidents.Services
             return !excludedTags.Contains(hashtag) && hashtag.Length >= 3;
         }
 
-        private DateTime ExtractTweetDate(HtmlNode tweetNode)
+        private DateTime ExtractTweetDateFromJson(JsonElement item)
         {
             try
             {
-                // Target the 'sk-post-dateposted' p element for date (from real HTML structure)
-                var dateNode = tweetNode.SelectSingleNode(".//p[contains(@class, 'sk-post-dateposted')]");
-                if (dateNode != null && DateTime.TryParse(dateNode.InnerText, out var date))
+                // Look for date_published field
+                if (item.TryGetProperty("date_published", out var dateElement))
                 {
-                    return date;
+                    var dateString = dateElement.GetString();
+                    if (!string.IsNullOrEmpty(dateString) && DateTime.TryParse(dateString, out DateTime parsedDate))
+                    {
+                        return parsedDate.ToUniversalTime();
+                    }
                 }
                 
-                // Fallback: try to find timestamp in various formats
-                var timeNode = tweetNode.SelectSingleNode(".//time | .//span[contains(@class, 'time')] | .//div[contains(@class, 'date')]");
-                
-                if (timeNode != null)
+                _logger.LogWarning("Could not extract tweet date from JSON, using current time");
+                return DateTime.UtcNow;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting tweet date from JSON");
+                return DateTime.UtcNow;
+            }
+        }
+
+        private string ExtractTweetUrlFromJson(JsonElement item)
+        {
+            try
+            {
+                // Look for url field
+                if (item.TryGetProperty("url", out var urlElement))
                 {
-                    string timeText = timeNode.GetAttributeValue("datetime", "") ?? timeNode.InnerText;
-                    
-                    if (DateTime.TryParse(timeText, out DateTime parsedDate))
+                    var url = urlElement.GetString();
+                    if (!string.IsNullOrEmpty(url))
                     {
-                        return parsedDate;
+                        return url;
+                    }
+                }
+                
+                // Fallback: look for external_url field
+                if (item.TryGetProperty("external_url", out var externalUrlElement))
+                {
+                    var externalUrl = externalUrlElement.GetString();
+                    if (!string.IsNullOrEmpty(externalUrl))
+                    {
+                        return externalUrl;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error extracting tweet date");
-            }
-            
-            // Fallback to current time
-            _logger.LogWarning("Could not extract tweet date, defaulting to UtcNow.");
-            return DateTime.UtcNow;
-        }
-
-        private string ExtractTweetUrl(HtmlNode tweetNode)
-        {
-            try
-            {
-                // Target the 'sk-post-link' div with an a tag for the tweet URL (from real HTML structure)
-                var urlNode = tweetNode.SelectSingleNode(".//div[contains(@class, 'sk-post-link')]/a");
-                if (urlNode != null)
-                {
-                    return urlNode.GetAttributeValue("href", "");
-                }
-                
-                // Fallback: try to find any tweet URL
-                var linkNode = tweetNode.SelectSingleNode(".//a[contains(@href, 'twitter.com') or contains(@href, 'x.com')]");
-                
-                if (linkNode != null)
-                {
-                    return linkNode.GetAttributeValue("href", "");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error extracting tweet URL");
+                _logger.LogError(ex, "Error extracting tweet URL from JSON");
             }
             
             return "https://twitter.com/112Greece";
