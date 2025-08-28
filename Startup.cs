@@ -43,6 +43,7 @@ namespace FireIncidents
             services.AddScoped<JavaScriptRendererService>();
             services.AddScoped<TwitterScraperService>();
             services.AddScoped<Warning112Service>();
+            services.AddSingleton<AlertsStoreService>();
 
             // Configure logging
             services.AddLogging(logging =>
