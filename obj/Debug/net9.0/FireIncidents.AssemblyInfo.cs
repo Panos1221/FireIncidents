@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+05d56d082d61e20957b0781c3416e9f78a7ea41e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5b608fbceaba58bc011f96a8cd65bf94c99adaec")]
 [assembly: System.Reflection.AssemblyProductAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FireIncidents")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

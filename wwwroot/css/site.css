@@ -699,6 +699,34 @@ html, body {
     border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Legend separator (Emergency Warnings) styling for dark theme */
+[data-theme="dark"] .legend-separator strong {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .legend-separator hr {
+    border-color: rgba(255, 255, 255, 0.2);
+    opacity: 0.5;
+}
+
+.legend-separator {
+    margin: 15px 0 10px 0;
+    text-align: center;
+}
+
+.legend-separator hr {
+    margin: 5px 0;
+    border-top: 1px solid var(--card-border);
+}
+
+.legend-separator strong {
+    color: var(--text-color);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* Statistics styling for dark mode */
 [data-theme="dark"] .stat-item {
     border-bottom-color: rgba(255, 255, 255, 0.1);
@@ -806,3 +834,166 @@ footer {
         background: #dc3545;
         box-shadow: 0 0 8px #dc3545aa;
     }
+
+/* 112 Warning styling */
+.warning-stat {
+    color: #ff8c00 !important; /* Orange color for warning statistics */
+    font-weight: 700;
+}
+
+[data-theme="dark"] .warning-stat {
+    color: #ffa500 !important; /* Brighter orange for dark theme */
+    text-shadow: 0 0 5px rgba(255, 165, 0, 0.3);
+}
+
+/* Warning popup styling */
+.warning-popup {
+    background-color: #fffbeb !important;
+    border-left: 4px solid #f59e0b !important;
+    padding: 8px 12px !important;
+}
+
+[data-theme="dark"] .warning-popup {
+    background-color: rgba(251, 191, 36, 0.1) !important;
+    border-left: 4px solid #fbbf24 !important;
+    color: #ffffff !important;
+}
+
+/* Leaflet popup styling for warnings in dark theme */
+[data-theme="dark"] .leaflet-popup-content-wrapper {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--card-border) !important;
+}
+
+[data-theme="dark"] .leaflet-popup-tip {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+}
+
+/* Ensure warning popups have proper dark theme styling */
+[data-theme="dark"] .leaflet-popup-content {
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .leaflet-popup-close-button {
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .leaflet-popup-close-button:hover {
+    color: #fbbf24 !important;
+}
+
+.warning-popup-container {
+    max-width: 300px !important;
+}
+
+.warning-content {
+    font-size: 0.85rem;
+    margin: 8px 0;
+    padding: 6px;
+    background-color: rgba(245, 158, 11, 0.1);
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .warning-content {
+    background-color: rgba(251, 191, 36, 0.15);
+    color: #ffffff;
+}
+
+/* Warning modal styling */
+.warning-detail {
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.warning-type {
+    font-weight: 600;
+    color: #f59e0b;
+    background-color: rgba(245, 158, 11, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .warning-type {
+    color: #fbbf24;
+    background-color: rgba(251, 191, 36, 0.15);
+}
+
+.warning-status {
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.warning-red {
+    color: #dc2626;
+    background-color: rgba(220, 38, 38, 0.1);
+}
+
+.warning-yellow {
+    color: #d97706;
+    background-color: rgba(217, 119, 6, 0.1);
+}
+
+[data-theme="dark"] .warning-red {
+    color: #fca5a5;
+    background-color: rgba(252, 165, 165, 0.15);
+}
+
+[data-theme="dark"] .warning-yellow {
+    color: #fed7aa;
+    background-color: rgba(254, 215, 170, 0.15);
+}
+
+.warning-text {
+    background-color: rgba(245, 158, 11, 0.05);
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+[data-theme="dark"] .warning-text {
+    background-color: rgba(251, 191, 36, 0.1);
+    color: #ffffff;
+}
+
+/* Additional dark theme fixes for warning elements */
+[data-theme="dark"] .warning-popup strong,
+[data-theme="dark"] .warning-popup .warning-content strong {
+    color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .warning-popup .btn {
+    background-color: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .warning-popup .btn:hover {
+    background-color: rgba(251, 191, 36, 0.2) !important;
+    border-color: #fbbf24 !important;
+}
+
+.warning-content-full {
+    margin-top: 15px;
+}
+
+/* Warning highlight tooltip */
+.warning-tooltip {
+    background-color: #fbbf24 !important;
+    color: #000000 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3) !important;
+}
+
+[data-theme="dark"] .warning-tooltip {
+    background-color: #f59e0b !important;
+    color: #000000 !important;
+}

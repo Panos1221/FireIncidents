@@ -34,12 +34,27 @@
         "assistancePartial": "Assistance - Partial Control",
         "assistanceControlled": "Assistance - Full Control",
         
+        // 112 Warnings
+        "emergencyWarnings": "Emergency Warnings",
+        "warning112Active": "112 Warning - Immediate (0-12h)",
+        "warning112Expiring": "112 Warning - Older (12–24 hours). May still be in effect.",
+        "warningType": "Warning Type",
+        "locations": "Locations",
+        "alertTime": "Alert Time",
+        "activeWarning": "Immediate",
+        "expiredWarning": "Older",
+        "message": "Message",
+        "noContentAvailable": "No content available",
+        "clickForDetails": "Click for details",
+        "source": "Source",
+        
         // Statistics
         "statistics": "Statistics",
         "totalIncidents": "Total Incidents",
         "forestFireCount": "Forest Fires",
         "urbanFireCount": "Urban Fires",
         "assistanceCount": "Assistance",
+        "warningsCount": "112 Warnings",
         
         // Incident details
         "incidentDetails": "Incident Details",
@@ -64,8 +79,9 @@
 
         // Footer
         "footer": "Fire Incidents Map - Hellenic Fire Service",
-        "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service.",
+        "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service or the Civil Protection.",
         "locationDisclaimer": "All locations are approximate, as there are no official addresses or coordinates, only the municipality.",
+        "warning112Disclaimer": "112 warnings are provided for informational purposes only. Some data could not be parsed automatically. Always follow instructions from official authorities.",
 
         //Civil Protection Daily Map
         "civilmap": "Fire Risk Map",
@@ -109,12 +125,27 @@
         "assistancePartial": "Παροχή Βοήθειας - Μερικός Έλεγχος",
         "assistanceControlled": "Παροχή Βοήθειας - Πλήρης Έλεγχος",
         
+        // 112 Warnings
+        "emergencyWarnings": "Προειδοποιήσεις Έκτακτης Ανάγκης",
+        "warning112Active": "Προειδοποίηση 112 - Άμεση (0-12ω)",
+        "warning112Expiring": "Προειδοποίηση 112 - Παλαιά (12–24 ώρες). Μπορεί να ισχύει ακόμα.",
+        "warningType": "Τύπος Προειδοποίησης",
+        "locations": "Τοποθεσίες",
+        "alertTime": "Χρόνος Συναγερμού",
+        "activeWarning": "Άμεση",
+        "expiredWarning": "Παλαιά",
+        "message": "Μήνυμα",
+        "noContentAvailable": "Δεν υπάρχει διαθέσιμο περιεχόμενο",
+        "clickForDetails": "Κάντε κλικ για λεπτομέρειες",
+        "source": "Πηγή",
+        
         // Statistics
         "statistics": "Στατιστικά",
         "totalIncidents": "Συνολικά Περιστατικά",
         "forestFireCount": "Δασικές Πυρκαγιές",
         "urbanFireCount": "Αστικές Πυρκαγιές",
         "assistanceCount": "Παροχές Βοήθειας",
+        "warningsCount": "Προειδοποιήσεις 112",
         
         // Incident details
         "incidentDetails": "Λεπτομέρειες Περιστατικού",
@@ -139,8 +170,9 @@
 
         // Footer
         "footer": "Χάρτης Πυρκαγιών - Δεδομένα Πυροσβεστικού Σώματος Ελλάδος",
-        "disclaimer": "Αυτή είναι μια ανεπίσημη εφαρμογή που δεν συνδέεται, δεν υποστηρίζεται και δεν έχει σχέση με το Πυροσβεστικό Σώμα Ελλάδος.",
+        "disclaimer": "Αυτή είναι μια ανεπίσημη εφαρμογή που δεν συνδέεται, δεν υποστηρίζεται και δεν έχει σχέση με το Πυροσβεστικό Σώμα Ελλάδος ή την Πολιτική Προστασία",
         "locationDisclaimer": "Όλες οι τοποθεσίες είναι κατά προσέγγιση, καθώς δεν υπάρχουν επίσημες διευθύνσεις ή συντεταγμένες, μόνο ο δήμος.",
+        "warning112Disclaimer": "Οι προειδοποιήσεις 112 παρέχονται μόνο για ενημερωτικούς σκοπούς. Ορισμένα δεδομένα μπορεί να μην έχουν αναγνωριστεί αυτόματα. Ακολουθείτε πάντα τις οδηγίες των αρμόδιων αρχών.",
 
         //Civil Protection Daily Map
         "civilmap": "Χάρτης Πρόβλεψης Κινδύνου Πυρκαγιάς",

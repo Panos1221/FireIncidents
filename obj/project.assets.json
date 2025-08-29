@@ -175,23 +175,26 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\pansa\\.nuget\\packages\\": {},
+    "C:\\Users\\pstav\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\DevExpress 20.2\\Components\\Offline Packages": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\FireIncidents.csproj",
+      "projectUniqueName": "C:\\Users\\pstav\\source\\repos\\_personal\\repos\\FireIncidents\\FireIncidents.csproj",
       "projectName": "FireIncidents",
-      "projectPath": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\FireIncidents.csproj",
-      "packagesPath": "C:\\Users\\pansa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pansa\\source\\repos\\FireIncidents\\FireIncidents\\obj\\",
+      "projectPath": "C:\\Users\\pstav\\source\\repos\\_personal\\repos\\FireIncidents\\FireIncidents.csproj",
+      "packagesPath": "C:\\Users\\pstav\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\pstav\\source\\repos\\_personal\\repos\\FireIncidents\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
+        "C:\\Program Files (x86)\\DevExpress 20.2\\Components\\Offline Packages",
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\pansa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\pstav\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 20.2.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -199,7 +202,9 @@
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\DevExpress 20.2\\Components\\System\\Components\\Packages": {},
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -256,7 +261,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

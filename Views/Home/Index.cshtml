@@ -84,6 +84,10 @@
                             <span class="stat-label" data-translate="assistanceCount">Assistance:</span>
                             <span class="stat-value" id="assistanceCount">0</span>
                         </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-translate="warningsCount">112 Warnings:</span>
+                            <span class="stat-value warning-stat" id="warningsCount">0</span>
+                        </div>
                         <div class="stat-item last-updated">
                             <span class="stat-label" data-translate="lastUpdated">Last Updated:</span>
                             <span class="stat-value" id="lastUpdated">Never</span>
@@ -134,6 +138,17 @@
                         <img src="~/images/markers/assistance-controlled.png" width="24" height="24" />
                         <span data-translate="assistanceControlled">Assistance - Full Control</span>
                     </div>
+                    <div class="legend-separator">
+                        <hr><strong data-translate="emergencyWarnings">Emergency Warnings</strong>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/112warning_red.png" width="24" height="24" />
+                        <span data-translate="warning112Active">112 Warning - Active (0-12h)</span>
+                    </div>
+                    <div class="legend-item">
+                        <img src="~/images/markers/112warning_yellow.png" width="24" height="24" />
+                        <span data-translate="warning112Expiring">112 Warning - Expiring (12-24h)</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -158,19 +173,35 @@
                 <!-- Left: 112Greece -->
                 <div class="col-md-6">
                     <div class="card feed-card h-100">
-                        <div class="card-header fw-semibold">112 Greece — Live feed</div>
+                        <div class="card-header fw-semibold">@("112") Greece — Live feed</div>
                         <div class="card-body p-2">
-                            <div class="sk-ww-twitter-feed" data-embed-id="25590424"></div>
+                            <div id="rss-feed-112greece">
+                                <rssapp-feed id="bcgxFnQk0mKozyCv"></rssapp-feed>
+                            </div>
+                            <div id="fallback-112greece" style="display: none;" class="text-center text-muted">
+                                <i class="fas fa-exclamation-triangle mb-2" style="font-size: 1.5rem;"></i>
+                                <p class="mb-1"><strong>Feed Loading Issue</strong></p>
+                                <p class="small mb-0">RSS.app widget failed to load.<br>
+                                Visit <a href="https://twitter.com/112Greece" target="_blank" class="text-decoration-none">@("112Greece")</a> directly.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right: pyrosvestiki -->
+                <!-- Right: pyrosvestiki  -->
                 <div class="col-md-6">
                     <div class="card feed-card h-100">
                         <div class="card-header fw-semibold">Πυροσβεστική — Live feed</div>
                         <div class="card-body p-2">
-                            <div class="sk-ww-twitter-feed" data-embed-id="25590421"></div>
+                            <div id="rss-feed-pyrosvestiki">
+                                <rssapp-feed id="8ZGdB9JB2hxcHx2W"></rssapp-feed>
+                            </div>
+                            <div id="fallback-pyrosvestiki" style="display: none;" class="text-center text-muted">
+                                <i class="fas fa-exclamation-triangle mb-2" style="font-size: 1.5rem;"></i>
+                                <p class="mb-1"><strong>Feed Loading Issue</strong></p>
+                                <p class="small mb-0">RSS.app widget failed to load.<br>
+                                Visit <a href="https://twitter.com/pyrosvestiki" target="_blank" class="text-decoration-none">@("pyrosvestiki")</a> directly.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -218,7 +249,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/map.js" asp-append-version="true"></script>
-    <script src="https://widgets.sociablekit.com/twitter-feed/widget.js" defer></script>
+    <!-- RSS.app Widget Script -->
+    <script src="https://widget.rss.app/v1/feed.js" type="text/javascript" async></script>
 
     <!--Fire Risk Map-->
     <script>
@@ -251,5 +283,54 @@
             btnTextSpan.setAttribute('data-translate', 'civilmap');
             if (typeof applyTranslations === 'function') applyTranslations();
         });
+
+        // RSS.app Widget Fallback Detection (non-destructive, robust)
+        (function () {
+            function isWidgetLoaded(container) {
+                if (!container) return false;
+                // Consider loaded if an iframe exists (rss.app usually injects an iframe)
+                if (container.querySelector('iframe')) return true;
+                // Or if the custom element has any children
+                const feedEl = container.querySelector('rssapp-feed');
+                if (feedEl && feedEl.childNodes && feedEl.childNodes.length > 0) return true;
+                // Or if the container has visible, non-empty content
+                const rect = container.getBoundingClientRect();
+                if (rect.height > 0 && rect.width > 0 && container.innerHTML && container.innerHTML.trim() !== '') return true;
+                return false;
+            }
+
+            function waitForWidget(containerSelector, fallbackId, maxWaitMs = 15000, intervalMs = 500) {
+                const container = document.querySelector(containerSelector);
+                if (!container) return;
+
+                // If already loaded, do nothing
+                if (isWidgetLoaded(container)) return;
+
+                const start = Date.now();
+                const timer = setInterval(() => {
+                    if (isWidgetLoaded(container)) {
+                        clearInterval(timer);
+                        return;
+                    }
+                    if (Date.now() - start >= maxWaitMs) {
+                        clearInterval(timer);
+                        const fb = document.getElementById(fallbackId);
+                        if (fb) fb.style.display = 'block';
+                    }
+                }, intervalMs);
+
+                // Also react to DOM mutations quickly
+                const mo = new MutationObserver(() => {
+                    if (isWidgetLoaded(container)) {
+                        mo.disconnect();
+                    }
+                });
+                mo.observe(container, { childList: true, subtree: true });
+            }
+
+            // Start checks for both widgets; do NOT hide the widget containers
+            waitForWidget('#rss-feed-112greece', 'fallback-112greece');
+            waitForWidget('#rss-feed-pyrosvestiki', 'fallback-pyrosvestiki');
+        })();
     </script>
 }

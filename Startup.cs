@@ -25,6 +25,7 @@ namespace FireIncidents
             // Register services
             services.AddScoped<FireServiceScraperService>();
             services.AddScoped<GeocodingService>();
+            services.AddSingleton<AlertsStoreService>();
 
             // Configure logging
             services.AddLogging(logging =>
