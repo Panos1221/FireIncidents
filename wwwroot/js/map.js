@@ -490,6 +490,12 @@ function getCategoryCode(category) {
 function createMarker(incident, markerImage) {
     let marker;
 
+    // Convert coordinates to decimal degrees
+    const lat = incident.latitude > 1000 ? incident.latitude / 10000000 : incident.latitude;
+    const lng = incident.longitude > 1000 ? incident.longitude / 10000000 : incident.longitude;
+
+    console.log(`Converting coordinates: ${incident.latitude}, ${incident.longitude} -> ${lat}, ${lng}`);
+
     try {
         const icon = L.icon({
             iconUrl: `/images/markers/${markerImage}`,
@@ -501,7 +507,7 @@ function createMarker(incident, markerImage) {
             shadowAnchor: [13, 41]
         });
 
-        marker = L.marker([incident.latitude, incident.longitude], {
+        marker = L.marker([lat, lng], {
             icon: icon,
             title: `${incident.category} - ${incident.location || getText('unknown')}`,
             riseOnHover: true, 
@@ -509,7 +515,7 @@ function createMarker(incident, markerImage) {
         });
     } catch (error) {
         console.warn(`Error creating custom marker: ${error.message}. Using default marker.`);
-        marker = L.marker([incident.latitude, incident.longitude], {
+        marker = L.marker([lat, lng], {
             title: `${incident.category} - ${incident.location || getText('unknown')}`,
             riseOnHover: true
         });
