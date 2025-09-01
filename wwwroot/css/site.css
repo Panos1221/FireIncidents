@@ -796,7 +796,7 @@ html, body {
     opacity: 0.9;
 }
 
-/* Docked antenna in footer, bottom right */
+/* Docked antenna in footer, bottom left */
 .fire-status {
     position: absolute;
     left: 24px;
@@ -810,6 +810,61 @@ html, body {
     .fire-status:hover {
         filter: brightness(1.2);
     }
+
+/* Email contact button in footer, bottom right */
+.email-contact {
+    position: absolute;
+    right: 24px;
+    bottom: 50px;
+    z-index: 10;
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-color);
+    padding: 12px 16px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border: 1px solid var(--btn-primary-border);
+}
+
+    .email-contact:hover {
+        background-color: var(--btn-primary-bg);
+        color: var(--btn-primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        text-decoration: none;
+    }
+
+    .email-contact i {
+        font-size: 1rem;
+    }
+
+    .email-contact span {
+        white-space: nowrap;
+    }
+
+/* Responsive design for email contact */
+@media (max-width: 768px) {
+    .email-contact {
+        right: 16px;
+        bottom: 40px;
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .email-contact span {
+        display: none;
+    }
+    
+    .email-contact i {
+        font-size: 1.1rem;
+    }
+}
 
 footer {
     position: relative;

@@ -1,0 +1,359 @@
+@{
+    ViewData["Title"] = "Live RSS Feeds";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-4">
+                <h1 class="display-4 fw-bold text-primary mb-3">
+                    <i class="fas fa-rss me-3"></i>
+                    <span data-translate="liveFeeds">Live RSS Feeds</span>
+                </h1>
+                <p class="lead text-muted" data-translate="feedsDescription">
+                    Real-time updates from official emergency services and fire departments
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: 112 Greece Feed -->
+        <div class="col-lg-6">
+            <div class="card feed-card h-100 shadow-lg">
+                <div class="card-header bg-danger text-white d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <h4 class="mb-0 fw-bold">112 Greece Emergency Alerts</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="feed-container">
+                        <div class="feed-header p-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-danger fs-6">
+                                    <i class="fas fa-broadcast-tower me-1"></i>
+                                    LIVE
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-link me-1"></i>
+                                    feeds.livefireincidents.gr/112greece/rss
+                                </small>
+                            </div>
+                        </div>
+                        <div class="feed-content" id="feed-112greece">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-danger" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Loading emergency alerts...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Official emergency alerts and civil protection warnings
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Pyrosvestiki Feed -->
+        <div class="col-lg-6">
+            <div class="card feed-card h-100 shadow-lg">
+                <div class="card-header bg-warning text-dark d-flex align-items-center">
+                    <i class="fas fa-fire me-2"></i>
+                    <h4 class="mb-0 fw-bold">Πυροσβεστική (Fire Service)</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="feed-container">
+                        <div class="feed-header p-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning text-dark fs-6">
+                                    <i class="fas fa-broadcast-tower me-1"></i>
+                                    LIVE
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-link me-1"></i>
+                                    feeds.livefireincidents.gr/pyrosvestiki/rss
+                                </small>
+                            </div>
+                        </div>
+                        <div class="feed-content" id="feed-pyrosvestiki">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Loading fire service updates...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Hellenic Fire Service official updates and incidents
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refresh Controls -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button id="refreshFeeds" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-sync-alt me-2"></i>
+                <span data-translate="refreshFeeds">Refresh Feeds</span>
+            </button>
+            <button id="autoRefreshToggle" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-clock me-2"></i>
+                <span data-translate="autoRefresh">Auto Refresh: ON</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Last Updated Info -->
+    <div class="row mt-3">
+        <div class="col-12 text-center">
+            <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                <span data-translate="lastUpdated">Last updated:</span>
+                <span id="lastUpdatedTime">--</span>
+            </small>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let autoRefreshInterval;
+        let autoRefreshEnabled = true;
+        
+        // RSS Feed URLs
+        const feedUrls = {
+            '112greece': 'https://feeds.livefireincidents.gr/112greece/rss',
+            'pyrosvestiki': 'https://feeds.livefireincidents.gr/pyrosvestiki/rss'
+        };
+        
+        // Load RSS feed using a CORS proxy
+        async function loadRSSFeed(feedKey, containerId) {
+            try {
+                // Use server-side RSS proxy to fetch the RSS feed
+                const proxyUrl = '/Home/RSSProxy?url=';
+                const response = await fetch(proxyUrl + encodeURIComponent(feedUrls[feedKey]));
+                
+                if (response.ok) {
+                    const xmlText = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    const items = xmlDoc.querySelectorAll('item');
+                    
+                    if (items.length > 0) {
+                        const feedItems = Array.from(items).slice(0, 10).map(item => {
+                            const title = item.querySelector('title')?.textContent || 'No title';
+                            const description = item.querySelector('description')?.textContent || 'No description';
+                            const link = item.querySelector('link')?.textContent || '#';
+                            const pubDate = item.querySelector('pubDate')?.textContent || new Date().toISOString();
+                            
+                            return { title, description, link, pubDate };
+                        });
+                        
+                        displayFeedItems(feedItems, containerId, feedKey);
+                    } else {
+                        displayFeedError(containerId, 'No items found in feed');
+                    }
+                } else {
+                    displayFeedError(containerId, `Failed to fetch feed (${response.status})`);
+                }
+            } catch (error) {
+                console.error(`Error loading ${feedKey} feed:`, error);
+                displayFeedError(containerId, 'Failed to load feed');
+            }
+        }
+        
+        // Display feed items
+        function displayFeedItems(items, containerId, feedKey) {
+            const container = document.getElementById(containerId);
+            const isEmergency = feedKey === '112greece';
+            
+            let html = '<div class="feed-items">';
+            
+            items.forEach((item, index) => {
+                const pubDate = new Date(item.pubDate);
+                const timeAgo = getTimeAgo(pubDate);
+                const urgencyClass = isEmergency ? 'border-danger' : 'border-warning';
+                const iconClass = isEmergency ? 'fas fa-exclamation-triangle text-danger' : 'fas fa-fire text-warning';
+                
+                html += `
+                    <div class="feed-item border-start ${urgencyClass} border-3 p-3 mb-3 bg-white rounded-end shadow-sm">
+                        <div class="d-flex align-items-start">
+                            <i class="${iconClass} me-3 mt-1"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-2">
+                                    <a href="${item.link}" target="_blank" class="text-decoration-none text-dark">
+                                        ${item.title}
+                                    </a>
+                                </h6>
+                                <p class="text-muted mb-2 small">${item.description || 'No description available'}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        ${timeAgo}
+                                    </small>
+                                    <a href="${item.link}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // Display feed error
+        function displayFeedError(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <div class="text-center p-4">
+                    <i class="fas fa-exclamation-triangle text-warning mb-3" style="font-size: 2rem;"></i>
+                    <h5 class="text-muted">Feed Unavailable</h5>
+                    <p class="text-muted">${message}</p>
+                    <button class="btn btn-outline-primary btn-sm" onclick="loadAllFeeds()">
+                        <i class="fas fa-retry me-1"></i>
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Get time ago string
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${diffDays}d ago`;
+        }
+        
+        // Load all feeds
+        function loadAllFeeds() {
+            loadRSSFeed('112greece', 'feed-112greece');
+            loadRSSFeed('pyrosvestiki', 'feed-pyrosvestiki');
+            document.getElementById('lastUpdatedTime').textContent = new Date().toLocaleString();
+        }
+        
+        // Toggle auto refresh
+        function toggleAutoRefresh() {
+            const button = document.getElementById('autoRefreshToggle');
+            const span = button.querySelector('span');
+            
+            if (autoRefreshEnabled) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshEnabled = false;
+                span.textContent = 'Auto Refresh: OFF';
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-outline-danger');
+            } else {
+                startAutoRefresh();
+                autoRefreshEnabled = true;
+                span.textContent = 'Auto Refresh: ON';
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-outline-secondary');
+            }
+        }
+        
+        // Start auto refresh
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(loadAllFeeds, 300000); // 5 minutes
+        }
+        
+        // Event listeners
+        document.getElementById('refreshFeeds').addEventListener('click', loadAllFeeds);
+        document.getElementById('autoRefreshToggle').addEventListener('click', toggleAutoRefresh);
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllFeeds();
+            startAutoRefresh();
+        });
+    </script>
+}
+
+<style>
+    .feed-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+    }
+    
+    .feed-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    }
+    
+    .feed-content {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .feed-item {
+        transition: all 0.3s ease;
+    }
+    
+    .feed-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    }
+    
+    .feed-items {
+        padding: 1rem;
+    }
+    
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    @@media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem;
+        }
+        
+        .feed-content {
+            max-height: 400px;
+        }
+        
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+    }
+    
+    /* Dark theme support */
+    [data-theme="dark"] .feed-item {
+        background-color: var(--card-bg) !important;
+        color: var(--text-color);
+    }
+    
+    [data-theme="dark"] .feed-item h6 a {
+        color: var(--text-color) !important;
+    }
+    
+    [data-theme="dark"] .feed-header {
+        background-color: var(--card-header-bg) !important;
+    }
+    
+    [data-theme="dark"] .card-footer {
+        background-color: var(--card-header-bg) !important;
+    }
+</style>

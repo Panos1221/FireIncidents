@@ -100,7 +100,15 @@ const translations = {
 
         // Theme
         "darkMode": "Dark Mode",
-        "lightMode": "Light Mode"
+        "lightMode": "Light Mode",
+        
+        // RSS Feeds
+        "map": "Map",
+        "feeds": "RSS Feeds",
+        "liveFeeds": "Live RSS Feeds",
+        "feedsDescription": "Real-time updates from official emergency services and fire departments",
+        "refreshFeeds": "Refresh Feeds",
+        "autoRefresh": "Auto Refresh"
     },
     el: {
         // General
@@ -202,7 +210,15 @@ const translations = {
         "civilmap": "Χάρτης Πρόβλεψης Κινδύνου Πυρκαγιάς",
         // Theme
         "darkMode": "Σκούρο Θέμα",
-        "lightMode": "Φωτεινό Θέμα"
+        "lightMode": "Φωτεινό Θέμα",
+        
+        // RSS Feeds
+        "map": "Χάρτης",
+        "feeds": "RSS Ροές",
+        "liveFeeds": "Ζωντανές RSS Ροές",
+        "feedsDescription": "Ενημερώσεις σε πραγματικό χρόνο από επίσημες υπηρεσίες έκτακτης ανάγκης και πυροσβεστικές υπηρεσίες",
+        "refreshFeeds": "Ανανέωση Ροών",
+        "autoRefresh": "Αυτόματη Ανανέωση"
     }
 };
 

@@ -22,6 +22,20 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-map me-1"></i>
+                                <span data-translate="map">Map</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Feeds">
+                                <i class="fas fa-rss me-1"></i>
+                                <span data-translate="feeds">RSS Feeds</span>
+                            </a>
+                        </li>
+                    </ul>
                     <!-- Language select -->
                     <div class="language-selector ms-auto">
                         <label for="languageSelector" data-translate="language">Language</label>
@@ -69,6 +83,10 @@
                     <div id="fireAntennaStatus" class="fire-status" title="Checking status...">
                         <span class="status-light" id="antennaStatusLight"></span>
                     </div>
+                    <a href="mailto:contact@livefireincidents.gr" class="email-contact" title="Contact us">
+                        <i class="fas fa-envelope"></i>
+                        <span>contact@livefireincidents.gr</span>
+                    </a>
                 </div>
             </div>
         </div>
