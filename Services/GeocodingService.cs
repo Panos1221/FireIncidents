@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Text;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace FireIncidents.Services
 {
@@ -19,6 +20,8 @@ namespace FireIncidents.Services
 
         // municipality mappings
         private Dictionary<string, (double Lat, double Lon)> _municipalityCoordinates;
+        // Synchronization object to serialize access to municipalities.json and in-memory dictionary updates
+        private static readonly object _municipalitiesFileLock = new object();
 
         // Track incident coordinates to avoid placing them on top of each other
         private Dictionary<string, List<(double Lat, double Lon)>> _activeIncidentCoordinates;
@@ -451,42 +454,59 @@ namespace FireIncidents.Services
 
             try
             {
-                if (!_municipalityCoordinates.ContainsKey(key))
+                lock (_municipalitiesFileLock)
                 {
-                    _municipalityCoordinates[key] = (lat, lon);
-                    _logger.LogInformation($"Added new coordinates for '{key}': {lat}, {lon}");
-
-                    var directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
-                    if (!Directory.Exists(directoryPath))
+                    if (!_municipalityCoordinates.ContainsKey(key))
                     {
-                        Directory.CreateDirectory(directoryPath);
-                    }
+                        _municipalityCoordinates[key] = (lat, lon);
+                        _logger.LogInformation($"Added new coordinates for '{key}': {lat}, {lon}");
 
-                    var filePath = Path.Combine(directoryPath, "municipalities.json");
-
-                    Dictionary<string, (double Lat, double Lon)> data = new Dictionary<string, (double Lat, double Lon)>();
-                    if (File.Exists(filePath))
-                    {
-                        try
+                        var directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+                        if (!Directory.Exists(directoryPath))
                         {
-                            var json = File.ReadAllText(filePath, Encoding.UTF8);
-                            var existingData = JsonSerializer.Deserialize<Dictionary<string, (double Lat, double Lon)>>(json);
-                            if (existingData != null)
+                            Directory.CreateDirectory(directoryPath);
+                        }
+
+                        var filePath = Path.Combine(directoryPath, "municipalities.json");
+
+                        Dictionary<string, (double Lat, double Lon)> data = new Dictionary<string, (double Lat, double Lon)>();
+                        if (File.Exists(filePath))
+                        {
+                            try
                             {
-                                data = existingData;
+                                var json = File.ReadAllText(filePath, Encoding.UTF8);
+                                var existingData = JsonSerializer.Deserialize<Dictionary<string, (double Lat, double Lon)>>(json);
+                                if (existingData != null)
+                                {
+                                    data = existingData;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error reading existing municipality data file");
                             }
                         }
-                        catch (Exception ex)
+
+                        data[key] = (lat, lon);
+
+                        var options = new JsonSerializerOptions { WriteIndented = true };
+                        var newJson = JsonSerializer.Serialize(data, options);
+
+                        const int maxAttempts = 5;
+                        const int delayMs = 200;
+                        for (int attempt = 1; attempt <= maxAttempts; attempt++)
                         {
-                            _logger.LogError(ex, "Error reading existing municipality data file");
+                            try
+                            {
+                                File.WriteAllText(filePath, newJson, Encoding.UTF8);
+                                break;
+                            }
+                            catch (IOException) when (attempt < maxAttempts)
+                            {
+                                Thread.Sleep(delayMs);
+                            }
                         }
                     }
-
-                    data[key] = (lat, lon);
-
-                    var options = new JsonSerializerOptions { WriteIndented = true };
-                    var newJson = JsonSerializer.Serialize(data, options);
-                    File.WriteAllText(filePath, newJson, Encoding.UTF8);
                 }
             }
             catch (Exception ex)
