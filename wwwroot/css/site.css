@@ -52,7 +52,7 @@ html, body {
     background-color: var(--body-bg);
     color: var(--text-color);
     transition: background-color 0.3s ease, color 0.3s ease;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Theme toggle button */

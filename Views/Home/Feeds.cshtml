@@ -366,6 +366,19 @@
         padding: 0;
     }
     
+    /* emoji support */
+    .tweet-feed * {
+        font-variant-emoji: emoji;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Ensure proper emoji rendering for all tweet content */
+    .tweet-item, .tweet-content, .tweet-text, .tweet-description {
+        font-synthesis: none;
+        text-decoration-skip-ink: auto;
+    }
+    
     .tweet-item {
         background-color: var(--card-bg);
         color: var(--text-color);
@@ -436,6 +449,12 @@
     .tweet-content {
         margin-left: 52px;
         margin-bottom: 12px;
+        font-family: 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', Tahoma, Geneva, Verdana, sans-serif;
+        text-rendering: optimizeLegibility;
+        -webkit-font-feature-settings: "liga", "kern";
+        font-feature-settings: "liga", "kern";
+        unicode-bidi: embed;
+        direction: ltr;
     }
     
     .tweet-text {
@@ -444,6 +463,10 @@
         color: var(--text-color);
         margin-bottom: 8px;
         word-wrap: break-word;
+        font-family: 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', Tahoma, Geneva, Verdana, sans-serif;
+        text-rendering: optimizeLegibility;
+        -webkit-font-feature-settings: "liga", "kern";
+        font-feature-settings: "liga", "kern";
     }
     
     .tweet-description {
@@ -452,6 +475,10 @@
         font-weight: 600;
         line-height: 1.3125;
         margin-top: 4px;
+        font-family: 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', Tahoma, Geneva, Verdana, sans-serif;
+        text-rendering: optimizeLegibility;
+        -webkit-font-feature-settings: "liga", "kern";
+        font-feature-settings: "liga", "kern";
     }
     
     .tweet-actions {
