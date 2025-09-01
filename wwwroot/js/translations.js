@@ -106,7 +106,7 @@ const translations = {
         "map": "Map",
         "feeds": "RSS Feeds",
         "liveFeeds": "Live RSS Feeds",
-        "feedsDescription": "Real-time updates from official emergency services and fire departments",
+        "feedsDescription": "Real-time updates from the official Hellenic Fire Service and 112 Greece accounts",
         "refreshFeeds": "Refresh Feeds",
         "autoRefresh": "Auto Refresh"
     },
@@ -214,9 +214,9 @@ const translations = {
         
         // RSS Feeds
         "map": "Χάρτης",
-        "feeds": "RSS Ροές",
-        "liveFeeds": "Ζωντανές RSS Ροές",
-        "feedsDescription": "Ενημερώσεις σε πραγματικό χρόνο από επίσημες υπηρεσίες έκτακτης ανάγκης και πυροσβεστικές υπηρεσίες",
+        "feeds": "Ροές RSS",
+        "liveFeeds": "Ροές Δεδομένων RSS",
+        "feedsDescription": "Ενημερώσεις από τους επίσημους λογαριασμούς του Πυροσβεστικού Σώματος Ελλάδος και του 112 Ελλάδος.",
         "refreshFeeds": "Ανανέωση Ροών",
         "autoRefresh": "Αυτόματη Ανανέωση"
     }

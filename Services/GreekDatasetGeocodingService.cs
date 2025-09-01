@@ -258,7 +258,16 @@ namespace FireIncidents.Services
                         _logger.LogInformation("Selected city: '{City}' in municipality: '{Municipality}' with coordinates: {Lat}, {Lon}",
                             selectedEntry.City, selectedEntry.Municipality, selectedEntry.Latitude, selectedEntry.Longitude);
                         
-                        return (Convert.ToDouble(selectedEntry.Latitude), Convert.ToDouble(selectedEntry.Longitude));
+                        // Debug: Log raw coordinate strings before conversion
+                        _logger.LogDebug("Raw coordinate strings - Latitude: '{LatStr}', Longitude: '{LonStr}'",
+                            selectedEntry.Latitude, selectedEntry.Longitude);
+                        
+                        var lat = Convert.ToDouble(selectedEntry.Latitude, System.Globalization.CultureInfo.InvariantCulture);
+                        var lon = Convert.ToDouble(selectedEntry.Longitude, System.Globalization.CultureInfo.InvariantCulture);
+                        
+                        _logger.LogDebug("Converted coordinates - Latitude: {Lat}, Longitude: {Lon}", lat, lon);
+                        
+                        return (lat, lon);
                     }
                     else
                     {
@@ -375,7 +384,7 @@ namespace FireIncidents.Services
                 _logger.LogInformation("Fuzzy match found: '{City}' in '{Municipality}' with score: {Score:F2} (Reason: {Reason})",
                     bestMatch.City.City, bestMatch.City.Municipality, bestMatch.Score, bestMatch.Reason);
                 
-                return (Convert.ToDouble(bestMatch.City.Latitude), Convert.ToDouble(bestMatch.City.Longitude));
+                return (Convert.ToDouble(bestMatch.City.Latitude, System.Globalization.CultureInfo.InvariantCulture), Convert.ToDouble(bestMatch.City.Longitude, System.Globalization.CultureInfo.InvariantCulture));
             }
             
             _logger.LogWarning("No fuzzy matches found for municipality: '{Municipality}'", incident.Municipality);
@@ -436,7 +445,7 @@ namespace FireIncidents.Services
                 // Verify coordinates are in the right region using backup geocoding
                 if (await VerifyCoordinatesWithBackup(incident, bestCandidate.City))
                 {
-                    return (Convert.ToDouble(bestCandidate.City.Latitude), Convert.ToDouble(bestCandidate.City.Longitude));
+                    return (Convert.ToDouble(bestCandidate.City.Latitude, System.Globalization.CultureInfo.InvariantCulture), Convert.ToDouble(bestCandidate.City.Longitude, System.Globalization.CultureInfo.InvariantCulture));
                 }
                 else
                 {
@@ -516,8 +525,8 @@ namespace FireIncidents.Services
                 
                 if (backupResult.IsGeocoded)
                 {
-                    var candidateLat = Convert.ToDouble(candidateCity.Latitude);
-                    var candidateLon = Convert.ToDouble(candidateCity.Longitude);
+                    var candidateLat = Convert.ToDouble(candidateCity.Latitude, System.Globalization.CultureInfo.InvariantCulture);
+                var candidateLon = Convert.ToDouble(candidateCity.Longitude, System.Globalization.CultureInfo.InvariantCulture);
                     
                     // Calculate distance between coordinates (rough estimation)
                     var distance = CalculateDistance(backupResult.Latitude, backupResult.Longitude, candidateLat, candidateLon);

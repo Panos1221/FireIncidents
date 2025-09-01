@@ -23,11 +23,11 @@
             <div class="card feed-card h-100 shadow-lg">
                 <div class="card-header bg-danger text-white d-flex align-items-center">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <h4 class="mb-0 fw-bold">112 Greece Emergency Alerts</h4>
+                    <h4 class="mb-0 fw-bold">112 Greece</h4>
                 </div>
                 <div class="card-body p-0">
                     <div class="feed-container">
-                        <div class="feed-header p-3 bg-light">
+                        <div class="feed-header p-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="badge bg-danger fs-6">
                                     <i class="fas fa-broadcast-tower me-1"></i>
@@ -35,7 +35,7 @@
                                 </span>
                                 <small class="text-muted">
                                     <i class="fas fa-link me-1"></i>
-                                    feeds.livefireincidents.gr/112greece/rss
+                                    https://x.com/112Greece
                                 </small>
                             </div>
                         </div>
@@ -49,12 +49,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-light text-center">
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Official emergency alerts and civil protection warnings
-                    </small>
-                </div>
             </div>
         </div>
 
@@ -63,11 +57,11 @@
             <div class="card feed-card h-100 shadow-lg">
                 <div class="card-header bg-warning text-dark d-flex align-items-center">
                     <i class="fas fa-fire me-2"></i>
-                    <h4 class="mb-0 fw-bold">Πυροσβεστική (Fire Service)</h4>
+                    <h4 class="mb-0 fw-bold">Πυροσβεστικό Σώμα</h4>
                 </div>
                 <div class="card-body p-0">
                     <div class="feed-container">
-                        <div class="feed-header p-3 bg-light">
+                        <div class="feed-header p-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="badge bg-warning text-dark fs-6">
                                     <i class="fas fa-broadcast-tower me-1"></i>
@@ -75,7 +69,7 @@
                                 </span>
                                 <small class="text-muted">
                                     <i class="fas fa-link me-1"></i>
-                                    feeds.livefireincidents.gr/pyrosvestiki/rss
+                                    https://x.com/pyrosvestiki
                                 </small>
                             </div>
                         </div>
@@ -88,12 +82,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-light text-center">
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Hellenic Fire Service official updates and incidents
-                    </small>
                 </div>
             </div>
         </div>
@@ -151,10 +139,16 @@
                     
                     if (items.length > 0) {
                         const feedItems = Array.from(items).slice(0, 10).map(item => {
-                            const title = item.querySelector('title')?.textContent || 'No title';
-                            const description = item.querySelector('description')?.textContent || 'No description';
+                            let title = item.querySelector('title')?.textContent || 'No title';
+                            let description = item.querySelector('description')?.textContent || 'No description';
                             const link = item.querySelector('link')?.textContent || '#';
                             const pubDate = item.querySelector('pubDate')?.textContent || new Date().toISOString();
+                            
+                            // Filter out 'Image' text from title and description
+                            if (title === 'Image' || title.trim() === 'Image') {
+                                title = description !== 'No description' ? description : 'Emergency Alert';
+                                description = 'No description';
+                            }
                             
                             return { title, description, link, pubDate };
                         });
@@ -177,35 +171,63 @@
             const container = document.getElementById(containerId);
             const isEmergency = feedKey === '112greece';
             
-            let html = '<div class="feed-items">';
+            // Twitter-like profile info
+            const profileInfo = isEmergency ? {
+                username: '112Greece',
+                handle: '@@112Greece',
+                avatar: '/images/profiles/112greece.png',
+                verified: true
+            } : {
+                username: 'Πυροσβεστικό Σώμα',
+                handle: '@@pyrosvestiki',
+                avatar: '/images/profiles/pyrosvestiki.png',
+                verified: true
+            };
+            
+            let html = '<div class="tweet-feed">';
             
             items.forEach((item, index) => {
                 const pubDate = new Date(item.pubDate);
                 const timeAgo = getTimeAgo(pubDate);
-                const urgencyClass = isEmergency ? 'border-danger' : 'border-warning';
-                const iconClass = isEmergency ? 'fas fa-exclamation-triangle text-danger' : 'fas fa-fire text-warning';
                 
                 html += `
-                    <div class="feed-item border-start ${urgencyClass} border-3 p-3 mb-3 bg-white rounded-end shadow-sm">
-                        <div class="d-flex align-items-start">
-                            <i class="${iconClass} me-3 mt-1"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-2">
-                                    <a href="${item.link}" target="_blank" class="text-decoration-none text-dark">
-                                        ${item.title}
-                                    </a>
-                                </h6>
-                                <p class="text-muted mb-2 small">${item.description || 'No description available'}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>
-                                        ${timeAgo}
-                                    </small>
-                                    <a href="${item.link}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-external-link-alt me-1"></i>
-                                        View
-                                    </a>
+                    <div class="tweet-item">
+                        <div class="tweet-header">
+                            <div class="tweet-avatar">
+                                <img src="${profileInfo.avatar}" alt="${profileInfo.username}" class="avatar-img">
+                            </div>
+                            <div class="tweet-user-info">
+                                <div class="tweet-username">
+                                    <span class="display-name">${profileInfo.username}</span>
+                                    ${profileInfo.verified ? '<i class="fas fa-check-circle verified-badge"></i>' : ''}
+                                    <span class="handle">${profileInfo.handle}</span>
+                                    <span class="tweet-time">· ${timeAgo}</span>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="tweet-content">
+                            ${item.description && item.description !== 'No description available' && item.description !== 'No description' ? 
+                                `<div class="tweet-description">${item.description}</div>` : 
+                                (item.title && item.title !== 'Image' && item.title.trim() !== 'Image' ? 
+                                    `<div class="tweet-description">${item.title}</div>` : '')}
+                        </div>
+                        <div class="tweet-actions">
+                            <div class="tweet-action">
+                                <i class="far fa-comment"></i>
+                                <span class="action-count"></span>
+                            </div>
+                            <div class="tweet-action">
+                                <i class="fas fa-retweet"></i>
+                                <span class="action-count"></span>
+                            </div>
+                            <div class="tweet-action">
+                                <i class="far fa-heart"></i>
+                                <span class="action-count"></span>
+                            </div>
+                            <div class="tweet-action">
+                                <a href="${item.link}" target="_blank" class="external-link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -315,8 +337,8 @@
         box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
     }
     
-    .feed-items {
-        padding: 1rem;
+    .tweet-feed {
+        padding: 0;
     }
     
     .spinner-border {
@@ -339,21 +361,257 @@
         }
     }
     
-    /* Dark theme support */
-    [data-theme="dark"] .feed-item {
-        background-color: var(--card-bg) !important;
+    /* Twitter-like feed styling */
+    .tweet-feed {
+        padding: 0;
+    }
+    
+    .tweet-item {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border-bottom: 1px solid var(--card-border);
+        padding: 12px 16px;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .tweet-item:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .tweet-header {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 4px;
+    }
+    
+    .tweet-avatar {
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+    
+    .avatar-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .tweet-user-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .tweet-username {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        line-height: 1.3;
+    }
+    
+    .display-name {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text-color);
+        margin-right: 4px;
+    }
+    
+    .verified-badge {
+        color: #1d9bf0;
+        font-size: 14px;
+        margin-right: 4px;
+    }
+    
+    .handle {
+        color: #657786;
+        font-size: 15px;
+        margin-right: 4px;
+    }
+    
+    .tweet-time {
+        color: #657786;
+        font-size: 15px;
+    }
+    
+    .tweet-content {
+        margin-left: 52px;
+        margin-bottom: 12px;
+    }
+    
+    .tweet-text {
+        font-size: 15px;
+        line-height: 1.3125;
+        color: var(--text-color);
+        margin-bottom: 8px;
+        word-wrap: break-word;
+    }
+    
+    .tweet-description {
+        font-size: 15px;
+        color: var(--text-color);
+        font-weight: 600;
+        line-height: 1.3125;
+        margin-top: 4px;
+    }
+    
+    .tweet-actions {
+        display: flex;
+        justify-content: space-between;
+        max-width: 425px;
+        margin-left: 52px;
+        margin-top: 12px;
+    }
+    
+    .tweet-action {
+        display: flex;
+        align-items: center;
+        color: #657786;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        min-width: 32px;
+        justify-content: center;
+    }
+    
+    .tweet-action:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+        color: #1d9bf0;
+    }
+    
+    .tweet-action i {
+        font-size: 16px;
+    }
+    
+    .external-link {
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .external-link:hover {
+        color: inherit;
+    }
+    
+    .action-count {
+        margin-left: 4px;
+        font-size: 13px;
+    }
+    
+    .feed-header {
+        background-color: var(--card-header-bg) !important;
         color: var(--text-color);
     }
     
-    [data-theme="dark"] .feed-item h6 a {
-        color: var(--text-color) !important;
+    .card-footer {
+        background-color: var(--card-header-bg) !important;
+        color: var(--text-color);
     }
     
-    [data-theme="dark"] .feed-header {
-        background-color: var(--card-header-bg) !important;
-    }
-    
-    [data-theme="dark"] .card-footer {
-        background-color: var(--card-header-bg) !important;
-    }
+    /* Card header styling */
+     .card-header {
+         border-bottom: 1px solid var(--card-border);
+     }
+     
+     /* Dark theme specific overrides */
+     [data-theme="dark"] .tweet-item {
+         background-color: var(--card-bg);
+         color: #ffffff;
+         border-bottom-color: rgba(255, 255, 255, 0.125);
+     }
+     
+     [data-theme="dark"] .tweet-item:hover {
+         background-color: rgba(255, 255, 255, 0.05);
+     }
+     
+     [data-theme="dark"] .display-name {
+         color: #e1e8ed;
+         font-weight: 700;
+     }
+     
+     [data-theme="dark"] .tweet-text {
+         color: #e1e8ed;
+     }
+     
+     [data-theme="dark"] .handle,
+     [data-theme="dark"] .tweet-time {
+         color: #8b949e;
+     }
+     
+     [data-theme="dark"] .tweet-description {
+         color: #ffffff;
+         font-weight: 600;
+     }
+     
+     [data-theme="dark"] .tweet-action {
+         color: #8b949e;
+     }
+     
+     [data-theme="dark"] .tweet-action:hover {
+         background-color: rgba(29, 155, 240, 0.1);
+         color: #1d9bf0;
+     }
+     
+     [data-theme="dark"] .tweet-feed {
+         background-color: transparent;
+     }
+     
+     [data-theme="dark"] .feed-content {
+         background-color: var(--card-bg);
+         border-radius: 8px;
+     }
+     
+     [data-theme="dark"] .card-header.bg-danger {
+         background-color: #dc3545 !important;
+         color: #ffffff !important;
+     }
+     
+     [data-theme="dark"] .card-header.bg-warning {
+         background-color: #ffc107 !important;
+         color: #000000 !important;
+     }
+     
+     [data-theme="dark"] .card-footer {
+         background-color: #1a1a1a !important;
+         border-top-color: #444 !important;
+         color: #8b949e !important;
+     }
+     
+     [data-theme="dark"] .card-footer small {
+         color: #8b949e !important;
+     }
+     
+     [data-theme="dark"] .text-muted {
+         color: #8b949e !important;
+     }
+     
+     [data-theme="dark"] .badge.bg-warning {
+         background-color: #ffc107 !important;
+         color: #000000 !important;
+     }
+     
+     [data-theme="dark"] .badge.bg-danger {
+         background-color: #dc3545 !important;
+         color: #ffffff !important;
+     }
+     
+     /* Responsive design for mobile */
+      @@media (max-width: 768px) {
+         .tweet-content {
+             margin-left: 48px;
+         }
+         
+         .tweet-actions {
+             margin-left: 48px;
+         }
+         
+         .avatar-img {
+             width: 36px;
+             height: 36px;
+         }
+         
+         .tweet-avatar {
+             margin-right: 8px;
+         }
+     }
 </style>

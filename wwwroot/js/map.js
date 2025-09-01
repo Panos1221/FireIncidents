@@ -491,8 +491,28 @@ function createMarker(incident, markerImage) {
     let marker;
 
     // Convert coordinates to decimal degrees
-    const lat = incident.latitude > 1000 ? incident.latitude / 10000000 : incident.latitude;
-    const lng = incident.longitude > 1000 ? incident.longitude / 10000000 : incident.longitude;
+    // Handle coordinates that come as large integers (e.g., 370551454 -> 37.0551454)
+    let lat = incident.latitude;
+    let lng = incident.longitude;
+    
+    // Convert large integer coordinates to decimal degrees
+    if (lat > 1000) {
+        const latStr = lat.toString();
+        if (latStr.length >= 8) {
+            // Insert decimal point after first 2 digits for Greek coordinates
+            // 370551454 -> 37.0551454, 40239881 -> 40.239881
+            lat = parseFloat(latStr.substring(0, 2) + '.' + latStr.substring(2));
+        }
+    }
+    
+    if (lng > 1000) {
+        const lngStr = lng.toString();
+        if (lngStr.length >= 8) {
+            // Insert decimal point after first 2 digits for Greek coordinates
+            // 221139316 -> 22.1139316, 232853943 -> 23.2853943
+            lng = parseFloat(lngStr.substring(0, 2) + '.' + lngStr.substring(2));
+        }
+    }
 
     console.log(`Converting coordinates: ${incident.latitude}, ${incident.longitude} -> ${lat}, ${lng}`);
 
