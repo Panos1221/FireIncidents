@@ -17,11 +17,11 @@
 </style>
 
 <div class="container alerts-container">
-    <h2>Emergency Alerts</h2>
+    <h2 data-translate="emergencyAlertsTitle">Emergency Alerts</h2>
 
     @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-info">No alerts yet.</div>
+        <div class="alert alert-info" data-translate="noAlertsYet">No alerts yet.</div>
     }
     else
     {
@@ -40,10 +40,20 @@
                 <div class="alert-actions mt-2">
                     @if (!string.IsNullOrWhiteSpace(a.Url))
                     {
-                        <a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener" href="@a.Url">View original tweet</a>
+                        <a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener" href="@a.Url" data-translate="viewOriginalTweet">View original tweet</a>
                     }
                 </div>
             </div>
         }
     }
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.translations && window.translations.updatePageTranslations) {
+                window.translations.updatePageTranslations();
+            }
+        });
+    </script>
+}

@@ -997,3 +997,24 @@ footer {
     background-color: #f59e0b !important;
     color: #000000 !important;
 }
+
+/* Fire District Labels */
+.fire-district-label {
+    pointer-events: none;
+    z-index: 500;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.fire-district-label:hover {
+    opacity: 1;
+}
+
+.fire-district-label div {
+    white-space: nowrap;
+    text-shadow: 1px 1px 1px rgba(255,255,255,0.8);
+    box-shadow: none;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

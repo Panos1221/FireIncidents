@@ -16,6 +16,10 @@ namespace FireIncidents
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            
+            // Configure geocoding settings
+            services.Configure<FireIncidents.Models.GeocodingConfiguration>(
+                Configuration.GetSection("Geocoding"));
 
             services.AddHttpClient("FireService");
             services.AddHttpClient("Nominatim");
@@ -40,6 +44,8 @@ namespace FireIncidents
             // Register services
             services.AddScoped<FireServiceScraperService>();
             services.AddScoped<GeocodingService>();
+            services.AddScoped<GreekDatasetGeocodingService>();
+            services.AddScoped<UnifiedGeocodingService>();
             services.AddScoped<JavaScriptRendererService>();
             services.AddScoped<TwitterScraperService>();
             services.AddScoped<Warning112Service>();

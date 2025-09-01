@@ -8,6 +8,10 @@ let incidentModal;
 let markersLayer;
 let warningsLayer;
 let warningHighlightsLayer;
+let fireDistrictsLayer;
+let fireDistrictsLabelsLayer;
+let fireDistrictsData = null;
+let fireDistrictsColors = new Map();
 let isInitialLoad = true;
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -38,6 +42,8 @@ function initMap() {
     markersLayer = L.layerGroup();
     warningsLayer = L.layerGroup();
     warningHighlightsLayer = L.layerGroup();
+    fireDistrictsLayer = L.layerGroup();
+    fireDistrictsLabelsLayer = L.layerGroup();
 
     // Center map on Greece
     map = L.map('map', {
@@ -59,10 +65,34 @@ function initMap() {
         detectRetina: true
     }).addTo(map);
 
-    // Add layers in order: highlights (bottom), markers (middle), warnings (top)
+    // Add layers in order: fire districts (bottom), highlights, markers (middle), 112 warnings (top)
+    fireDistrictsLayer.addTo(map);
+    fireDistrictsLabelsLayer.addTo(map);
     warningHighlightsLayer.addTo(map);
     markersLayer.addTo(map);
     warningsLayer.addTo(map);
+    
+    // Add zoom event listener for label visibility
+    map.on('zoomend', function() {
+        const currentZoom = map.getZoom();
+        if (currentZoom >= 12) {
+            if (!map.hasLayer(fireDistrictsLabelsLayer)) {
+                fireDistrictsLabelsLayer.addTo(map);
+            }
+        } else {
+            if (map.hasLayer(fireDistrictsLabelsLayer)) {
+                map.removeLayer(fireDistrictsLabelsLayer);
+            }
+        }
+    });
+    
+    // Initial check for label visibility on map load
+    map.on('ready', function() {
+        const currentZoom = map.getZoom();
+        if (currentZoom < 12 && map.hasLayer(fireDistrictsLabelsLayer)) {
+            map.removeLayer(fireDistrictsLabelsLayer);
+        }
+    });
 
     L.control.scale({
         imperial: false,
@@ -98,6 +128,18 @@ function setupEventListeners() {
     // Setup status filter checkboxes
     document.getElementById('ongoingCheck').addEventListener('change', filterIncidents);
     document.getElementById('partialControlCheck').addEventListener('change', filterIncidents);
+    
+    // fire districts toggle
+    document.getElementById('fireDistrictsCheck').addEventListener('change', function() {
+        if (this.checked) {
+            showFireDistricts();
+        } else {
+            hideFireDistricts();
+        }
+    });
+    
+    // Load fire districts data
+    loadFireDistricts();
     document.getElementById('fullControlCheck').addEventListener('change', filterIncidents);
 
     // Setup category filter checkboxes
@@ -664,5 +706,340 @@ function animateCounter(elementId, targetValue) {
         }, step);
     } else {
         element.textContent = targetValue;
+    }
+}
+
+// Fire Districts Functions
+async function loadFireDistricts() {
+    try {
+        console.log('Loading fire department districts...');
+        const response = await fetch('/api/fire-districts');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        fireDistrictsData = await response.json();
+        console.log('Fire districts data loaded:', fireDistrictsData);
+        
+        // Generate colors for each district
+        generateDistrictColors();
+        
+        // Enable toggle button
+        const toggleButton = document.getElementById('fireDistrictsCheck');
+        toggleButton.disabled = false;
+        
+        console.log('Fire districts loaded successfully');
+    } catch (error) {
+        console.error('Error loading fire districts:', error);
+        // toggle disabled on error
+    }
+}
+
+function generateDistrictColors() {
+    if (!fireDistrictsData || !fireDistrictsData.features) {
+        return;
+    }
+    
+    const districts = fireDistrictsData.features;
+
+    const colorPalette = [
+    // Reds & Oranges
+    '#FF0000', '#FF4500', '#FF6347', '#FF7F50', '#FF8C00',
+    '#FFA500', '#FFD700', '#FFB347',
+
+    // Yellows & Warm tones
+    '#FFFF00', '#F0E68C', '#FFDAB9', '#FFE4B5', '#F5DEB3',
+
+    // Greens
+    '#32CD32', '#00FF00', '#7CFC00', '#98FB98', '#00FA9A',
+    '#2E8B57', '#3CB371', '#228B22', '#ADFF2F',
+
+    // Cyans & Teals
+    '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#5F9EA0',
+
+    // Blues
+    '#1E90FF', '#4169E1', '#0000FF', '#6495ED', '#87CEEB',
+    '#4682B4', '#00BFFF', '#7B68EE',
+
+    // Purples & Violets
+    '#8A2BE2', '#9932CC', '#BA55D3', '#DA70D6', '#9400D3',
+    '#EE82EE', '#DDA0DD', '#C71585',
+
+    // Pinks
+    '#FF69B4', '#FF1493', '#DB7093', '#FFC0CB', '#FFB6C1',
+
+    // Browns & Neutrals
+    '#8B4513', '#A0522D', '#CD853F', '#D2691E', '#DEB887',
+    '#BC8F8F', '#BDB76B', '#808000'
+    ];
+    
+    // Shuffle the palette
+    const shuffledPalette = [...colorPalette];
+    for (let i = shuffledPalette.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledPalette[i], shuffledPalette[j]] = [shuffledPalette[j], shuffledPalette[i]];
+    }
+    
+    districts.forEach((district, index) => {
+        const stationName = district.properties.PYR_YPIRES;
+        const color = shuffledPalette[index % shuffledPalette.length];
+        fireDistrictsColors.set(stationName, color);
+    });
+}
+
+// Coordinate transformation cache for performance
+const coordinateCache = new Map();
+
+function getCachedCoordinate(x, y) {
+    const key = `${x},${y}`;
+    if (coordinateCache.has(key)) {
+        return coordinateCache.get(key);
+    }
+    
+    const transformed = proj4('EPSG:2100', 'EPSG:4326', [x, y]);
+    const result = [transformed[1], transformed[0]];
+    coordinateCache.set(key, result);
+    return result;
+}
+
+function showFireDistricts() {
+    if (!fireDistrictsData || !fireDistrictsData.features) {
+        console.warn('No fire districts data available');
+        return;
+    }
+    
+    console.log(`Processing ${fireDistrictsData.features.length} fire districts...`);
+    
+    // loading indicator
+    showDistrictsLoadingIndicator(true);
+    
+    // Clear coordinate cache
+    coordinateCache.clear();
+    
+    // Greek Grid EPSG:2100 for coordinates system
+    if (!proj4.defs('EPSG:2100')) {
+        proj4.defs('EPSG:2100', '+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=-199.87,74.79,246.62,0,0,0,0 +units=m +no_defs');
+    }
+    
+    let successCount = 0;
+    let errorCount = 0;
+    const districts = fireDistrictsData.features;
+    const chunkSize = 10; // How many districts we process each time by default 10 
+    let currentIndex = 0;
+    
+    function processChunk() {
+        const endIndex = Math.min(currentIndex + chunkSize, districts.length);
+        
+        for (let index = currentIndex; index < endIndex; index++) {
+            const district = districts[index];
+        try {
+            const stationName = district.properties.PYR_YPIRES || `District ${index + 1}`;
+            // validate station name we got above
+            if (!stationName || stationName.trim() === '') {
+                errorCount++;
+                return;
+            }
+
+            // geometry type - support for both Polygon and MultiPolygon
+             if (district.geometry.type !== 'Polygon' && district.geometry.type !== 'MultiPolygon') {
+                 errorCount++;
+                 return;
+             }
+
+             const color = fireDistrictsColors.get(stationName) || '#3388ff';
+             
+             // Convert coordinates from Greek Grid (EPSG:2100) to WGS84 using proj4js
+             // Handle both Polygon and MultiPolygon geometries
+             let polygonsToProcess = [];
+             
+             if (district.geometry.type === 'Polygon') {
+                 polygonsToProcess = [district.geometry.coordinates[0]]; // Single polygon outer ring
+             } else if (district.geometry.type === 'MultiPolygon') {
+                 // Process all polygons in MultiPolygon
+                 polygonsToProcess = district.geometry.coordinates.map(polygon => polygon[0]); // All outer rings
+             }
+             
+             // Process each polygon separately
+             polygonsToProcess.forEach((rawCoordinates, polygonIndex) => {
+                 // Validate coordinates exist and have data)
+                 if (!rawCoordinates || rawCoordinates.length < 3) {
+                     return;
+                 }
+                 
+                 const coordinates = rawCoordinates.map((coord, coordIndex) => {
+                try {
+                    // Validate input coordinates
+                    if (!Array.isArray(coord) || coord.length !== 2) {
+                        return null;
+                    }
+                    
+                    const [x, y] = coord;
+                    
+                    // Check if coordinates are finite numbers
+                    if (!isFinite(x) || !isFinite(y) || x === null || y === null || x === undefined || y === undefined) {
+                        return null;
+                    }
+                    
+                    // Use cached coordinate transformation
+                    const result = getCachedCoordinate(x, y);
+                    
+                    // Validate transformed coordinates (based on default central Greece roughly 34-42°N, 19-30°E)
+                    if (isNaN(result[0]) || isNaN(result[1]) || 
+                        result[0] < 30 || result[0] > 45 || 
+                        result[1] < 15 || result[1] > 35) {
+                        return null;
+                    }
+                    
+                    return result;
+                } catch (coordError) {
+                    return null;
+                }
+                 }).filter(coord => coord !== null);
+                 
+                 // Validate coordinates for this polygon
+                 if (coordinates.length === 0) {
+                     return; // Skip this polygon
+                 }
+                 
+                 const polygon = L.polygon(coordinates, {
+                     color: color,
+                     weight: 2,
+                     opacity: 0.8,
+                     fillColor: color,
+                     fillOpacity: 0.2
+                 });
+                 
+                 // popup py name
+                 const popupText = `<strong>${stationName}</strong>`;
+                 polygon.bindPopup(popupText);
+                 
+                 fireDistrictsLayer.addLayer(polygon);
+             });
+             
+             // label at the center of all polygons for this district
+             if (polygonsToProcess.length > 0) {
+                 // Calculate center from all valid polygons
+                 let allBounds = null;
+                 polygonsToProcess.forEach(rawCoordinates => {
+                     if (rawCoordinates && rawCoordinates.length >= 3) {
+                         const coords = rawCoordinates.map(coord => {
+                             if (Array.isArray(coord) && coord.length === 2) {
+                                 const [x, y] = coord;
+                                 if (isFinite(x) && isFinite(y)) {
+                                     return getCachedCoordinate(x, y);
+                                 }
+                             }
+                             return null;
+                         }).filter(coord => coord !== null);
+                         
+                         if (coords.length > 0) {
+                             const tempPolygon = L.polygon(coords);
+                             const bounds = tempPolygon.getBounds();
+                             if (!allBounds) {
+                                 allBounds = bounds;
+                             } else {
+                                 allBounds.extend(bounds);
+                             }
+                         }
+                     }
+                 });
+                 
+                 if (allBounds) {
+                     const center = allBounds.getCenter();
+                     const label = L.marker(center, {
+                         icon: L.divIcon({
+                             className: 'fire-district-label',
+                             html: `<div style="background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; color: #333; border: 1px solid #ff6b35; box-shadow: 0 1px 2px rgba(0,0,0,0.3); white-space: nowrap; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${stationName}</div>`,
+                             iconSize: [100, 16],
+                             iconAnchor: [50, 8]
+                         })
+                     });
+                     // Only add label if zoom level is appropriate
+                     const currentZoom = map.getZoom();
+                     if (currentZoom >= 12) {
+                         fireDistrictsLabelsLayer.addLayer(label);
+                     }
+                 }
+             }
+             
+             successCount++;
+            
+        } catch (error) {
+            console.error(`Error processing district ${index}:`, error);
+            errorCount++;
+        }
+        }
+        
+        currentIndex = endIndex;
+        
+        // Update progress
+        const progress = Math.round((currentIndex / districts.length) * 100);
+        updateDistrictsProgress(progress);
+        
+        // Continue processing if there are more districts
+        if (currentIndex < districts.length) {
+            setTimeout(processChunk, 10);
+        } else {
+            // completed operation
+            console.log(`Fire districts processing complete: ${successCount} successful, ${errorCount} errors`);
+            showDistrictsLoadingIndicator(false);
+        }
+    }
+    
+    processChunk();
+}
+
+function hideFireDistricts() {
+    console.log('Hiding fire districts from map');
+    fireDistrictsLayer.clearLayers();
+    fireDistrictsLabelsLayer.clearLayers();
+    showDistrictsLoadingIndicator(false);
+}
+
+// Loading indicator functions
+function showDistrictsLoadingIndicator(show) {
+    let indicator = document.getElementById('districts-loading-indicator');
+    
+    if (show) {
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'districts-loading-indicator';
+            indicator.innerHTML = `
+                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                           background: rgba(255,255,255,0.95); padding: 20px; border-radius: 8px; 
+                           box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10000; text-align: center;
+                           border: 2px solid #ff6b35;">
+                    <div style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 10px;" data-translate="loadingfiredistricts">${getText('loadingfiredistricts')}</div>
+                    <div style="width: 200px; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+                        <div id="districts-progress-bar" style="width: 0%; height: 100%; background: #ff6b35; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div id="districts-progress-text" style="font-size: 12px; color: #666; margin-top: 5px;">0%</div>
+                </div>
+            `;
+            document.body.appendChild(indicator);
+            
+            // Apply translations to the newly created element
+            if (window.translations && window.translations.updatePageTranslations) {
+                window.translations.updatePageTranslations();
+            }
+        }
+        indicator.style.display = 'block';
+    } else {
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }
+}
+
+function updateDistrictsProgress(percentage) {
+    const progressBar = document.getElementById('districts-progress-bar');
+    const progressText = document.getElementById('districts-progress-text');
+    
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+    }
+    if (progressText) {
+        progressText.textContent = percentage + '%';
     }
 }

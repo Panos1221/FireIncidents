@@ -1,4 +1,4 @@
-﻿const translations = {
+const translations = {
     en: {
         // General
         "appTitle": "Hellenic Fire Service Live Incidents Map",
@@ -48,6 +48,13 @@
         "clickForDetails": "Click for details",
         "source": "Source",
         
+        // Fire Districts
+        "districts": "Fire Districts",
+        "showFireDistricts": "Show Fire Department Districts. Click on the map to see which agency each area belongs to.",
+        "fireDistrict": "Fire District",
+        "fireStation": "Fire Station",
+        "loadingfiredistricts": "Loading Fire Districts",
+        
         // Statistics
         "statistics": "Statistics",
         "totalIncidents": "Total Incidents",
@@ -71,6 +78,11 @@
         // Theme
         "darkMode": "Dark Mode",
         "lightMode": "Light Mode",
+        
+        // Alerts page
+        "emergencyAlertsTitle": "Emergency Alerts",
+        "noAlertsYet": "No alerts yet.",
+        "viewOriginalTweet": "View original tweet",
         
         // Language
         "language": "Language",
@@ -139,6 +151,13 @@
         "clickForDetails": "Κάντε κλικ για λεπτομέρειες",
         "source": "Πηγή",
         
+        // Fire Districts
+        "districts": "Περιοχές Ευθύνης",
+        "showFireDistricts": "Εμφάνιση ορίων Πυροσβεστικών Υπηρεσιών και Κλιμακίων (κάντε κλικ στον χάρτη για να δείτε σε ποια υπηρεσία ανήκει η περιοχή)",
+        "fireDistrict": "Περιοχή Πυροσβεστικής",
+        "fireStation": "Πυροσβεστικός Σταθμός",
+        "loadingfiredistricts": "Φόρτωση Περιοχών Ευθύνης",
+        
         // Statistics
         "statistics": "Στατιστικά",
         "totalIncidents": "Συνολικά Περιστατικά",
@@ -162,6 +181,11 @@
         // Theme
         "darkMode": "Σκούρο Θέμα",
         "lightMode": "Φωτεινό Θέμα",
+        
+        // Alerts page
+        "emergencyAlertsTitle": "Ειδοποιήσεις Έκτακτης Ανάγκης",
+        "noAlertsYet": "Δεν υπάρχουν ειδοποιήσεις ακόμα.",
+        "viewOriginalTweet": "Προβολή αρχικού tweet",
         
         // Language
         "language": "Γλώσσα",

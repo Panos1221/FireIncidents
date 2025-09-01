@@ -10,12 +10,12 @@ namespace FireIncidents.Controllers
     {
         private readonly ILogger<IncidentsApiController> _logger;
         private readonly FireServiceScraperService _scraperService;
-        private readonly GeocodingService _geocodingService;
+        private readonly UnifiedGeocodingService _geocodingService;
 
         public IncidentsApiController(
             ILogger<IncidentsApiController> logger,
             FireServiceScraperService scraperService,
-            GeocodingService geocodingService)
+            UnifiedGeocodingService geocodingService)
         {
             _logger = logger;
             _scraperService = scraperService;
