@@ -19,12 +19,19 @@ document.addEventListener('DOMContentLoaded', function () {
     initModal();
     setupEventListeners();
     loadIncidents();
-    loadWarnings112();
+    
+    // Only load 112 warnings if enabled in configuration
+    if (window.appConfig && window.appConfig.show112Warnings) {
+        loadWarnings112();
+    }
 
     // Auto-refresh every 5 minutes
     setInterval(() => {
         loadIncidents();
-        loadWarnings112();
+        // Only refresh 112 warnings if enabled in configuration
+        if (window.appConfig && window.appConfig.show112Warnings) {
+            loadWarnings112();
+        }
     }, 5 * 60 * 1000);
 });
 
@@ -114,10 +121,14 @@ function setupEventListeners() {
         refreshBtn.disabled = true;
         refreshBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> <span>${getText('loading')}</span>`;
 
-        Promise.all([
-            loadIncidents(),
-            loadWarnings112()
-        ]).finally(() => {
+        const promises = [loadIncidents()];
+        
+        // Only load 112 warnings if enabled in configuration
+        if (window.appConfig && window.appConfig.show112Warnings) {
+            promises.push(loadWarnings112());
+        }
+        
+        Promise.all(promises).finally(() => {
             setTimeout(() => {
                 refreshBtn.disabled = false;
                 refreshBtn.innerHTML = originalText;
@@ -668,18 +679,18 @@ function updateStatistics(incidents) {
     const urbanFireCount = incidents.filter(i => i.category === "ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ").length;
     const assistanceCount = incidents.filter(i => i.category === "ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ").length;
     
-    // Add 112 warnings statistics
-    const warningsCount = allWarnings112.length;
-
     animateCounter('totalIncidents', totalIncidents);
     animateCounter('forestFireCount', forestFireCount);
     animateCounter('urbanFireCount', urbanFireCount);
     animateCounter('assistanceCount', assistanceCount);
     
-    // Update warnings count if element exists
-    const warningsElement = document.getElementById('warningsCount');
-    if (warningsElement) {
-        animateCounter('warningsCount', warningsCount);
+    // Update warnings count only if 112 warnings are enabled and element exists
+    if (window.appConfig && window.appConfig.show112Warnings) {
+        const warningsCount = allWarnings112.length;
+        const warningsElement = document.getElementById('warningsCount');
+        if (warningsElement) {
+            animateCounter('warningsCount', warningsCount);
+        }
     }
 }
 
