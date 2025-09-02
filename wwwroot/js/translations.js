@@ -7,6 +7,8 @@ const translations = {
         "lastUpdated": "Last Updated",
         "error": "Error",
         "close": "Close",
+        "pyrosvestiki": "Hellenic Fire Service",
+        "112greece": "112 Greece",
         
         // Filters
         "filters": "Filters",
@@ -118,6 +120,8 @@ const translations = {
         "lastUpdated": "Τελευταία Ενημέρωση",
         "error": "Σφάλμα",
         "close": "Κλείσιμο",
+        "pyrosvestiki": "Πυροσβεστικό Σώμα",
+        "112greece": "112 Ελλάδος",
         
         // Filters
         "filters": "Φίλτρα",

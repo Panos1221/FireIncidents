@@ -23,16 +23,12 @@
             <div class="card feed-card h-100 shadow-lg">
                 <div class="card-header bg-danger text-white d-flex align-items-center">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <h4 class="mb-0 fw-bold">112 Greece</h4>
+                    <h4 class="mb-0 fw-bold" data-translate="112greece">112 Greece</h4>
                 </div>
                 <div class="card-body p-0">
                     <div class="feed-container">
                         <div class="feed-header p-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-danger fs-6">
-                                    <i class="fas fa-broadcast-tower me-1"></i>
-                                    LIVE
-                                </span>
                                 <small class="text-muted">
                                     <i class="fas fa-link me-1"></i>
                                     https://x.com/112Greece
@@ -57,16 +53,12 @@
             <div class="card feed-card h-100 shadow-lg">
                 <div class="card-header bg-warning text-dark d-flex align-items-center">
                     <i class="fas fa-fire me-2"></i>
-                    <h4 class="mb-0 fw-bold">Πυροσβεστικό Σώμα</h4>
+                    <h4 class="mb-0 fw-bold" data-translate="pyrosvestiki">Πυροσβεστικό Σώμα</h4>
                 </div>
                 <div class="card-body p-0">
                     <div class="feed-container">
                         <div class="feed-header p-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-warning text-dark fs-6">
-                                    <i class="fas fa-broadcast-tower me-1"></i>
-                                    LIVE
-                                </span>
                                 <small class="text-muted">
                                     <i class="fas fa-link me-1"></i>
                                     https://x.com/pyrosvestiki
@@ -184,12 +176,33 @@
                 verified: true
             };
             
+            // Function to replace numbers with emoji
+            function replaceNumbersWithEmoji(text) {
+                return text.replace(/1⃣/g, '1️⃣')
+                        .replace(/2⃣/g, '2️⃣')
+                        .replace(/3⃣/g, '3️⃣')
+                        .replace(/4⃣/g, '4️⃣')
+                        .replace(/5⃣/g, '5️⃣')
+                        .replace(/6⃣/g, '6️⃣')
+                        .replace(/7⃣/g, '7️⃣')
+                        .replace(/8⃣/g, '8️⃣')
+                        .replace(/9⃣/g, '9️⃣')
+                        .replace(/0⃣/g, '0️⃣');
+            }
+
             let html = '<div class="tweet-feed">';
             
             items.forEach((item, index) => {
                 const pubDate = new Date(item.pubDate);
                 const timeAgo = getTimeAgo(pubDate);
-                
+
+                // replace letters with emoji when needed
+                let description = item.description && item.description !== 'No description available' && item.description !== 'No description' 
+                                ? replaceNumbersWithEmoji(item.description) 
+                                : (item.title && item.title !== 'Image' && item.title.trim() !== 'Image' 
+                                    ? replaceNumbersWithEmoji(item.title) 
+                                    : '');
+
                 html += `
                     <div class="tweet-item">
                         <div class="tweet-header">
@@ -206,29 +219,7 @@
                             </div>
                         </div>
                         <div class="tweet-content">
-                            ${item.description && item.description !== 'No description available' && item.description !== 'No description' ? 
-                                `<div class="tweet-description">${item.description}</div>` : 
-                                (item.title && item.title !== 'Image' && item.title.trim() !== 'Image' ? 
-                                    `<div class="tweet-description">${item.title}</div>` : '')}
-                        </div>
-                        <div class="tweet-actions">
-                            <div class="tweet-action">
-                                <i class="far fa-comment"></i>
-                                <span class="action-count"></span>
-                            </div>
-                            <div class="tweet-action">
-                                <i class="fas fa-retweet"></i>
-                                <span class="action-count"></span>
-                            </div>
-                            <div class="tweet-action">
-                                <i class="far fa-heart"></i>
-                                <span class="action-count"></span>
-                            </div>
-                            <div class="tweet-action">
-                                <a href="${item.link}" target="_blank" class="external-link">
-                                    <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            </div>
+                            ${description}
                         </div>
                     </div>
                 `;
@@ -237,6 +228,7 @@
             html += '</div>';
             container.innerHTML = html;
         }
+
         
         // Display feed error
         function displayFeedError(containerId, message) {
@@ -366,9 +358,9 @@
         padding: 0;
     }
     
-    /* emoji support */
+    /* emoji support - allow Unicode emoji but prevent ASCII numbers from becoming emoji */
     .tweet-feed * {
-        font-variant-emoji: emoji;
+        font-variant-emoji: unicode;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
