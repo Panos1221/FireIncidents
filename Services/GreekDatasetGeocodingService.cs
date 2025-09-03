@@ -301,6 +301,70 @@ namespace FireIncidents.Services
             var normalized = NormalizeMunicipalityName(municipalityName);
             searchKeys.Add(normalized);
             
+            // Greek plural/singular variations
+            var baseWord = RemoveMunicipalityPrefix(municipalityName).ToUpperInvariant();
+            if (!string.IsNullOrEmpty(baseWord))
+            {
+                // Add all common Greek word ending variations
+                var variations = new List<string> { baseWord };
+                
+                // Handle -Ο/-ΟΣ/-ΟΝ endings (masculine)
+                if (baseWord.EndsWith("Ο"))
+                {
+                    variations.Add(baseWord + "Σ");     // Σύνδενδρο -> Σύνδενδρος  
+                    variations.Add(baseWord + "Ν");     // Σύνδενδρο -> Σύνδενδρον
+                }
+                else if (baseWord.EndsWith("ΟΣ"))
+                {
+                    var stem = baseWord.Substring(0, baseWord.Length - 2);
+                    variations.Add(stem + "Ο");         // Σύνδενδρος -> Σύνδενδρο
+                    variations.Add(stem + "ΟΝ");       // Σύνδενδρος -> Σύνδενδρον
+                }
+                else if (baseWord.EndsWith("ΟΝ"))
+                {
+                    var stem = baseWord.Substring(0, baseWord.Length - 2);
+                    variations.Add(stem + "Ο");         // Σύνδενδρον -> Σύνδενδρο
+                    variations.Add(stem + "ΟΣ");       // Σύνδενδρον -> Σύνδενδρος
+                }
+                
+                // Handle -Ά/-ΆΣ endings (feminine)
+                else if (baseWord.EndsWith("Ά"))
+                {
+                    variations.Add(baseWord + "Σ");     // Μελιγαλά -> Μελιγαλάς
+                }
+                else if (baseWord.EndsWith("ΆΣ"))
+                {
+                    variations.Add(baseWord.Substring(0, baseWord.Length - 1)); // Μελιγαλάς -> Μελιγαλά
+                }
+                
+                // Handle -Η/-ΗΣ endings (feminine)
+                else if (baseWord.EndsWith("Η"))
+                {
+                    variations.Add(baseWord + "Σ");     // Add ς ending
+                }
+                else if (baseWord.EndsWith("ΗΣ"))
+                {
+                    variations.Add(baseWord.Substring(0, baseWord.Length - 1)); // Remove ς ending
+                }
+                
+                // Handle -Ι/-ΙΟ endings (neuter)
+                else if (baseWord.EndsWith("Ι"))
+                {
+                    variations.Add(baseWord + "Ο");     // Add ο ending
+                }
+                else if (baseWord.EndsWith("ΙΟ"))
+                {
+                    variations.Add(baseWord.Substring(0, baseWord.Length - 1)); // Remove ο ending
+                }
+                
+                // Add all variations to search keys
+                foreach (var variation in variations)
+                {
+                    searchKeys.Add(variation);
+                    searchKeys.Add("ΔΗΜΟΣ " + variation);
+                }
+            }
+            
             // Convert "Δ. NAME" to "Δημος NAME" format
             if (municipalityName.StartsWith("Δ. ", StringComparison.OrdinalIgnoreCase))
             {
@@ -578,11 +642,10 @@ namespace FireIncidents.Services
             _logger.LogDebug("FilterValidEntries: Input {InputCount} entries, {ValidCount} with coordinates", 
                 entries.Count, validEntries.Count);
             
-            if (!string.IsNullOrEmpty(region) && validEntries.Count > 1)
+            if (!string.IsNullOrEmpty(region))
             {
-                // Try to match region for accuracy
-                var regionMatches = validEntries.Where(e => 
-                    MatchesRegion(e.Region, region)).ToList();
+                // Strict region enforcement: only keep entries whose region matches the incident region
+                var regionMatches = validEntries.Where(e => MatchesRegion(e.Region, region)).ToList();
                 
                 if (regionMatches.Any())
                 {
@@ -594,13 +657,11 @@ namespace FireIncidents.Services
                 else
                 {
                     _logger.LogWarning("No region matches found for incident region: '{IncidentRegion}'. " +
-                        "Sample dataset regions: '{SampleRegions}'. Returning all valid entries.",
-                        region, string.Join(", ", validEntries.Take(3).Select(e => e.Region)));
+                        "Strict region enforcement active — rejecting {RejectedCount} entries.",
+                        region, validEntries.Count);
                     
-                    // Return all valid entries even if region doesn't match exactly
-                    // This is more forgiving and will allow matches even with region mismatches
-                    // Will be improved 
-                    return validEntries;
+                    // Strict: no match => no results from this dataset slice
+                    return new List<GreekCityData>();
                 }
             }
             
@@ -638,10 +699,31 @@ namespace FireIncidents.Services
         {
             if (string.IsNullOrEmpty(region)) return string.Empty;
             
-            return region.Replace("ΠΕΡΙΦΕΡΕΙΑ ", "")
-                        .Replace("Περιφερεια ", "")
-                        .Trim()
-                        .ToUpperInvariant();
+            // Remove diacritics and standardize casing before stripping known prefixes
+            var withoutDiacritics = RemoveDiacritics(region);
+            var upper = withoutDiacritics.ToUpperInvariant();
+            
+            return upper.Replace("ΠΕΡΙΦΕΡΕΙΑ ", "")
+                        .Trim();
+        }
+
+        // Remove Greek (and general) diacritics by decomposing to FormD and skipping combining marks
+        private static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return string.Empty;
+            var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder(capacity: normalized.Length);
+            foreach (var ch in normalized)
+            {
+                var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (uc != System.Globalization.UnicodeCategory.NonSpacingMark &&
+                    uc != System.Globalization.UnicodeCategory.SpacingCombiningMark &&
+                    uc != System.Globalization.UnicodeCategory.EnclosingMark)
+                {
+                    sb.Append(ch);
+                }
+            }
+            return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
         }
 
         private string NormalizeMunicipalityName(string municipality)
