@@ -151,11 +151,55 @@ namespace FireIncidents.Services
                 var withoutPrefix = RemoveMunicipalityPrefix(city.Municipality);
                 if (!string.IsNullOrEmpty(withoutPrefix) && withoutPrefix != normalizedKey)
                 {
-                    if (!_municipalityIndex.ContainsKey(withoutPrefix))
+                    var normalizedWithoutPrefix = NormalizeMunicipalityName(withoutPrefix);
+                    if (!_municipalityIndex.ContainsKey(normalizedWithoutPrefix))
                     {
-                        _municipalityIndex[withoutPrefix] = new List<GreekCityData>();
+                        _municipalityIndex[normalizedWithoutPrefix] = new List<GreekCityData>();
                     }
-                    _municipalityIndex[withoutPrefix].Add(city);
+                    _municipalityIndex[normalizedWithoutPrefix].Add(city);
+                }
+                
+                // Index individual words within municipality names for partial matching
+                // This helps match "ΛΕΣΒΟΥ" with "ΔΥΤΙΚΗΣ ΛΕΣΒΟΥ"
+                var words = withoutPrefix.Split(new[] { ' ', '-' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var word in words)
+                {
+                    var normalizedWord = NormalizeMunicipalityName(word.Trim());
+                    if (!string.IsNullOrEmpty(normalizedWord) && normalizedWord.Length > 2) // Only index meaningful words
+                    {
+                        if (!_municipalityIndex.ContainsKey(normalizedWord))
+                        {
+                            _municipalityIndex[normalizedWord] = new List<GreekCityData>();
+                        }
+                        _municipalityIndex[normalizedWord].Add(city);
+                        
+                        // Also add with ΔΗΜΟΣ prefix
+                        var withDimosPrefix = "ΔΗΜΟΣ " + normalizedWord;
+                        if (!_municipalityIndex.ContainsKey(withDimosPrefix))
+                        {
+                            _municipalityIndex[withDimosPrefix] = new List<GreekCityData>();
+                        }
+                        _municipalityIndex[withDimosPrefix].Add(city);
+                    }
+                }
+                
+                // Also index by city name to handle cases like 'ΠΟΛΙΧΝΙΤΟΥ' -> 'Πολιχνίτος'
+                if (!string.IsNullOrEmpty(city.City))
+                {
+                    var normalizedCityName = NormalizeMunicipalityName(city.City);
+                    if (!_municipalityIndex.ContainsKey(normalizedCityName))
+                    {
+                        _municipalityIndex[normalizedCityName] = new List<GreekCityData>();
+                    }
+                    _municipalityIndex[normalizedCityName].Add(city);
+                    
+                    // Also add with ΔΗΜΟΣ prefix
+                    var cityWithDimosPrefix = "ΔΗΜΟΣ " + normalizedCityName;
+                    if (!_municipalityIndex.ContainsKey(cityWithDimosPrefix))
+                    {
+                        _municipalityIndex[cityWithDimosPrefix] = new List<GreekCityData>();
+                    }
+                    _municipalityIndex[cityWithDimosPrefix].Add(city);
                 }
             }
 
@@ -231,8 +275,9 @@ namespace FireIncidents.Services
             _logger.LogDebug("Searching for municipality: '{Original}' -> normalized: '{Normalized}'", 
                 incident.Municipality, normalizedMunicipality);
 
-            // Try multiple search strategies
+            // Try multiple search strategies - collect all potential matches first
             var searchKeys = GenerateMunicipalitySearchKeys(incident.Municipality);
+            var allCandidates = new List<(GreekCityData Entry, string SearchKey, bool IsExactMatch, int TotalEntriesForKey)>();
             
             foreach (var searchKey in searchKeys)
             {
@@ -252,22 +297,14 @@ namespace FireIncidents.Services
                     
                     if (validEntries.Any())
                     {
-                        // Select the best entry (prefer higher population or specific criteria)
-                        var selectedEntry = SelectBestEntry(validEntries);
+                        // Determine if this is an exact match
+                        bool isExactMatch = IsExactMatch(searchKey, normalizedMunicipality, incident.Municipality);
                         
-                        _logger.LogInformation("Selected city: '{City}' in municipality: '{Municipality}' with coordinates: {Lat}, {Lon}",
-                            selectedEntry.City, selectedEntry.Municipality, selectedEntry.Latitude, selectedEntry.Longitude);
-                        
-                        // Debug: Log raw coordinate strings before conversion
-                        _logger.LogDebug("Raw coordinate strings - Latitude: '{LatStr}', Longitude: '{LonStr}'",
-                            selectedEntry.Latitude, selectedEntry.Longitude);
-                        
-                        var lat = Convert.ToDouble(selectedEntry.Latitude, System.Globalization.CultureInfo.InvariantCulture);
-                        var lon = Convert.ToDouble(selectedEntry.Longitude, System.Globalization.CultureInfo.InvariantCulture);
-                        
-                        _logger.LogDebug("Converted coordinates - Latitude: {Lat}, Longitude: {Lon}", lat, lon);
-                        
-                        return (lat, lon);
+                        // Add all valid entries as candidates
+                        foreach (var entry in validEntries)
+                        {
+                            allCandidates.Add((entry, searchKey, isExactMatch, cityEntries.Count));
+                        }
                     }
                     else
                     {
@@ -287,8 +324,91 @@ namespace FireIncidents.Services
                 }
             }
             
+            // If we have candidates, prioritize exact matches first
+            if (allCandidates.Any())
+            {
+                // First, try to find exact matches
+                var exactMatches = allCandidates.Where(c => c.IsExactMatch).ToList();
+                if (exactMatches.Any())
+                {
+                    var selectedEntry = SelectBestExactMatch(exactMatches);
+                    var matchInfo = exactMatches.First(c => c.Entry == selectedEntry);
+                    
+                    _logger.LogInformation("Selected EXACT match: '{City}' in municipality: '{Municipality}' (search key: '{SearchKey}') with coordinates: {Lat}, {Lon}",
+                        selectedEntry.City, selectedEntry.Municipality, matchInfo.SearchKey, selectedEntry.Latitude, selectedEntry.Longitude);
+                    
+                    var lat = Convert.ToDouble(selectedEntry.Latitude, System.Globalization.CultureInfo.InvariantCulture);
+                    var lon = Convert.ToDouble(selectedEntry.Longitude, System.Globalization.CultureInfo.InvariantCulture);
+                    
+                    return (lat, lon);
+                }
+                
+                // If no exact matches, use the best partial match
+                var selectedPartialEntry = SelectBestEntry(allCandidates.Select(c => c.Entry).ToList());
+                var partialMatchInfo = allCandidates.First(c => c.Entry == selectedPartialEntry);
+                
+                _logger.LogInformation("Selected PARTIAL match: '{City}' in municipality: '{Municipality}' (search key: '{SearchKey}') with coordinates: {Lat}, {Lon}",
+                    selectedPartialEntry.City, selectedPartialEntry.Municipality, partialMatchInfo.SearchKey, selectedPartialEntry.Latitude, selectedPartialEntry.Longitude);
+                
+                var partialLat = Convert.ToDouble(selectedPartialEntry.Latitude, System.Globalization.CultureInfo.InvariantCulture);
+                var partialLon = Convert.ToDouble(selectedPartialEntry.Longitude, System.Globalization.CultureInfo.InvariantCulture);
+                
+                return (partialLat, partialLon);
+            }
+            
             // fuzzy matching as last resort
             return await TryFuzzyMatching(incident);
+        }
+
+        private bool IsExactMatch(string searchKey, string normalizedMunicipality, string originalMunicipality)
+        {
+            _logger.LogDebug("IsExactMatch: Checking searchKey='{SearchKey}' against normalizedMunicipality='{NormalizedMunicipality}' originalMunicipality='{OriginalMunicipality}'",
+                searchKey, normalizedMunicipality, originalMunicipality);
+            
+            // First check if it's the normalized original municipality
+            if (searchKey.Equals(normalizedMunicipality, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogDebug("IsExactMatch: Found direct match with normalized municipality");
+                return true;
+            }
+            
+            // Check if the search key represents an individual part of the municipality
+            // Split by common separators and check if any part matches the search key
+            var parts = originalMunicipality.Split(new[] { "-", ",", " - ", " , " }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Trim())
+                .Where(p => !string.IsNullOrEmpty(p));
+            
+            _logger.LogDebug("IsExactMatch: Split into parts: [{Parts}]", string.Join(", ", parts));
+            
+            foreach (var part in parts)
+            {
+                var normalizedPart = NormalizeMunicipalityName(part);
+                var basePart = RemoveMunicipalityPrefix(normalizedPart).ToUpperInvariant();
+                
+                _logger.LogDebug("IsExactMatch: Checking part='{Part}' -> normalized='{NormalizedPart}' -> base='{BasePart}'",
+                    part, normalizedPart, basePart);
+                
+                // Check if search key matches the part directly or any of its variations
+                if (searchKey.Equals(normalizedPart, StringComparison.OrdinalIgnoreCase) ||
+                    searchKey.Equals(basePart, StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogDebug("IsExactMatch: Found direct part match!");
+                    return true;
+                }
+                
+                // Check if search key is a word variation of this part
+                var variations = GenerateWordVariations(basePart);
+                _logger.LogDebug("IsExactMatch: Generated variations for '{BasePart}': [{Variations}]",
+                    basePart, string.Join(", ", variations));
+                if (variations.Contains(searchKey, StringComparer.OrdinalIgnoreCase))
+                {
+                    _logger.LogDebug("IsExactMatch: Found variation match!");
+                    return true;
+                }
+            }
+            
+            _logger.LogDebug("IsExactMatch: No match found, returning false");
+            return false;
         }
 
         private List<string> GenerateMunicipalitySearchKeys(string municipalityName)
@@ -305,57 +425,7 @@ namespace FireIncidents.Services
             var baseWord = RemoveMunicipalityPrefix(municipalityName).ToUpperInvariant();
             if (!string.IsNullOrEmpty(baseWord))
             {
-                // Add all common Greek word ending variations
-                var variations = new List<string> { baseWord };
-                
-                // Handle -Ο/-ΟΣ/-ΟΝ endings (masculine)
-                if (baseWord.EndsWith("Ο"))
-                {
-                    variations.Add(baseWord + "Σ");     // Σύνδενδρο -> Σύνδενδρος  
-                    variations.Add(baseWord + "Ν");     // Σύνδενδρο -> Σύνδενδρον
-                }
-                else if (baseWord.EndsWith("ΟΣ"))
-                {
-                    var stem = baseWord.Substring(0, baseWord.Length - 2);
-                    variations.Add(stem + "Ο");         // Σύνδενδρος -> Σύνδενδρο
-                    variations.Add(stem + "ΟΝ");       // Σύνδενδρος -> Σύνδενδρον
-                }
-                else if (baseWord.EndsWith("ΟΝ"))
-                {
-                    var stem = baseWord.Substring(0, baseWord.Length - 2);
-                    variations.Add(stem + "Ο");         // Σύνδενδρον -> Σύνδενδρο
-                    variations.Add(stem + "ΟΣ");       // Σύνδενδρον -> Σύνδενδρος
-                }
-                
-                // Handle -Ά/-ΆΣ endings (feminine)
-                else if (baseWord.EndsWith("Ά"))
-                {
-                    variations.Add(baseWord + "Σ");     // Μελιγαλά -> Μελιγαλάς
-                }
-                else if (baseWord.EndsWith("ΆΣ"))
-                {
-                    variations.Add(baseWord.Substring(0, baseWord.Length - 1)); // Μελιγαλάς -> Μελιγαλά
-                }
-                
-                // Handle -Η/-ΗΣ endings (feminine)
-                else if (baseWord.EndsWith("Η"))
-                {
-                    variations.Add(baseWord + "Σ");     // Add ς ending
-                }
-                else if (baseWord.EndsWith("ΗΣ"))
-                {
-                    variations.Add(baseWord.Substring(0, baseWord.Length - 1)); // Remove ς ending
-                }
-                
-                // Handle -Ι/-ΙΟ endings (neuter)
-                else if (baseWord.EndsWith("Ι"))
-                {
-                    variations.Add(baseWord + "Ο");     // Add ο ending
-                }
-                else if (baseWord.EndsWith("ΙΟ"))
-                {
-                    variations.Add(baseWord.Substring(0, baseWord.Length - 1)); // Remove ο ending
-                }
+                var variations = GenerateWordVariations(baseWord);
                 
                 // Add all variations to search keys
                 foreach (var variation in variations)
@@ -400,6 +470,19 @@ namespace FireIncidents.Services
                         if (!string.IsNullOrEmpty(cleanPart))
                         {
                             searchKeys.Add(NormalizeMunicipalityName(cleanPart));
+                            // Also add with ΔΗΜΟΣ prefix for better matching
+                            searchKeys.Add(NormalizeMunicipalityName("ΔΗΜΟΣ " + cleanPart));
+                            
+                            // Apply word variations to individual parts as well
+                            var partVariations = GenerateWordVariations(cleanPart.ToUpperInvariant());
+                            foreach (var variation in partVariations)
+                            {
+                                if (variation != cleanPart.ToUpperInvariant()) // Only add if different from original
+                                {
+                                    searchKeys.Add(NormalizeMunicipalityName(variation));
+                                    searchKeys.Add(NormalizeMunicipalityName("ΔΗΜΟΣ " + variation));
+                                }
+                            }
                         }
                     }
                 }
@@ -407,6 +490,72 @@ namespace FireIncidents.Services
             
             // Remove duplicates
             return searchKeys.Distinct().ToList();
+        }
+
+        private List<string> GenerateWordVariations(string word)
+        {
+            var variations = new List<string> { word };
+            
+            if (string.IsNullOrEmpty(word)) return variations;
+            
+            // Handle -Ο/-ΟΣ/-ΟΝ endings (masculine)
+            if (word.EndsWith("Ο"))
+            {
+                variations.Add(word + "Σ");     // Σύνδενδρο -> Σύνδενδρος  
+                variations.Add(word + "Ν");     // Σύνδενδρο -> Σύνδενδρον
+            }
+            // Handle -ΟΥ/-ΟΣ transformation (e.g., Πολιχνίτου -> Πολιχνίτος)
+            else if (word.EndsWith("ΟΥ"))
+            {
+                var stem = word.Substring(0, word.Length - 2);
+                var osVariation = stem + "ΟΣ";
+                variations.Add(osVariation);  // Πολιχνίτου -> Πολιχνίτος
+                _logger.LogDebug("Generated word variation: '{Original}' -> '{Variation}'", word, osVariation);
+            }
+            else if (word.EndsWith("ΟΣ"))
+            {
+                var stem = word.Substring(0, word.Length - 2);
+                variations.Add(stem + "Ο");         // Σύνδενδρος -> Σύνδενδρο
+                variations.Add(stem + "ΟΝ");       // Σύνδενδρος -> Σύνδενδρον
+            }
+            else if (word.EndsWith("ΟΝ"))
+            {
+                var stem = word.Substring(0, word.Length - 2);
+                variations.Add(stem + "Ο");         // Σύνδενδρον -> Σύνδενδρο
+                variations.Add(stem + "ΟΣ");       // Σύνδενδρον -> Σύνδενδρος
+            }
+            
+            // Handle -Ά/-ΆΣ endings (feminine)
+            else if (word.EndsWith("Ά"))
+            {
+                variations.Add(word + "Σ");     // Μελιγαλά -> Μελιγαλάς
+            }
+            else if (word.EndsWith("ΆΣ"))
+            {
+                variations.Add(word.Substring(0, word.Length - 1)); // Μελιγαλάς -> Μελιγαλά
+            }
+            
+            // Handle -Η/-ΗΣ endings (feminine)
+            else if (word.EndsWith("Η"))
+            {
+                variations.Add(word + "Σ");     // Add ς ending
+            }
+            else if (word.EndsWith("ΗΣ"))
+            {
+                variations.Add(word.Substring(0, word.Length - 1)); // Remove ς ending
+            }
+            
+            // Handle -Ι/-ΙΟ endings (neuter)
+            else if (word.EndsWith("Ι"))
+            {
+                variations.Add(word + "Ο");     // Add ο ending
+            }
+            else if (word.EndsWith("ΙΟ"))
+            {
+                variations.Add(word.Substring(0, word.Length - 1)); // Remove ο ending
+            }
+            
+            return variations;
         }
 
         private async Task<(double Lat, double Lon)?> TryFuzzyMatching(FireIncident incident)
@@ -682,6 +831,30 @@ namespace FireIncidents.Services
             // Fall back to first entry
             return entries.First();
         }
+        
+        private GreekCityData SelectBestExactMatch(List<(GreekCityData Entry, string SearchKey, bool IsExactMatch, int TotalEntriesForKey)> exactMatches)
+        {
+            if (exactMatches.Count == 1) return exactMatches[0].Entry;
+            
+            // Group by search key and prioritize by specificity (fewer total entries = more specific)
+            var searchKeyGroups = exactMatches.GroupBy(m => m.SearchKey).ToList();
+            
+            // Find the most specific search key (the one with the fewest total entries)
+            var mostSpecificGroup = searchKeyGroups.OrderBy(g => g.First().TotalEntriesForKey).First();
+            
+            _logger.LogDebug("SelectBestExactMatch: Found {GroupCount} search key groups. Most specific: '{SearchKey}' with {TotalEntries} total entries in dataset",
+                searchKeyGroups.Count, mostSpecificGroup.Key, mostSpecificGroup.First().TotalEntriesForKey);
+            
+            // If the most specific group has only one entry, return it
+            if (mostSpecificGroup.Count() == 1)
+            {
+                return mostSpecificGroup.First().Entry;
+            }
+            
+            // If multiple entries for the most specific search key, use population-based selection
+            var entriesFromMostSpecific = mostSpecificGroup.Select(m => m.Entry).ToList();
+            return SelectBestEntry(entriesFromMostSpecific);
+        }
 
         private bool MatchesRegion(string datasetRegion, string incidentRegion)
         {
@@ -729,10 +902,12 @@ namespace FireIncidents.Services
         private string NormalizeMunicipalityName(string municipality)
         {
             if (string.IsNullOrEmpty(municipality)) return string.Empty;
-            
-            return municipality.Trim()
-                             .Replace("  ", " ")
-                             .ToUpperInvariant();
+
+            var withoutDiacritics = RemoveDiacritics(municipality);
+            return withoutDiacritics
+                    .Trim()
+                    .Replace("  ", " ")
+                    .ToUpperInvariant();
         }
 
         private string RemoveMunicipalityPrefix(string municipality)

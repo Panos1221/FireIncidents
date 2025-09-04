@@ -1,6 +1,7 @@
 using FireIncidents.Services;
 using FireIncidents.Logging;
 using System.Text;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FireIncidents
 {
@@ -52,10 +53,16 @@ namespace FireIncidents
             services.AddScoped<GeocodingService>();
             services.AddScoped<GreekDatasetGeocodingService>();
             services.AddScoped<UnifiedGeocodingService>();
-            services.AddScoped<JavaScriptRendererService>();
-            services.AddScoped<TwitterScraperService>();
+            services.AddScoped<RssParsingService>(provider => 
+                new RssParsingService(
+                    provider.GetRequiredService<ILogger<RssParsingService>>(),
+                    provider.GetRequiredService<IHttpClientFactory>().CreateClient("RSSFeed"),
+                    provider.GetRequiredService<IMemoryCache>()));
             services.AddScoped<Warning112Service>();
-            services.AddSingleton<AlertsStoreService>();
+
+            // Register background services
+            services.AddHostedService<RssBackgroundService>();
+            services.AddHostedService<Warning112BackgroundService>();
 
             // Configure logging
             services.AddLogging(logging =>

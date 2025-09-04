@@ -9,13 +9,11 @@ namespace FireIncidents.Services
     public class Warning112Service
     {
         private readonly ILogger<Warning112Service> _logger;
-        private readonly TwitterScraperService _twitterScraperService;
-        private readonly GeocodingService _geocodingService;
+        private readonly RssParsingService _rssParsingService;
+        private readonly UnifiedGeocodingService _unifiedGeocodingService;
         private readonly IMemoryCache _cache;
 
-        // Cache keys
-        private const string ACTIVE_WARNINGS_CACHE_KEY = "active_112_warnings";
-        private const string TEST_WARNINGS_CACHE_KEY = "test_112_warnings";
+        // Cache keys managed by CacheKeyManager
         
         // Geocoding cache
         private static readonly Dictionary<string, List<GeocodedWarning112.WarningLocation>> _geocodingCache = new();
@@ -32,13 +30,13 @@ namespace FireIncidents.Services
 
         public Warning112Service(
             ILogger<Warning112Service> logger,
-            TwitterScraperService twitterScraperService,
-            GeocodingService geocodingService,
+            RssParsingService rssParsingService,
+            UnifiedGeocodingService unifiedGeocodingService,
             IMemoryCache cache)
         {
             _logger = logger;
-            _twitterScraperService = twitterScraperService;
-            _geocodingService = geocodingService;
+            _rssParsingService = rssParsingService;
+            _unifiedGeocodingService = unifiedGeocodingService;
             _cache = cache;
         }
 
@@ -55,24 +53,35 @@ namespace FireIncidents.Services
                 allWarnings.AddRange(testWarnings);
                 _logger.LogInformation($"Found {testWarnings.Count} test warnings");
 
-                // Check cache for scraped warnings
-                if (_cache.TryGetValue(ACTIVE_WARNINGS_CACHE_KEY, out List<GeocodedWarning112>? cachedWarnings) && cachedWarnings != null)
+                // First, try to get warnings from background service cache
+                var backgroundWarnings = Warning112BackgroundService.GetCachedWarnings(_cache);
+                if (backgroundWarnings?.Any() == true)
                 {
-                    var activeScrapedWarnings = cachedWarnings.Where(w => w.IsActive).ToList();
-                    allWarnings.AddRange(activeScrapedWarnings);
-                    _logger.LogInformation($"Found {activeScrapedWarnings.Count} cached scraped warnings");
+                    var activeBackgroundWarnings = backgroundWarnings.Where(w => w.IsActive).ToList();
+                    allWarnings.AddRange(activeBackgroundWarnings);
+                    _logger.LogInformation($"Found {activeBackgroundWarnings.Count} background processed warnings");
                 }
                 else
                 {
-                    // Scrape fresh warnings (use default 7 days for active warnings)
-                    var scrapedWarnings = await ScrapeAndProcessWarningsAsync();
+                    // Fallback to regular cache
+                    if (_cache.TryGetValue(CacheKeyManager.ACTIVE_WARNINGS_CACHE, out List<GeocodedWarning112>? cachedWarnings) && cachedWarnings != null)
+                    {
+                        var activeScrapedWarnings = cachedWarnings.Where(w => w.IsActive).ToList();
+                        allWarnings.AddRange(activeScrapedWarnings);
+                        _logger.LogInformation($"Found {activeScrapedWarnings.Count} cached scraped warnings");
+                    }
+                    else
+                    {
+                        // Last resort: Parse fresh warnings from RSS feed
+                        var parsedWarnings = await ParseAndProcessWarningsAsync();
 
-                    // Cache the results for 5 minutes
-                    _cache.Set(ACTIVE_WARNINGS_CACHE_KEY, scrapedWarnings, TimeSpan.FromMinutes(5));
+                        // Cache the results for 5 minutes
+                        _cache.Set(CacheKeyManager.ACTIVE_WARNINGS_CACHE, parsedWarnings, CacheKeyManager.GetRegularCacheOptions());
 
-                    var activeScrapedWarnings = scrapedWarnings.Where(w => w.IsActive).ToList();
-                    allWarnings.AddRange(activeScrapedWarnings);
-                    _logger.LogInformation($"Found {activeScrapedWarnings.Count} fresh scraped warnings");
+                        var activeParsedWarnings = parsedWarnings.Where(w => w.IsActive).ToList();
+                        allWarnings.AddRange(activeParsedWarnings);
+                        _logger.LogInformation($"Found {activeParsedWarnings.Count} fresh RSS warnings");
+                    }
                 }
 
                 // Filter out expired warnings from the combined list
@@ -88,15 +97,18 @@ namespace FireIncidents.Services
             }
         }
 
-        public async Task<List<GeocodedWarning112>> ScrapeAndProcessWarningsAsync(int? daysBack = null)
+        public async Task<List<GeocodedWarning112>> ParseAndProcessWarningsAsync(int? daysBack = null)
         {
             try
             {
                 var effectiveDaysBack = daysBack ?? 7;
-                _logger.LogInformation($"Scraping and processing 112 warnings (last {effectiveDaysBack} days)...");
+                _logger.LogInformation($"Parsing and processing 112 warnings from RSS feed (last {effectiveDaysBack} days)...");
 
-                // Scrape warnings from Twitter with flexible date range
-                var rawWarnings = await _twitterScraperService.ScrapeWarningsAsync(effectiveDaysBack);
+                // Get RSS items from the feed
+                var rssItems = await _rssParsingService.GetRssItemsAsync();
+                
+                // Convert RSS items to Warning112 objects
+                var rawWarnings = ConvertRssItemsToWarnings(rssItems, effectiveDaysBack);
 
                 if (!rawWarnings.Any())
                 {
@@ -216,12 +228,12 @@ namespace FireIncidents.Services
         {
             // 112Greece posts Greek and English versions of the same incident within minutes
             // Check if warnings are about the same incident based on:
-            // 1. Similar time (within 5 minutes) - 112Greece posts both versions quickly
+            // 1. Similar time (within 3 minutes) - 112Greece posts both versions quickly its instant usually
             // 2. Similar location count (should be roughly the same)
             // 3. Both should be valid 112 activation tweets
 
             var timeDiff = Math.Abs((warning1.TweetDate - warning2.TweetDate).TotalMinutes);
-            if (timeDiff > 5)
+            if (timeDiff > 3)
             {
                 _logger.LogDebug($"Time difference too large: {timeDiff:F1} minutes");
                 return false;
@@ -238,15 +250,15 @@ namespace FireIncidents.Services
             return true;
         }
 
-        private async Task<GeocodedWarning112> ProcessWarningAsync(Warning112 warning)
+        public async Task<GeocodedWarning112> ProcessWarningAsync(Warning112 warning)
         {
             try
             {
                 _logger.LogInformation($"Processing warning {warning.Id}");
 
                 // STRATEGY: 112Greece posts 2 tweets per incident (Greek + English)
-                // 1. Use Greek content for location extraction (more accurate Greek location names)
-                // 2. Keep English content for display (better UX for international users)
+                // 1. Use Greek content for location extraction (more accurate Greek location names using our dataset)
+                // 2. Keep English content for display
                 // 3. If only one language available, use what we have
 
                 var hasGreek = !string.IsNullOrEmpty(warning.GreekContent);
@@ -258,7 +270,7 @@ namespace FireIncidents.Services
                     return null;
                 }
 
-                // For location extraction, prefer Greek (more accurate location names)
+                // For location extraction, prefer Greek
                 var contentForLocationExtraction = hasGreek ? warning.GreekContent : warning.EnglishContent;
                 var extractionLanguage = hasGreek ? "Greek" : "English";
 
@@ -1169,7 +1181,7 @@ namespace FireIncidents.Services
                     LastUpdate = DateTime.Now.ToString()
                 };
 
-                var geocodedIncident = await _geocodingService.GeocodeIncidentAsync(tempIncident);
+                var geocodedIncident = await _unifiedGeocodingService.GeocodeIncidentAsync(tempIncident);
 
                 // Reject default/fallback coordinates for life-saving accuracy
                 var isDefaultCoordinates = (Math.Abs(geocodedIncident.Latitude - 38.2) < 0.1 && Math.Abs(geocodedIncident.Longitude - 23.8) < 0.1) ||
@@ -1424,8 +1436,8 @@ namespace FireIncidents.Services
 
         public void ClearCache()
         {
-            _cache.Remove(ACTIVE_WARNINGS_CACHE_KEY);
-            _cache.Remove(TEST_WARNINGS_CACHE_KEY);
+            _cache.Remove(CacheKeyManager.ACTIVE_WARNINGS_CACHE);
+            _cache.Remove(CacheKeyManager.TEST_WARNINGS_CACHE);
             _logger.LogInformation("Cleared 112 warnings cache");
         }
 
@@ -1437,7 +1449,7 @@ namespace FireIncidents.Services
                 testWarnings.Add(warning);
 
                 // Store test warnings for 1 hour
-                _cache.Set(TEST_WARNINGS_CACHE_KEY, testWarnings, TimeSpan.FromHours(1));
+                _cache.Set(CacheKeyManager.TEST_WARNINGS_CACHE, testWarnings, CacheKeyManager.GetTestCacheOptions());
 
                 _logger.LogInformation($"Added test warning {warning.Id} for {warning.Locations?.FirstOrDefault()}");
             }
@@ -1523,7 +1535,7 @@ namespace FireIncidents.Services
         {
             try
             {
-                if (_cache.TryGetValue(TEST_WARNINGS_CACHE_KEY, out List<GeocodedWarning112>? testWarnings) && testWarnings != null)
+                if (_cache.TryGetValue(CacheKeyManager.TEST_WARNINGS_CACHE, out List<GeocodedWarning112>? testWarnings) && testWarnings != null)
                 {
                     // Filter out expired test warnings
                     var activeTestWarnings = testWarnings.Where(w => w.IsActive).ToList();
@@ -1531,7 +1543,7 @@ namespace FireIncidents.Services
                     // Update cache if we filtered out expired warnings
                     if (activeTestWarnings.Count != testWarnings.Count)
                     {
-                        _cache.Set(TEST_WARNINGS_CACHE_KEY, activeTestWarnings, TimeSpan.FromHours(1));
+                        _cache.Set(CacheKeyManager.TEST_WARNINGS_CACHE, activeTestWarnings, CacheKeyManager.GetTestCacheOptions());
                     }
 
                     return activeTestWarnings;
@@ -1554,6 +1566,15 @@ namespace FireIncidents.Services
 
         public async Task<Dictionary<string, int>> GetWarningsStatisticsAsync()
         {
+            // First, try to get statistics from background service cache
+            var backgroundStats = Warning112BackgroundService.GetCachedStatistics(_cache);
+            if (backgroundStats != null)
+            {
+                _logger.LogInformation("Retrieved statistics from background service cache");
+                return backgroundStats;
+            }
+
+            // Fallback to generating statistics from active warnings
             var warnings = await GetActiveWarningsAsync();
 
             return new Dictionary<string, int>
@@ -1627,6 +1648,138 @@ namespace FireIncidents.Services
             }
 
             _logger.LogInformation($"✅ Parallel geocoding completed. Successfully geocoded {geocodedWarning.GeocodedLocations.Count} out of {locationsToGeocode.Count} locations");
+        }
+
+        private List<Warning112> ConvertRssItemsToWarnings(List<RssItem> rssItems, int daysBack)
+        {
+            try
+            {
+                _logger.LogInformation($"Converting {rssItems.Count} RSS items to Warning112 objects...");
+                
+                var warnings = new List<Warning112>();
+                var cutoffDate = DateTime.UtcNow.AddDays(-daysBack);
+                
+                foreach (var item in rssItems)
+                {
+                    try
+                    {
+                        // Skip items older than the cutoff date
+                        if (item.PubDate < cutoffDate)
+                        {
+                            _logger.LogDebug($"Skipping RSS item from {item.PubDate:yyyy-MM-dd HH:mm} (older than {daysBack} days)");
+                            continue;
+                        }
+                        
+                        // Create Warning112 object from RSS item
+                        var warning = new Warning112
+                        {
+                            Id = GenerateWarningId(item),
+                            EnglishContent = ExtractEnglishContent(item),
+                            GreekContent = ExtractGreekContent(item),
+                            Locations = ExtractLocationsFromRssItem(item),
+                            TweetDate = item.PubDate,
+                            SourceUrl = item.Link ?? "https://feeds.livefireincidents.gr/112Greece/rss",
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        
+                        // Only add warnings that have content and locations
+                        if (!string.IsNullOrEmpty(warning.EnglishContent) || !string.IsNullOrEmpty(warning.GreekContent))
+                        {
+                            warnings.Add(warning);
+                            _logger.LogDebug($"Converted RSS item to warning: {warning.Id}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error converting RSS item to warning: {item.Title}");
+                    }
+                }
+                
+                _logger.LogInformation($"Successfully converted {warnings.Count} RSS items to Warning112 objects");
+                return warnings;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error converting RSS items to warnings");
+                return new List<Warning112>();
+            }
+        }
+        
+        private string GenerateWarningId(RssItem item)
+        {
+            // Generate a unique ID based on the RSS item content and date
+            var content = $"{item.Title}_{item.PubDate:yyyyMMddHHmm}";
+            return $"rss_{content.GetHashCode():X8}";
+        }
+        
+        private string ExtractEnglishContent(RssItem item)
+        {
+            // RSS feed contains both Greek and English content
+            // Try to extract English content from title and description
+            var content = $"{item.Title}\n{item.Description}";
+            
+            // Simple heuristic: if content contains Latin characters, it's likely English
+            if (ContainsLatinCharacters(content))
+            {
+                return content.Trim();
+            }
+            
+            return string.Empty;
+        }
+        
+        private string ExtractGreekContent(RssItem item)
+        {
+            // RSS feed contains both Greek and English content
+            // Try to extract Greek content from title and description
+            var content = $"{item.Title}\n{item.Description}";
+            
+            // Simple heuristic: if content contains Greek characters, it's Greek
+            if (ContainsGreekCharacters(content))
+            {
+                return content.Trim();
+            }
+            
+            return string.Empty;
+        }
+        
+        private bool ContainsLatinCharacters(string text)
+        {
+            return !string.IsNullOrEmpty(text) && text.Any(c => (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'));
+        }
+        
+        private bool ContainsGreekCharacters(string text)
+        {
+            return !string.IsNullOrEmpty(text) && text.Any(c => c >= 'Α' && c <= 'ω');
+        }
+        
+        private List<string> ExtractLocationsFromRssItem(RssItem item)
+        {
+            var locations = new List<string>();
+            
+            try
+            {
+                // Extract locations from both title and description
+                var content = $"{item.Title} {item.Description}";
+                
+                // Use existing location extraction logic (similar to what was used for Twitter)
+                // This is a simplified version - you may want to enhance this based on RSS content structure
+                var locationMatches = Regex.Matches(content, @"[Α-Ωα-ωA-Za-z\s]+(?=\s|$|,|\.|!|\?)", RegexOptions.IgnoreCase);
+                
+                foreach (Match match in locationMatches)
+                {
+                    var location = match.Value.Trim();
+                    if (location.Length > 2 && !locations.Contains(location))
+                    {
+                        locations.Add(location);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error extracting locations from RSS item: {item.Title}");
+            }
+            
+            return locations;
         }
     }
 }

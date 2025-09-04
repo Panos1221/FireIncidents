@@ -93,7 +93,7 @@ namespace FireIncidents.Controllers
                 _warning112Service.ClearCache();
 
                 // Get fresh warnings
-                var warnings = await _warning112Service.ScrapeAndProcessWarningsAsync();
+                var warnings = await _warning112Service.ParseAndProcessWarningsAsync();
 
                 _logger.LogInformation($"Refreshed and returning {warnings.Count} warnings");
                 return Ok(warnings);
@@ -173,6 +173,48 @@ namespace FireIncidents.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error clearing 112 warnings cache");
+                return StatusCode(500, new
+                {
+                    error = "Internal server error",
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("by-date")]
+        public async Task<ActionResult<List<GeocodedWarning112>>> GetWarningsByDate(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] string language = "en")
+        {
+            try
+            {
+                _logger.LogInformation($"API request received for 112 warnings by date range: {fromDate} to {toDate}");
+
+                // Set default date range if not provided (last 7 days)
+                var effectiveFromDate = fromDate ?? DateTime.UtcNow.AddDays(-7);
+                var effectiveToDate = toDate ?? DateTime.UtcNow;
+
+                // Ensure fromDate is not after toDate
+                if (effectiveFromDate > effectiveToDate)
+                {
+                    return BadRequest(new { error = "fromDate cannot be after toDate" });
+                }
+
+                // Get warnings from RSS feed
+                var allWarnings = await _warning112Service.ParseAndProcessWarningsAsync();
+
+                // Filter by date range
+                var filteredWarnings = allWarnings.Where(w => 
+                    w.TweetDate >= effectiveFromDate && 
+                    w.TweetDate <= effectiveToDate).ToList();
+
+                _logger.LogInformation($"Returning {filteredWarnings.Count} warnings for date range {effectiveFromDate:yyyy-MM-dd} to {effectiveToDate:yyyy-MM-dd}");
+                return Ok(filteredWarnings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving 112 warnings by date");
                 return StatusCode(500, new
                 {
                     error = "Internal server error",
@@ -286,7 +328,7 @@ namespace FireIncidents.Controllers
             {
                 _logger.LogInformation($"API request received to test Twitter scraping (daysBack: {daysBack})");
 
-                var warnings = await _warning112Service.ScrapeAndProcessWarningsAsync(daysBack);
+                var warnings = await _warning112Service.ParseAndProcessWarningsAsync(daysBack);
 
                 return Ok(new
                 {
@@ -331,7 +373,7 @@ namespace FireIncidents.Controllers
             {
                 _logger.LogInformation($"API request received to test Twitter scraping with extended range: {daysBack} days");
 
-                var warnings = await _warning112Service.ScrapeAndProcessWarningsAsync(daysBack);
+                var warnings = await _warning112Service.ParseAndProcessWarningsAsync(daysBack);
 
                 return Ok(new
                 {
