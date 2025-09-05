@@ -524,7 +524,9 @@ function showWarningDetails(warning) {
         ${warning.sourceUrl ? `
         <div class="warning-detail">
             <span class="incident-label">${getText('source')}:</span> 
-            <a href="${warning.sourceUrl}" target="_blank" rel="noopener">112Greece Twitter</a>
+            <a href="${warning.sourceUrl.replace('nitter.net', 'x.com')}" target="_blank" rel="noopener">
+                112Greece via X
+            </a>
         </div>
         ` : ''}
     `;

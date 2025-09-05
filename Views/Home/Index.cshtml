@@ -436,7 +436,7 @@
                     // Style stay indoors warnings  
                     //content = content.replace(/(Stay indoors|Παραμείνετε σε εσωτερικούς χώρους)/gi, '<span class="warning-text">$1</span>');
 
-                    html += '<div class="tweet-item ' + profile.type + '" data-link="' + item.link + '">' +
+                    html += '<div class="tweet-item ' + profile.type + '" data-link="' + item.link.replace('nitter.net','x.com') + '">' +
                         '<div class="tweet-header">' +
                             '<div class="tweet-avatar">' +
                                 '<img src="' + profile.avatar + '" alt="' + profile.username + '" onerror="this.src=\'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2NTc3ODYiLz4KPGNpcmNsZSBjeD0iMjAiIGN5PSIxNiIgcj0iNiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTggMzJDOCAyNi40NzcyIDEyLjQ3NzIgMjIgMTggMjJIMjJDMjcuNTIyOCAyMiAzMiAyNi40NzcyIDMyIDMyVjM0SDhWMzJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K\'">' +
