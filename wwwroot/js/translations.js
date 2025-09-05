@@ -103,7 +103,8 @@ const translations = {
         "footer": "Fire Incidents Map - Hellenic Fire Service",
         "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service or the Civil Protection.",
         "locationDisclaimer": "All locations are approximate, as there are no official addresses or coordinates, only the municipality.",
-        "warning112Disclaimer": "112 warnings are provided for informational purposes only. Some data could not be parsed automatically. Always follow instructions from official authorities.",
+        "warning112Disclaimer": "112 warnings are provided for informational purposes only. Some data could not be parsed automatically or may be placed in the wrong location.",
+        "alwaysFollowAuthorities":"Always follow instructions from official authorities.",
 
         //Civil Protection Daily Map
         "civilmap": "Fire Risk Map",
@@ -224,8 +225,9 @@ const translations = {
         // Footer
         "footer": "Χάρτης Πυρκαγιών - Δεδομένα Πυροσβεστικού Σώματος Ελλάδος",
         "disclaimer": "Αυτή είναι μια ανεπίσημη εφαρμογή που δεν συνδέεται, δεν υποστηρίζεται και δεν έχει σχέση με το Πυροσβεστικό Σώμα Ελλάδος ή την Πολιτική Προστασία",
-        "locationDisclaimer": "Όλες οι τοποθεσίες είναι κατά προσέγγιση, καθώς δεν υπάρχουν επίσημες διευθύνσεις ή συντεταγμένες, μόνο ο δήμος.",
-        "warning112Disclaimer": "Οι προειδοποιήσεις 112 παρέχονται μόνο για ενημερωτικούς σκοπούς. Ορισμένα δεδομένα μπορεί να μην έχουν αναγνωριστεί αυτόματα. Ακολουθείτε πάντα τις οδηγίες των αρμόδιων αρχών.",
+        "locationDisclaimer": "Όλες οι τοποθεσίες είναι κατά προσέγγιση, καθώς δεν υπάρχουν επίσημες διευθύνσεις ή συντεταγμένες, παρά μόνο ο δήμος.",
+        "warning112Disclaimer": "Οι προειδοποιήσεις 112 παρέχονται μόνο για ενημερωτικούς σκοπούς. Ορισμένα δεδομένα μπορεί να μην έχουν αναγνωριστεί αυτόματα ή να είναι σε λάθος τοποθεσία.",
+        "alwaysFollowAuthorities":"Ακολουθείτε πάντα τις οδηγίες των αρμόδιων αρχών.",
 
         //Civil Protection Daily Map
         "civilmap": "Χάρτης Πρόβλεψης Κινδύνου Πυρκαγιάς",

@@ -792,6 +792,10 @@ html, body {
     opacity: 0.8;
 }
 
+    .disclaimer small[data-translate="alwaysFollowAuthorities"] {
+        font-weight: bold;
+    }
+
 [data-theme="dark"] .disclaimer {
     opacity: 0.9;
 }
