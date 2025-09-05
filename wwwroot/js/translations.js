@@ -50,6 +50,14 @@ const translations = {
         "clickForDetails": "Click for details",
         "source": "Source",
         
+        // Warning Types
+        "emergencyWarning": "Emergency Warning",
+        "fireWarning": "Fire Warning",
+        "floodWarning": "Flood Warning",
+        "weatherWarning": "Weather Warning",
+        "earthquakeWarning": "Earthquake Warning",
+        "generalWarning": "General Warning",
+        
         // Fire Districts
         "districts": "Fire Districts",
         "showFireDistricts": "Show Fire Department Districts. Click on the map to see which agency each area belongs to.",
@@ -162,6 +170,14 @@ const translations = {
         "noContentAvailable": "Δεν υπάρχει διαθέσιμο περιεχόμενο",
         "clickForDetails": "Κάντε κλικ για λεπτομέρειες",
         "source": "Πηγή",
+        
+        // Warning Types
+        "emergencyWarning": "Επείγουσα Ειδοποίηση",
+        "fireWarning": "Προειδοποίηση Πυρκαγιάς",
+        "floodWarning": "Προειδοποίηση Πλημμύρας",
+        "weatherWarning": "Καιρική Προειδοποίηση",
+        "earthquakeWarning": "Προειδοποίηση Σεισμού",
+        "generalWarning": "Γενική Προειδοποίηση",
         
         // Fire Districts
         "districts": "Περιοχές Ευθύνης",
@@ -321,9 +337,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Function to translate warning types from backend
+function translateWarningType(warningType) {
+    if (!warningType) return getText('emergencyWarning');
+    
+    const warningTypeMap = {
+        'Emergency Warning': 'emergencyWarning',
+        'Fire Warning': 'fireWarning',
+        'Wildfire Warning': 'fireWarning',
+        'Flood Warning': 'floodWarning',
+        'Weather Warning': 'weatherWarning',
+        'Earthquake Warning': 'earthquakeWarning',
+        'Evacuation Warning': 'emergencyWarning',
+        'General Warning': 'generalWarning'
+    };
+    
+    const translationKey = warningTypeMap[warningType];
+    return translationKey ? getText(translationKey) : warningType;
+}
+
 window.translations = {
     getText,
     setLanguage,
     getCurrentLanguage: () => currentLanguage,
-    updatePageTranslations
+    updatePageTranslations,
+    translateWarningType
 };

@@ -18,22 +18,34 @@ document.addEventListener('DOMContentLoaded', async function () {
     initMap();
     initModal();
     setupEventListeners();
-    
-    // Load incidents first, then warnings to ensure proper collision detection
-    await loadIncidents();
-    
+
+    // Load both incidents and warnings data first
+    const loadPromises = [loadIncidents()];
+
     // Only load 112 warnings if enabled in configuration
     if (window.appConfig && window.appConfig.show112Warnings) {
-        await loadWarnings112();
+        loadPromises.push(loadWarnings112());
     }
+
+    // Wait for both to complete, then filter/display
+    await Promise.all(loadPromises);
+
+    // Now that both are loaded, apply filters and display everything
+    await filterIncidents();
 
     // Auto-refresh every 5 minutes
     setInterval(async () => {
-        await loadIncidents();
+        const refreshPromises = [loadIncidents()];
+
         // Only refresh 112 warnings if enabled in configuration
         if (window.appConfig && window.appConfig.show112Warnings) {
-            await loadWarnings112();
+            refreshPromises.push(loadWarnings112());
         }
+
+        // Wait for both to complete, then filter/display
+        await Promise.all(refreshPromises);
+        await filterIncidents();
+
         // Update statistics after both are refreshed
         updateStatistics(allIncidents);
     }, 5 * 60 * 1000);
@@ -82,9 +94,9 @@ function initMap() {
     warningHighlightsLayer.addTo(map);
     markersLayer.addTo(map);
     warningsLayer.addTo(map);
-    
+
     // Add zoom event listener for label visibility
-    map.on('zoomend', function() {
+    map.on('zoomend', function () {
         const currentZoom = map.getZoom();
         if (currentZoom >= 12) {
             if (!map.hasLayer(fireDistrictsLabelsLayer)) {
@@ -96,9 +108,9 @@ function initMap() {
             }
         }
     });
-    
+
     // Initial check for label visibility on map load
-    map.on('ready', function() {
+    map.on('ready', function () {
         const currentZoom = map.getZoom();
         if (currentZoom < 12 && map.hasLayer(fireDistrictsLabelsLayer)) {
             map.removeLayer(fireDistrictsLabelsLayer);
@@ -118,44 +130,48 @@ function initModal() {
 
 // event listeners for filters and refresh button
 function setupEventListeners() {
-    document.getElementById('refreshBtn').addEventListener('click', function () {
+    document.getElementById('refreshBtn').addEventListener('click', async function () {
         const refreshBtn = this;
         const originalText = refreshBtn.innerHTML;
 
         refreshBtn.disabled = true;
         refreshBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> <span>${getText('loading')}</span>`;
 
-        const promises = [loadIncidents()];
-        
-        // Only load 112 warnings if enabled in configuration
-        if (window.appConfig && window.appConfig.show112Warnings) {
-            promises.push(loadWarnings112());
-        }
-        
-        Promise.all(promises).then(() => {
+        try {
+            const refreshPromises = [loadIncidents()];
+
+            // Only load 112 warnings if enabled in configuration
+            if (window.appConfig && window.appConfig.show112Warnings) {
+                refreshPromises.push(loadWarnings112());
+            }
+
+            // Wait for both to complete, then filter/display
+            await Promise.all(refreshPromises);
+            await filterIncidents();
+
             // Update statistics after both incidents and warnings are loaded
             updateStatistics(allIncidents);
-        }).finally(() => {
+        } finally {
             setTimeout(() => {
                 refreshBtn.disabled = false;
                 refreshBtn.innerHTML = originalText;
             }, 500);
-        });
+        }
     });
 
     // Setup status filter checkboxes
     document.getElementById('ongoingCheck').addEventListener('change', filterIncidents);
     document.getElementById('partialControlCheck').addEventListener('change', filterIncidents);
-    
+
     // fire districts toggle
-    document.getElementById('fireDistrictsCheck').addEventListener('change', function() {
+    document.getElementById('fireDistrictsCheck').addEventListener('change', function () {
         if (this.checked) {
             showFireDistricts();
         } else {
             hideFireDistricts();
         }
     });
-    
+
     // Load fire districts data
     loadFireDistricts();
     document.getElementById('fullControlCheck').addEventListener('change', filterIncidents);
@@ -169,6 +185,11 @@ function setupEventListeners() {
 // Get translation text
 function getText(key) {
     return window.translations ? window.translations.getText(key) : key;
+}
+
+// Translate warning type
+function translateWarningType(warningType) {
+    return window.translations ? window.translations.translateWarningType(warningType) : warningType;
 }
 
 // Load incidents from API
@@ -199,9 +220,8 @@ async function loadIncidents() {
         allIncidents = data;
         console.log(`Received ${allIncidents.length} incidents`);
 
+        // Clear markers but don't filter yet - let the caller handle filtering
         clearMarkers();
-
-        filterIncidents();
 
         // Update last updated time
         document.getElementById('lastUpdated').classList.remove('loading-text');
@@ -241,11 +261,7 @@ async function loadWarnings112() {
         allWarnings112 = data;
         console.log(`Received ${allWarnings112.length} 112 warnings`);
 
-        clearWarnings();
-        addWarningsToMap(allWarnings112);
-        
-        // Update statistics to reflect the warnings count
-        updateStatistics(allIncidents);
+        // Don't add to map here - let the caller handle filtering and display
 
         return data;
     } catch (error) {
@@ -258,32 +274,48 @@ async function loadWarnings112() {
 function addIncidentsToMap(incidents) {
     if (!incidents || incidents.length === 0) {
         console.warn("No incidents to display on the map");
-        return;
+        return Promise.resolve();
     }
 
-    incidents.forEach((incident, index) => {
-        // Skip incidents without coordinates
-        if (!incident.latitude || !incident.longitude) {
-            console.warn(`Incident without coordinates: ${incident.category} - ${incident.location}`);
+    return new Promise((resolve) => {
+        let markersCreated = 0;
+        const totalMarkers = incidents.filter(incident => incident.latitude && incident.longitude).length;
+
+        if (totalMarkers === 0) {
+            resolve();
             return;
         }
 
-        setTimeout(() => {
-            try {
-                // Get marker image based on incident properties
-                let statusCode = getStatusCode(incident.status);
-                let categoryCode = getCategoryCode(incident.category);
-                let markerImage = `${categoryCode}-${statusCode}.png`;
-
-                console.log(`Creating marker for incident at ${incident.latitude}, ${incident.longitude} with image ${markerImage}`);
-
-                // Create marker with proper icon
-                createMarker(incident, markerImage);
-            } catch (error) {
-                console.error("Error creating marker:", error);
-                createMarker(incident, null);
+        incidents.forEach((incident, index) => {
+            // Skip incidents without coordinates
+            if (!incident.latitude || !incident.longitude) {
+                console.warn(`Incident without coordinates: ${incident.category} - ${incident.location}`);
+                return;
             }
-        }, index * 5); // Small delay for each marker
+
+            setTimeout(() => {
+                try {
+                    // Get marker image based on incident properties
+                    let statusCode = getStatusCode(incident.status);
+                    let categoryCode = getCategoryCode(incident.category);
+                    let markerImage = `${categoryCode}-${statusCode}.png`;
+
+                    console.log(`Creating marker for incident at ${incident.latitude}, ${incident.longitude} with image ${markerImage}`);
+
+                    // Create marker with proper icon
+                    createMarker(incident, markerImage);
+                } catch (error) {
+                    console.error("Error creating marker:", error);
+                    createMarker(incident, null);
+                }
+
+                markersCreated++;
+                if (markersCreated === totalMarkers) {
+                    console.log("All incident markers created, resolving promise");
+                    resolve();
+                }
+            }, index * 5); // Small delay for each marker
+        });
     });
 }
 
@@ -315,18 +347,18 @@ function createWarningMarkers(warning) {
     // Ensure we have a valid iconType
     const iconType = warning.iconType || 'red';
     const markerImage = `112warning_${iconType}.png`;
-    
+
     if (!warning.iconType) {
         console.warn('Warning missing iconType, using default "red":', warning);
     }
-    
+
     warning.geocodedLocations.forEach(location => {
         if (!location.isGeocoded) return;
-        
+
         try {
             // Apply offset to prevent overlap with incident markers
             const adjustedCoords = getAdjustedCoordinates(location.latitude, location.longitude);
-            
+
             const icon = L.icon({
                 iconUrl: `/images/markers/${markerImage}`,
                 iconSize: [32, 32],
@@ -366,7 +398,7 @@ function createWarningMarkers(warning) {
 function createWarningHighlights(warning) {
     warning.geocodedLocations.forEach(location => {
         if (!location.isGeocoded) return;
-        
+
         try {
             // circular highlight area around the warning location
             const circle = L.circle([location.latitude, location.longitude], {
@@ -378,7 +410,7 @@ function createWarningHighlights(warning) {
                 className: 'warning-highlight'
             });
 
-            circle.bindTooltip(`⚠️ ${warning.warningType} - ${location.locationName}`, {
+            circle.bindTooltip(`⚠️ ${translateWarningType(warning.warningType)} - ${location.locationName}`, {
                 permanent: false,
                 direction: 'top',
                 className: 'warning-tooltip'
@@ -395,9 +427,9 @@ function createWarningHighlights(warning) {
 function updateWarningPopup(marker, warning, location) {
     const currentLanguage = getCurrentLanguage();
     // Extract HTML content from the formatted content, preferring the <p> tag content
-    let rawContent = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) : 
-                    (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
-    
+    let rawContent = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) :
+        (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
+
     // If content contains both raw text and HTML, extract only the HTML part
     let content = rawContent;
     if (rawContent && rawContent.includes('<p>')) {
@@ -406,12 +438,16 @@ function updateWarningPopup(marker, warning, location) {
             content = pTagMatch[1];
         }
     }
-    
+
+    if (content) {
+        content = content.replace(/(Activation|Ενεργοποίηση)\s*(?:1⃣1⃣2⃣|1️⃣1️⃣2️⃣|112)/g, '$1 1️⃣1️⃣2️⃣');
+    }
+
     const shortContent = content ? content.substring(0, 100) + (content.length > 100 ? '...' : '') : '';
-    
+
     const popupContent = `
         <div class="map-popup warning-popup">
-            <strong>⚠️ ${warning.warningType || '112 Warning'}</strong><br>
+            <strong>⚠️ ${translateWarningType(warning.warningType)}</strong><br>
             <strong>${getText('location')}:</strong> ${location.locationName}<br>
             <div class="warning-content">${shortContent}</div>
             <small><em>${getText('clickForDetails')}</em></small>
@@ -432,13 +468,13 @@ function showWarningDetails(warning) {
     const modalBody = document.getElementById('incidentModalBody');
     const modalTitle = document.getElementById('incidentModalLabel');
     const currentLanguage = getCurrentLanguage();
-    
-    modalTitle.textContent = `⚠️ ${warning.warningType || '112 Emergency Warning'}`;
-    
+
+    modalTitle.textContent = `⚠️ ${translateWarningType(warning.warningType)}`;
+
     // Extract HTML content from the formatted content, preferring the <p> tag content
-    let rawContent = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) : 
-                    (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
-    
+    let rawContent = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) :
+        (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
+
     // If content contains both raw text and HTML, extract only the HTML part
     let content = rawContent;
     if (rawContent && rawContent.includes('<p>')) {
@@ -447,15 +483,25 @@ function showWarningDetails(warning) {
             content = pTagMatch[1];
         }
     }
-    
-    const locations = warning.geocodedLocations && warning.geocodedLocations.length > 0 
+
+    if (content) {
+        content = content.replace(/(Activation|Ενεργοποίηση)\s*(?:1⃣1⃣2⃣|1️⃣1️⃣2️⃣|112)/g, function (match, prefix) {
+            return prefix + ' <span class="activation-badges">' +
+                '<span class="activation-number">1</span>' +
+                '<span class="activation-number">1</span>' +
+                '<span class="activation-number">2</span>' +
+                '</span>';
+        });
+    }
+
+    const locations = warning.geocodedLocations && warning.geocodedLocations.length > 0
         ? warning.geocodedLocations.map(l => l.locationName).join(', ')
         : warning.locations ? warning.locations.join(', ') : getText('unknown');
 
     modalBody.innerHTML = `
         <div class="warning-detail">
             <span class="incident-label">${getText('warningType')}:</span> 
-            <span class="warning-type">${warning.warningType || '112 Warning'}</span>
+            <span class="warning-type">${translateWarningType(warning.warningType)}</span>
         </div>
         <div class="warning-detail">
             <span class="incident-label">${getText('locations')}:</span> 
@@ -503,28 +549,28 @@ function getCurrentLanguage() {
 function getAdjustedCoordinates(lat, lng) {
     const tolerance = 0.001; // ~100 meters tolerance for overlap detection
     const offsetDistance = 0.005; // ~500 meters offset
-    
+
     console.log(`Checking collision for warning at (${lat}, ${lng}), total incident markers: ${markers.length}`);
-    
+
     // Find overlapping incident markers at this location
     const overlappingIncidents = markers.filter(markerObj => {
         const incidentMarker = markerObj.marker;
         const incidentLat = incidentMarker.getLatLng().lat;
         const incidentLng = incidentMarker.getLatLng().lng;
-        
+
         const latDiff = Math.abs(incidentLat - lat);
         const lngDiff = Math.abs(incidentLng - lng);
         const isOverlapping = latDiff < tolerance && lngDiff < tolerance;
-        
+
         if (isOverlapping) {
             console.log(`Found overlapping incident at (${incidentLat}, ${incidentLng}), diffs: lat=${latDiff}, lng=${lngDiff}`);
         }
-        
+
         return isOverlapping;
     });
-    
+
     console.log(`Found ${overlappingIncidents.length} overlapping incidents`);
-    
+
     // Only apply offset if there are incident markers at this location
     if (overlappingIncidents.length > 0) {
         console.log(`Applying offset: (${lat}, ${lng}) -> (${lat}, ${lng + offsetDistance})`);
@@ -533,7 +579,7 @@ function getAdjustedCoordinates(lat, lng) {
             lng: lng + offsetDistance
         };
     }
-    
+
     // No collision, return original coordinates
     console.log(`No collision, keeping original coordinates: (${lat}, ${lng})`);
     return { lat, lng };
@@ -544,10 +590,10 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
     const R = 6371; // Earth's radius in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 }
 
@@ -579,7 +625,7 @@ function createMarker(incident, markerImage) {
     // Handle coordinates that come as large integers (e.g., 370551454 -> 37.0551454)
     let lat = incident.latitude;
     let lng = incident.longitude;
-    
+
     // Convert large integer coordinates to decimal degrees
     if (lat > 1000) {
         const latStr = lat.toString();
@@ -589,7 +635,7 @@ function createMarker(incident, markerImage) {
             lat = parseFloat(latStr.substring(0, 2) + '.' + latStr.substring(2));
         }
     }
-    
+
     if (lng > 1000) {
         const lngStr = lng.toString();
         if (lngStr.length >= 8) {
@@ -615,7 +661,7 @@ function createMarker(incident, markerImage) {
         marker = L.marker([lat, lng], {
             icon: icon,
             title: `${incident.category} - ${incident.location || getText('unknown')}`,
-            riseOnHover: true, 
+            riseOnHover: true,
             alt: incident.status
         });
     } catch (error) {
@@ -715,7 +761,7 @@ function clearMarkers() {
 }
 
 // Filter incidents based on user selections
-function filterIncidents() {
+async function filterIncidents() {
     const ongoingChecked = document.getElementById('ongoingCheck').checked;
     const partialControlChecked = document.getElementById('partialControlCheck').checked;
     const fullControlChecked = document.getElementById('fullControlCheck').checked;
@@ -757,7 +803,15 @@ function filterIncidents() {
 
     console.log(`Filtered down to ${filteredIncidents.length} incidents`);
 
-    addIncidentsToMap(filteredIncidents);
+    // Wait for all incident markers to be placed before adding warnings
+    await addIncidentsToMap(filteredIncidents);
+
+    // Now add 112 warnings with proper collision detection
+    if (window.appConfig && window.appConfig.show112Warnings && allWarnings112.length > 0) {
+        console.log("All incident markers placed, now adding 112 warnings");
+        clearWarnings();
+        addWarningsToMap(allWarnings112);
+    }
 
     updateStatistics(filteredIncidents);
 
@@ -789,12 +843,12 @@ function updateStatistics(incidents) {
     const forestFireCount = incidents.filter(i => i.category === "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ").length;
     const urbanFireCount = incidents.filter(i => i.category === "ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ").length;
     const assistanceCount = incidents.filter(i => i.category === "ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ").length;
-    
+
     animateCounter('totalIncidents', totalIncidents);
     animateCounter('forestFireCount', forestFireCount);
     animateCounter('urbanFireCount', urbanFireCount);
     animateCounter('assistanceCount', assistanceCount);
-    
+
     // Update warnings count only if 112 warnings are enabled and element exists
     if (window.appConfig && window.appConfig.show112Warnings) {
         const warningsCount = allWarnings112.length;
@@ -836,21 +890,21 @@ async function loadFireDistricts() {
     try {
         console.log('Loading fire department districts...');
         const response = await fetch('/api/fire-districts');
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         fireDistrictsData = await response.json();
         console.log('Fire districts data loaded:', fireDistrictsData);
-        
+
         // Generate colors for each district
         generateDistrictColors();
-        
+
         // Enable toggle button
         const toggleButton = document.getElementById('fireDistrictsCheck');
         toggleButton.disabled = false;
-        
+
         console.log('Fire districts loaded successfully');
     } catch (error) {
         console.error('Error loading fire districts:', error);
@@ -862,47 +916,47 @@ function generateDistrictColors() {
     if (!fireDistrictsData || !fireDistrictsData.features) {
         return;
     }
-    
+
     const districts = fireDistrictsData.features;
 
     const colorPalette = [
-    // Reds & Oranges
-    '#FF0000', '#FF4500', '#FF6347', '#FF7F50', '#FF8C00',
-    '#FFA500', '#FFD700', '#FFB347',
+        // Reds & Oranges
+        '#FF0000', '#FF4500', '#FF6347', '#FF7F50', '#FF8C00',
+        '#FFA500', '#FFD700', '#FFB347',
 
-    // Yellows & Warm tones
-    '#FFFF00', '#F0E68C', '#FFDAB9', '#FFE4B5', '#F5DEB3',
+        // Yellows & Warm tones
+        '#FFFF00', '#F0E68C', '#FFDAB9', '#FFE4B5', '#F5DEB3',
 
-    // Greens
-    '#32CD32', '#00FF00', '#7CFC00', '#98FB98', '#00FA9A',
-    '#2E8B57', '#3CB371', '#228B22', '#ADFF2F',
+        // Greens
+        '#32CD32', '#00FF00', '#7CFC00', '#98FB98', '#00FA9A',
+        '#2E8B57', '#3CB371', '#228B22', '#ADFF2F',
 
-    // Cyans & Teals
-    '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#5F9EA0',
+        // Cyans & Teals
+        '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#5F9EA0',
 
-    // Blues
-    '#1E90FF', '#4169E1', '#0000FF', '#6495ED', '#87CEEB',
-    '#4682B4', '#00BFFF', '#7B68EE',
+        // Blues
+        '#1E90FF', '#4169E1', '#0000FF', '#6495ED', '#87CEEB',
+        '#4682B4', '#00BFFF', '#7B68EE',
 
-    // Purples & Violets
-    '#8A2BE2', '#9932CC', '#BA55D3', '#DA70D6', '#9400D3',
-    '#EE82EE', '#DDA0DD', '#C71585',
+        // Purples & Violets
+        '#8A2BE2', '#9932CC', '#BA55D3', '#DA70D6', '#9400D3',
+        '#EE82EE', '#DDA0DD', '#C71585',
 
-    // Pinks
-    '#FF69B4', '#FF1493', '#DB7093', '#FFC0CB', '#FFB6C1',
+        // Pinks
+        '#FF69B4', '#FF1493', '#DB7093', '#FFC0CB', '#FFB6C1',
 
-    // Browns & Neutrals
-    '#8B4513', '#A0522D', '#CD853F', '#D2691E', '#DEB887',
-    '#BC8F8F', '#BDB76B', '#808000'
+        // Browns & Neutrals
+        '#8B4513', '#A0522D', '#CD853F', '#D2691E', '#DEB887',
+        '#BC8F8F', '#BDB76B', '#808000'
     ];
-    
+
     // Shuffle the palette
     const shuffledPalette = [...colorPalette];
     for (let i = shuffledPalette.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledPalette[i], shuffledPalette[j]] = [shuffledPalette[j], shuffledPalette[i]];
     }
-    
+
     districts.forEach((district, index) => {
         const stationName = district.properties.PYR_YPIRES;
         const color = shuffledPalette[index % shuffledPalette.length];
@@ -918,7 +972,7 @@ function getCachedCoordinate(x, y) {
     if (coordinateCache.has(key)) {
         return coordinateCache.get(key);
     }
-    
+
     const transformed = proj4('EPSG:2100', 'EPSG:4326', [x, y]);
     const result = [transformed[1], transformed[0]];
     coordinateCache.set(key, result);
@@ -930,175 +984,175 @@ function showFireDistricts() {
         console.warn('No fire districts data available');
         return;
     }
-    
+
     console.log(`Processing ${fireDistrictsData.features.length} fire districts...`);
-    
+
     // loading indicator
     showDistrictsLoadingIndicator(true);
-    
+
     // Clear coordinate cache
     coordinateCache.clear();
-    
+
     // Greek Grid EPSG:2100 for coordinates system
     if (!proj4.defs('EPSG:2100')) {
         proj4.defs('EPSG:2100', '+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=-199.87,74.79,246.62,0,0,0,0 +units=m +no_defs');
     }
-    
+
     let successCount = 0;
     let errorCount = 0;
     const districts = fireDistrictsData.features;
     const chunkSize = 10; // How many districts we process each time by default 10 
     let currentIndex = 0;
-    
+
     function processChunk() {
         const endIndex = Math.min(currentIndex + chunkSize, districts.length);
-        
+
         for (let index = currentIndex; index < endIndex; index++) {
             const district = districts[index];
-        try {
-            const stationName = district.properties.PYR_YPIRES || `District ${index + 1}`;
-            // validate station name we got above
-            if (!stationName || stationName.trim() === '') {
-                errorCount++;
-                return;
-            }
-
-            // geometry type - support for both Polygon and MultiPolygon
-             if (district.geometry.type !== 'Polygon' && district.geometry.type !== 'MultiPolygon') {
-                 errorCount++;
-                 return;
-             }
-
-             const color = fireDistrictsColors.get(stationName) || '#3388ff';
-             
-             // Convert coordinates from Greek Grid (EPSG:2100) to WGS84 using proj4js
-             // Handle both Polygon and MultiPolygon geometries
-             let polygonsToProcess = [];
-             
-             if (district.geometry.type === 'Polygon') {
-                 polygonsToProcess = [district.geometry.coordinates[0]]; // Single polygon outer ring
-             } else if (district.geometry.type === 'MultiPolygon') {
-                 // Process all polygons in MultiPolygon
-                 polygonsToProcess = district.geometry.coordinates.map(polygon => polygon[0]); // All outer rings
-             }
-             
-             // Process each polygon separately
-             polygonsToProcess.forEach((rawCoordinates, polygonIndex) => {
-                 // Validate coordinates exist and have data)
-                 if (!rawCoordinates || rawCoordinates.length < 3) {
-                     return;
-                 }
-                 
-                 const coordinates = rawCoordinates.map((coord, coordIndex) => {
-                try {
-                    // Validate input coordinates
-                    if (!Array.isArray(coord) || coord.length !== 2) {
-                        return null;
-                    }
-                    
-                    const [x, y] = coord;
-                    
-                    // Check if coordinates are finite numbers
-                    if (!isFinite(x) || !isFinite(y) || x === null || y === null || x === undefined || y === undefined) {
-                        return null;
-                    }
-                    
-                    // Use cached coordinate transformation
-                    const result = getCachedCoordinate(x, y);
-                    
-                    // Validate transformed coordinates (based on default central Greece roughly 34-42°N, 19-30°E)
-                    if (isNaN(result[0]) || isNaN(result[1]) || 
-                        result[0] < 30 || result[0] > 45 || 
-                        result[1] < 15 || result[1] > 35) {
-                        return null;
-                    }
-                    
-                    return result;
-                } catch (coordError) {
-                    return null;
+            try {
+                const stationName = district.properties.PYR_YPIRES || `District ${index + 1}`;
+                // validate station name we got above
+                if (!stationName || stationName.trim() === '') {
+                    errorCount++;
+                    return;
                 }
-                 }).filter(coord => coord !== null);
-                 
-                 // Validate coordinates for this polygon
-                 if (coordinates.length === 0) {
-                     return; // Skip this polygon
-                 }
-                 
-                 const polygon = L.polygon(coordinates, {
-                     color: color,
-                     weight: 2,
-                     opacity: 0.8,
-                     fillColor: color,
-                     fillOpacity: 0.2
-                 });
-                 
-                 // popup py name
-                 const popupText = `<strong>${stationName}</strong>`;
-                 polygon.bindPopup(popupText);
-                 
-                 fireDistrictsLayer.addLayer(polygon);
-             });
-             
-             // label at the center of all polygons for this district
-             if (polygonsToProcess.length > 0) {
-                 // Calculate center from all valid polygons
-                 let allBounds = null;
-                 polygonsToProcess.forEach(rawCoordinates => {
-                     if (rawCoordinates && rawCoordinates.length >= 3) {
-                         const coords = rawCoordinates.map(coord => {
-                             if (Array.isArray(coord) && coord.length === 2) {
-                                 const [x, y] = coord;
-                                 if (isFinite(x) && isFinite(y)) {
-                                     return getCachedCoordinate(x, y);
-                                 }
-                             }
-                             return null;
-                         }).filter(coord => coord !== null);
-                         
-                         if (coords.length > 0) {
-                             const tempPolygon = L.polygon(coords);
-                             const bounds = tempPolygon.getBounds();
-                             if (!allBounds) {
-                                 allBounds = bounds;
-                             } else {
-                                 allBounds.extend(bounds);
-                             }
-                         }
-                     }
-                 });
-                 
-                 if (allBounds) {
-                     const center = allBounds.getCenter();
-                     const label = L.marker(center, {
-                         icon: L.divIcon({
-                             className: 'fire-district-label',
-                             html: `<div style="background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; color: #333; border: 1px solid #ff6b35; box-shadow: 0 1px 2px rgba(0,0,0,0.3); white-space: nowrap; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${stationName}</div>`,
-                             iconSize: [100, 16],
-                             iconAnchor: [50, 8]
-                         })
-                     });
-                     // Only add label if zoom level is appropriate
-                     const currentZoom = map.getZoom();
-                     if (currentZoom >= 12) {
-                         fireDistrictsLabelsLayer.addLayer(label);
-                     }
-                 }
-             }
-             
-             successCount++;
-            
-        } catch (error) {
-            console.error(`Error processing district ${index}:`, error);
-            errorCount++;
+
+                // geometry type - support for both Polygon and MultiPolygon
+                if (district.geometry.type !== 'Polygon' && district.geometry.type !== 'MultiPolygon') {
+                    errorCount++;
+                    return;
+                }
+
+                const color = fireDistrictsColors.get(stationName) || '#3388ff';
+
+                // Convert coordinates from Greek Grid (EPSG:2100) to WGS84 using proj4js
+                // Handle both Polygon and MultiPolygon geometries
+                let polygonsToProcess = [];
+
+                if (district.geometry.type === 'Polygon') {
+                    polygonsToProcess = [district.geometry.coordinates[0]]; // Single polygon outer ring
+                } else if (district.geometry.type === 'MultiPolygon') {
+                    // Process all polygons in MultiPolygon
+                    polygonsToProcess = district.geometry.coordinates.map(polygon => polygon[0]); // All outer rings
+                }
+
+                // Process each polygon separately
+                polygonsToProcess.forEach((rawCoordinates, polygonIndex) => {
+                    // Validate coordinates exist and have data)
+                    if (!rawCoordinates || rawCoordinates.length < 3) {
+                        return;
+                    }
+
+                    const coordinates = rawCoordinates.map((coord, coordIndex) => {
+                        try {
+                            // Validate input coordinates
+                            if (!Array.isArray(coord) || coord.length !== 2) {
+                                return null;
+                            }
+
+                            const [x, y] = coord;
+
+                            // Check if coordinates are finite numbers
+                            if (!isFinite(x) || !isFinite(y) || x === null || y === null || x === undefined || y === undefined) {
+                                return null;
+                            }
+
+                            // Use cached coordinate transformation
+                            const result = getCachedCoordinate(x, y);
+
+                            // Validate transformed coordinates (based on default central Greece roughly 34-42°N, 19-30°E)
+                            if (isNaN(result[0]) || isNaN(result[1]) ||
+                                result[0] < 30 || result[0] > 45 ||
+                                result[1] < 15 || result[1] > 35) {
+                                return null;
+                            }
+
+                            return result;
+                        } catch (coordError) {
+                            return null;
+                        }
+                    }).filter(coord => coord !== null);
+
+                    // Validate coordinates for this polygon
+                    if (coordinates.length === 0) {
+                        return; // Skip this polygon
+                    }
+
+                    const polygon = L.polygon(coordinates, {
+                        color: color,
+                        weight: 2,
+                        opacity: 0.8,
+                        fillColor: color,
+                        fillOpacity: 0.2
+                    });
+
+                    // popup py name
+                    const popupText = `<strong>${stationName}</strong>`;
+                    polygon.bindPopup(popupText);
+
+                    fireDistrictsLayer.addLayer(polygon);
+                });
+
+                // label at the center of all polygons for this district
+                if (polygonsToProcess.length > 0) {
+                    // Calculate center from all valid polygons
+                    let allBounds = null;
+                    polygonsToProcess.forEach(rawCoordinates => {
+                        if (rawCoordinates && rawCoordinates.length >= 3) {
+                            const coords = rawCoordinates.map(coord => {
+                                if (Array.isArray(coord) && coord.length === 2) {
+                                    const [x, y] = coord;
+                                    if (isFinite(x) && isFinite(y)) {
+                                        return getCachedCoordinate(x, y);
+                                    }
+                                }
+                                return null;
+                            }).filter(coord => coord !== null);
+
+                            if (coords.length > 0) {
+                                const tempPolygon = L.polygon(coords);
+                                const bounds = tempPolygon.getBounds();
+                                if (!allBounds) {
+                                    allBounds = bounds;
+                                } else {
+                                    allBounds.extend(bounds);
+                                }
+                            }
+                        }
+                    });
+
+                    if (allBounds) {
+                        const center = allBounds.getCenter();
+                        const label = L.marker(center, {
+                            icon: L.divIcon({
+                                className: 'fire-district-label',
+                                html: `<div style="background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; color: #333; border: 1px solid #ff6b35; box-shadow: 0 1px 2px rgba(0,0,0,0.3); white-space: nowrap; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${stationName}</div>`,
+                                iconSize: [100, 16],
+                                iconAnchor: [50, 8]
+                            })
+                        });
+                        // Only add label if zoom level is appropriate
+                        const currentZoom = map.getZoom();
+                        if (currentZoom >= 12) {
+                            fireDistrictsLabelsLayer.addLayer(label);
+                        }
+                    }
+                }
+
+                successCount++;
+
+            } catch (error) {
+                console.error(`Error processing district ${index}:`, error);
+                errorCount++;
+            }
         }
-        }
-        
+
         currentIndex = endIndex;
-        
+
         // Update progress
         const progress = Math.round((currentIndex / districts.length) * 100);
         updateDistrictsProgress(progress);
-        
+
         // Continue processing if there are more districts
         if (currentIndex < districts.length) {
             setTimeout(processChunk, 10);
@@ -1108,7 +1162,7 @@ function showFireDistricts() {
             showDistrictsLoadingIndicator(false);
         }
     }
-    
+
     processChunk();
 }
 
@@ -1122,7 +1176,7 @@ function hideFireDistricts() {
 // Loading indicator functions
 function showDistrictsLoadingIndicator(show) {
     let indicator = document.getElementById('districts-loading-indicator');
-    
+
     if (show) {
         if (!indicator) {
             indicator = document.createElement('div');
@@ -1140,7 +1194,7 @@ function showDistrictsLoadingIndicator(show) {
                 </div>
             `;
             document.body.appendChild(indicator);
-            
+
             // Apply translations to the newly created element
             if (window.translations && window.translations.updatePageTranslations) {
                 window.translations.updatePageTranslations();
@@ -1157,7 +1211,7 @@ function showDistrictsLoadingIndicator(show) {
 function updateDistrictsProgress(percentage) {
     const progressBar = document.getElementById('districts-progress-bar');
     const progressText = document.getElementById('districts-progress-text');
-    
+
     if (progressBar) {
         progressBar.style.width = percentage + '%';
     }

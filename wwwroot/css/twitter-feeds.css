@@ -5,6 +5,7 @@
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.2s ease;
+    min-height: 820px;
 }
 
 .twitter-feed-header {
@@ -20,9 +21,11 @@
 }
 
 .twitter-feed-content {
-    max-height: 500px;
+    max-height: 750px;
     overflow-y: auto;
     background: #ffffff;
+    min-height: 750px;
+
 }
 
 .tweet-item {
