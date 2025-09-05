@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (window.appConfig && window.appConfig.show112Warnings) {
             await loadWarnings112();
         }
+        // Update statistics after both are refreshed
+        updateStatistics(allIncidents);
     }, 5 * 60 * 1000);
 });
 
@@ -130,7 +132,10 @@ function setupEventListeners() {
             promises.push(loadWarnings112());
         }
         
-        Promise.all(promises).finally(() => {
+        Promise.all(promises).then(() => {
+            // Update statistics after both incidents and warnings are loaded
+            updateStatistics(allIncidents);
+        }).finally(() => {
             setTimeout(() => {
                 refreshBtn.disabled = false;
                 refreshBtn.innerHTML = originalText;
@@ -238,6 +243,9 @@ async function loadWarnings112() {
 
         clearWarnings();
         addWarningsToMap(allWarnings112);
+        
+        // Update statistics to reflect the warnings count
+        updateStatistics(allIncidents);
 
         return data;
     } catch (error) {

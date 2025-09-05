@@ -187,17 +187,17 @@
             <div class="row g-3 mt-2" id="xFeedsRow">
                 <!-- Left: 112Greece -->
                 <div class="col-md-6">
-                    <div class="card feed-card h-100">
-                        <div class="card-header fw-semibold">@("112") Greece — Live feed</div>
-                        <div class="card-body p-2">
-                            <div id="rss-feed-112greece">
-                                <rssapp-feed id="bcgxFnQk0mKozyCv"></rssapp-feed>
-                            </div>
-                            <div id="fallback-112greece" style="display: none;" class="text-center text-muted">
-                                <i class="fas fa-exclamation-triangle mb-2" style="font-size: 1.5rem;"></i>
-                                <p class="mb-1"><strong>Feed Loading Issue</strong></p>
-                                <p class="small mb-0">RSS.app widget failed to load.<br>
-                                Visit <a href="https://twitter.com/112Greece" target="_blank" class="text-decoration-none">@("112Greece")</a> directly.</p>
+                    <div class="twitter-feed-container h-100">
+                        <div class="twitter-feed-header">
+                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                            @("112") Greece — Live feed
+                        </div>
+                        <div class="twitter-feed-content" id="feed-112greece">
+                            <div class="twitter-feed-loading">
+                                <div class="spinner-border text-danger" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading emergency alerts...</p>
                             </div>
                         </div>
                     </div>
@@ -205,17 +205,17 @@
 
                 <!-- Right: pyrosvestiki  -->
                 <div class="col-md-6">
-                    <div class="card feed-card h-100">
-                        <div class="card-header fw-semibold">Πυροσβεστική — Live feed</div>
-                        <div class="card-body p-2">
-                            <div id="rss-feed-pyrosvestiki">
-                                <rssapp-feed id="8ZGdB9JB2hxcHx2W"></rssapp-feed>
-                            </div>
-                            <div id="fallback-pyrosvestiki" style="display: none;" class="text-center text-muted">
-                                <i class="fas fa-exclamation-triangle mb-2" style="font-size: 1.5rem;"></i>
-                                <p class="mb-1"><strong>Feed Loading Issue</strong></p>
-                                <p class="small mb-0">RSS.app widget failed to load.<br>
-                                Visit <a href="https://twitter.com/pyrosvestiki" target="_blank" class="text-decoration-none">@("pyrosvestiki")</a> directly.</p>
+                    <div class="twitter-feed-container h-100">
+                        <div class="twitter-feed-header">
+                            <i class="fas fa-fire text-warning"></i>
+                            Πυροσβεστική — Live feed
+                        </div>
+                        <div class="twitter-feed-content" id="feed-pyrosvestiki">
+                            <div class="twitter-feed-loading">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading fire service updates...</p>
                             </div>
                         </div>
                     </div>
@@ -262,10 +262,9 @@
 
 @section Scripts {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="~/css/twitter-feeds.css" asp-append-version="true" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/map.js" asp-append-version="true"></script>
-    <!-- RSS.app Widget Script -->
-    <script src="https://widget.rss.app/v1/feed.js" type="text/javascript" async></script>
 
     <!--Fire Risk Map-->
     <script>
@@ -299,53 +298,321 @@
             if (typeof applyTranslations === 'function') applyTranslations();
         });
 
-        // RSS.app Widget Fallback Detection (non-destructive, robust)
+        // Custom Twitter Feed Implementation
         (function () {
-            function isWidgetLoaded(container) {
-                if (!container) return false;
-                // Consider loaded if an iframe exists (rss.app usually injects an iframe)
-                if (container.querySelector('iframe')) return true;
-                // Or if the custom element has any children
-                const feedEl = container.querySelector('rssapp-feed');
-                if (feedEl && feedEl.childNodes && feedEl.childNodes.length > 0) return true;
-                // Or if the container has visible, non-empty content
-                const rect = container.getBoundingClientRect();
-                if (rect.height > 0 && rect.width > 0 && container.innerHTML && container.innerHTML.trim() !== '') return true;
-                return false;
-            }
+            // RSS Feed URLs
+            const feedUrls = {
+                '112greece': 'https://feeds.livefireincidents.gr/112greece/rss',
+                'pyrosvestiki': 'https://feeds.livefireincidents.gr/pyrosvestiki/rss'
+            };
 
-            function waitForWidget(containerSelector, fallbackId, maxWaitMs = 15000, intervalMs = 500) {
-                const container = document.querySelector(containerSelector);
+            // Profile information
+            const profiles = {
+                '112greece': {
+                    username: '112 Greece',
+                    handle: '@@112Greece',
+                    avatar: '/images/profiles/112greece.png',
+                    verified: true,
+                    type: 'emergency'
+                },
+                'pyrosvestiki': {
+                    username: 'Πυροσβεστικό Σώμα',
+                    handle: '@@pyrosvestiki',
+                    avatar: '/images/profiles/pyrosvestiki.png',
+                    verified: true,
+                    type: 'fire-service'
+                }
+            };
+
+            // Load RSS feed with timeout and error handling
+            async function loadRSSFeed(feedKey, containerId) {
+                const container = document.getElementById(containerId);
                 if (!container) return;
 
-                // If already loaded, do nothing
-                if (isWidgetLoaded(container)) return;
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(function() {
+                    controller.abort();
+                }, 10000); // 10 second timeout
 
-                const start = Date.now();
-                const timer = setInterval(() => {
-                    if (isWidgetLoaded(container)) {
-                        clearInterval(timer);
-                        return;
+                try {
+                    // Use server-side RSS proxy to fetch the RSS feed
+                    const proxyUrl = '/Home/RSSProxy?url=';
+                    const response = await fetch(proxyUrl + encodeURIComponent(feedUrls[feedKey]), {
+                        signal: controller.signal,
+                        cache: 'no-cache'
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const xmlText = await response.text();
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                        const items = xmlDoc.querySelectorAll('item');
+                        
+                        if (items.length > 0) {
+                            const feedItems = Array.from(items).slice(0, 8).map(item => {
+                                let title = item.querySelector('title')?.textContent || 'No title';
+                                let description = item.querySelector('description')?.textContent || 'No description';
+                                const link = item.querySelector('link')?.textContent || '#';
+                                const pubDate = item.querySelector('pubDate')?.textContent || new Date().toISOString();
+                                
+                                // Filter out 'Image' text from title and description
+                                if (title === 'Image' || title.trim() === 'Image') {
+                                    title = description !== 'No description' ? description : 'Emergency Alert';
+                                    description = 'No description';
+                                }
+                                
+                                return { title, description, link, pubDate };
+                            });
+                            
+                            displayFeedItems(feedItems, containerId, feedKey);
+                        } else {
+                            displayFeedError(containerId, 'No items found in feed');
+                        }
+                    } else {
+                        displayFeedError(containerId, 'Failed to fetch feed (' + response.status + ')');
                     }
-                    if (Date.now() - start >= maxWaitMs) {
-                        clearInterval(timer);
-                        const fb = document.getElementById(fallbackId);
-                        if (fb) fb.style.display = 'block';
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError') {
+                        console.warn('Feed request timed out for ' + feedKey);
+                        displayFeedError(containerId, 'Feed request timed out');
+                    } else {
+                        console.error('Error loading ' + feedKey + ' feed:', error);
+                        displayFeedError(containerId, 'Failed to load feed');
                     }
-                }, intervalMs);
-
-                // Also react to DOM mutations quickly
-                const mo = new MutationObserver(() => {
-                    if (isWidgetLoaded(container)) {
-                        mo.disconnect();
-                    }
-                });
-                mo.observe(container, { childList: true, subtree: true });
+                }
             }
 
-            // Start checks for both widgets; do NOT hide the widget containers
-            waitForWidget('#rss-feed-112greece', 'fallback-112greece');
-            waitForWidget('#rss-feed-pyrosvestiki', 'fallback-pyrosvestiki');
+            // Display feed items
+            function displayFeedItems(items, containerId, feedKey) {
+                try {
+                    const container = document.getElementById(containerId);
+                    if (!container) return;
+                    
+                    const profile = profiles[feedKey];
+                    if (!profile) return;
+                    
+                    let html = '';
+                    
+                    // Limit items to prevent performance issues
+                    const limitedItems = items.slice(0, 6);
+                    
+                    limitedItems.forEach(function(item, index) {
+                    const pubDate = new Date(item.pubDate);
+                    const timeAgo = getTimeAgo(pubDate);
+
+                    // Process content for hashtags and mentions
+                    let content = item.description && item.description !== 'No description available' && item.description !== 'No description' 
+                                    ? item.description 
+                                    : (item.title && item.title !== 'Image' && item.title.trim() !== 'Image' 
+                                        ? item.title 
+                                        : '');
+
+                    // Replace hashtags and mentions with styled versions
+                    content = content.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
+                    content = content.replace(/@@(\w+)/g, '<span class="mention">@@$1</span>');
+
+                    // Process emergency content (no badges above messages)
+                    let badges = '';
+                    
+                    // Extract and style activation numbers (only Activation/Ενεργοποίηση 112)
+                    if (content.includes('Activation') || content.includes('Ενεργοποίηση')) {
+                        content = content.replace(/(Activation|Ενεργοποίηση)\s*(?:1⃣1⃣2⃣|1️⃣1️⃣2️⃣|112)/g, function(match, prefix) {
+                            return prefix + ' <span class="activation-badges">' +
+                                '<span class="activation-number">1</span>' +
+                                '<span class="activation-number">1</span>' +
+                                '<span class="activation-number">2</span>' +
+                            '</span>';
+                        });
+                    }
+                    
+                    // Style dangerous smoke warnings
+                    content = content.replace(/(Dangerous smoke|Επικίνδυνοι καπνοί)/gi, '<span class="emergency-text">$1</span>');
+                    content = content.replace(/(Wildfire|Δασική πυρκαγιά|Πυρκαγιά)/gi, '<span class="emergency-text">$1</span>');
+
+                    // Style stay indoors warnings  
+                    //content = content.replace(/(Stay indoors|Παραμείνετε σε εσωτερικούς χώρους)/gi, '<span class="warning-text">$1</span>');
+
+                    html += '<div class="tweet-item ' + profile.type + '" data-link="' + item.link + '">' +
+                        '<div class="tweet-header">' +
+                            '<div class="tweet-avatar">' +
+                                '<img src="' + profile.avatar + '" alt="' + profile.username + '" onerror="this.src=\'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2NTc3ODYiLz4KPGNpcmNsZSBjeD0iMjAiIGN5PSIxNiIgcj0iNiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTggMzJDOCAyNi40NzcyIDEyLjQ3NzIgMjIgMTggMjJIMjJDMjcuNTIyOCAyMiAzMiAyNi40NzcyIDMyIDMyVjM0SDhWMzJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K\'">' +
+                            '</div>' +
+                            '<div class="tweet-user-info">' +
+                                '<div class="tweet-username">' +
+                                    '<span class="tweet-display-name">' + profile.username + '</span>' +
+                                    (profile.verified ? '<i class="fas fa-check-circle tweet-verified"></i>' : '') +
+                                    '<span class="tweet-handle">' + profile.handle + '</span>' +
+                                    '<span class="tweet-time">' + timeAgo + '</span>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="tweet-content">' +
+                            badges + content +
+                        '</div>' +
+                    '</div>';
+                    });
+                    
+                    container.innerHTML = html;
+
+                    // Add click handlers for tweet items (with error handling)
+                    setTimeout(function() {
+                        try {
+                            const tweetItems = container.querySelectorAll('.tweet-item');
+                            tweetItems.forEach(function(item) {
+                                item.addEventListener('click', function(e) {
+                                    try {
+                                        if (e.target.closest('.tweet-actions')) return;
+                                        const link = this.dataset.link;
+                                        if (link && link !== '#') {
+                                            window.open(link, '_blank', 'noopener');
+                                        }
+                                    } catch (err) {
+                                        console.warn('Click handler error:', err);
+                                    }
+                                });
+                            });
+                        } catch (err) {
+                            console.warn('Event binding error:', err);
+                        }
+                    }, 100);
+                } catch (error) {
+                    console.error('Display feed items error:', error);
+                    displayFeedError(containerId, 'Error displaying feed');
+                }
+            }
+
+            // Display feed error
+            function displayFeedError(containerId, message) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '<div class="twitter-feed-error">' +
+                    '<i class="fas fa-exclamation-triangle"></i>' +
+                    '<h6>Feed Unavailable</h6>' +
+                    '<p>' + message + '</p>' +
+                    '<button class="btn btn-outline-primary btn-sm" onclick="loadAllFeeds()">' +
+                        '<i class="fas fa-sync-alt me-1"></i>' +
+                        'Try Again' +
+                    '</button>' +
+                '</div>';
+            }
+
+            // Get time ago string
+            function getTimeAgo(date) {
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
+                
+                if (diffMins < 1) return 'now';
+                if (diffMins < 60) return diffMins + 'm';
+                if (diffHours < 24) return diffHours + 'h';
+                return diffDays + 'd';
+            }
+
+            // Load all feeds with error handling
+            window.loadAllFeeds = function() {
+                try {
+                    // Load feeds with a small delay to prevent overwhelming the server
+                    loadRSSFeed('112greece', 'feed-112greece');
+                    setTimeout(function() {
+                        loadRSSFeed('pyrosvestiki', 'feed-pyrosvestiki');
+                    }, 500);
+                } catch (error) {
+                    console.error('Error in loadAllFeeds:', error);
+                }
+            };
+
+            // Simple dark theme detection (no mutation observer to prevent freezing)
+            function applyDarkTheme() {
+                try {
+                    const hasBootstrapDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                    const hasThemeDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    const hasBodyDark = document.body && document.body.classList.contains('dark');
+                    
+                    // Only apply dark theme if explicitly set by the application, not system preference
+                    const shouldBeDark = hasBootstrapDark || hasThemeDark || hasBodyDark;
+                    const currentlyDark = document.documentElement.classList.contains('dark-theme');
+                    
+                    if (shouldBeDark && !currentlyDark) {
+                        document.documentElement.classList.add('dark-theme');
+                    } else if (!shouldBeDark && currentlyDark) {
+                        document.documentElement.classList.remove('dark-theme');
+                    }
+                } catch (e) {
+                    console.warn('Dark theme detection error:', e);
+                }
+            }
+
+            // Initialize feeds when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('Twitter feeds initializing...');
+                const startTime = performance.now();
+                
+                try {
+                    // Apply initial dark theme detection
+                    applyDarkTheme();
+                    
+                    // Listen for manual theme changes via MutationObserver (debounced)
+                    if (window.MutationObserver) {
+                        let themeTimeout;
+                        const observer = new MutationObserver(function(mutations) {
+                            let shouldUpdate = false;
+                            mutations.forEach(function(mutation) {
+                                if (mutation.type === 'attributes' && 
+                                    (mutation.attributeName === 'data-bs-theme' || 
+                                     mutation.attributeName === 'data-theme' ||
+                                     mutation.attributeName === 'class')) {
+                                    shouldUpdate = true;
+                                }
+                            });
+                            
+                            if (shouldUpdate) {
+                                clearTimeout(themeTimeout);
+                                themeTimeout = setTimeout(applyDarkTheme, 100);
+                            }
+                        });
+                        
+                        observer.observe(document.documentElement, {
+                            attributes: true,
+                            attributeFilter: ['data-bs-theme', 'data-theme', 'class']
+                        });
+                        
+                        if (document.body) {
+                            observer.observe(document.body, {
+                                attributes: true,
+                                attributeFilter: ['class']
+                            });
+                        }
+                    }
+                    
+                    // Load feeds with performance monitoring
+                    loadAllFeeds();
+                    
+                    // Auto-refresh every 1 min
+                    setInterval(function() {
+                        try {
+                            loadAllFeeds();
+                        } catch (e) {
+                            console.error('Auto-refresh error:', e);
+                        }
+                    }, 60000);
+                    
+                    const endTime = performance.now();
+                    console.log('Twitter feeds initialized in ' + Math.round(endTime - startTime) + 'ms');
+                } catch (e) {
+                    console.error('Initialization error:', e);
+                    // Fallback: just load feeds without theme detection
+                    try {
+                        loadAllFeeds();
+                    } catch (fallbackError) {
+                        console.error('Fallback load error:', fallbackError);
+                    }
+                }
+            });
         })();
     </script>
     

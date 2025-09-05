@@ -1,0 +1,668 @@
+/* Twitter-like Feed Styling - Light Theme Default */
+.twitter-feed-container {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.twitter-feed-header {
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 20px;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.twitter-feed-content {
+    max-height: 500px;
+    overflow-y: auto;
+    background: #ffffff;
+}
+
+.tweet-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    background: #ffffff;
+}
+
+.tweet-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.tweet-display-name,
+.tweet-content {
+    color: #212529;
+}
+
+.tweet-handle,
+.tweet-time {
+    color: #657786;
+}
+
+/* Explicit Light Theme Support */
+[data-bs-theme="light"] .twitter-feed-container,
+[data-theme="light"] .twitter-feed-container {
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+}
+
+[data-bs-theme="light"] .twitter-feed-header,
+[data-theme="light"] .twitter-feed-header {
+    background: #ffffff !important;
+    border-bottom-color: #dee2e6 !important;
+    color: #212529 !important;
+}
+
+[data-bs-theme="light"] .twitter-feed-content,
+[data-theme="light"] .twitter-feed-content {
+    background: #ffffff !important;
+}
+
+[data-bs-theme="light"] .tweet-item,
+[data-theme="light"] .tweet-item {
+    background: #ffffff !important;
+    border-bottom-color: #dee2e6 !important;
+}
+
+[data-bs-theme="light"] .tweet-item:hover,
+[data-theme="light"] .tweet-item:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-bs-theme="light"] .tweet-display-name,
+[data-bs-theme="light"] .tweet-content,
+[data-theme="light"] .tweet-display-name,
+[data-theme="light"] .tweet-content {
+    color: #212529 !important;
+}
+
+[data-bs-theme="light"] .tweet-handle,
+[data-bs-theme="light"] .tweet-time,
+[data-theme="light"] .tweet-handle,
+[data-theme="light"] .tweet-time {
+    color: #657786 !important;
+}
+
+.twitter-feed-container:hover {
+    border-color: var(--bs-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.twitter-feed-header {
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 20px;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.twitter-feed-content {
+    max-height: 500px;
+    overflow-y: auto;
+    background: #ffffff;
+}
+
+.twitter-feed-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.twitter-feed-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.twitter-feed-content::-webkit-scrollbar-thumb {
+    background: #dee2e6;
+    border-radius: 3px;
+}
+
+.twitter-feed-content::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+/* Tweet Item Styling */
+.tweet-item:last-child {
+    border-bottom: none;
+}
+
+.tweet-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.tweet-avatar {
+    flex-shrink: 0;
+}
+
+.tweet-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #dee2e6;
+}
+
+.tweet-user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.tweet-username {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    line-height: 1.3;
+}
+
+.tweet-display-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: #212529;
+}
+
+.tweet-verified {
+    color: #1d9bf0;
+    font-size: 16px;
+}
+
+.tweet-handle {
+    color: #657786;
+    font-size: 15px;
+}
+
+.tweet-time {
+    color: #657786;
+    font-size: 15px;
+}
+
+.tweet-time::before {
+    content: "·";
+    margin: 0 4px;
+}
+
+.tweet-content {
+    margin-left: 52px;
+    font-size: 15px;
+    line-height: 1.2;
+    color: #212529;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    margin-bottom: 8px;
+}
+
+/* Specific styling for 112Greece emergency feed to reduce line spacing */
+#feed-112greece .tweet-content {
+    line-height: 1.1;
+    white-space: normal;
+}
+
+.tweet-content p {
+    margin: 0 0 8px 0;
+}
+
+.tweet-content p:last-child {
+    margin-bottom: 0;
+}
+
+.tweet-actions {
+    display: flex;
+    justify-content: space-between;
+    max-width: 425px;
+    margin-left: 52px;
+    margin-top: 12px;
+}
+
+.tweet-action {
+    display: flex;
+    align-items: center;
+    color: #657786;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.tweet-action:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+    color: #1d9bf0;
+}
+
+.tweet-action i {
+    font-size: 16px;
+}
+
+.action-count {
+    margin-left: 4px;
+    font-size: 13px;
+}
+
+/* Loading State */
+.twitter-feed-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.twitter-feed-loading .spinner-border {
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: 16px;
+}
+
+/* Error State */
+.twitter-feed-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.twitter-feed-error i {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    color: #ffc107;
+}
+
+/* Emergency Alert Styling */
+.tweet-item.emergency {
+    border-left: 4px solid #dc3545;
+}
+
+.tweet-item.fire-service {
+    border-left: 4px solid #ffc107;
+}
+
+/* Hashtag and Mention Styling */
+.tweet-content .hashtag {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.tweet-content .hashtag:hover {
+    text-decoration: underline;
+}
+
+.tweet-content .mention {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.tweet-content .mention:hover {
+    text-decoration: underline;
+}
+
+/* Emergency Icons and Badges */
+.emergency-badge {
+    background: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+.fire-badge {
+    background: #ffc107;
+    color: #000;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+/* Activation badges (like 1️⃣1️⃣2️⃣) */
+.activation-badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 8px;
+}
+
+.activation-number {
+    background: #1d9bf0;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* SOS and warning indicators */
+.sos-indicator {
+    background: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 6px;
+    display: inline-block;
+}
+
+/* Special styling for emergency content */
+.tweet-content .emergency-text {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.tweet-content .warning-text {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+/* Dark Theme Support */
+[data-bs-theme="dark"] .twitter-feed-container,
+[data-theme="dark"] .twitter-feed-container,
+.dark .twitter-feed-container {
+    background: #16181c !important;
+    border-color: #2f3336 !important;
+}
+
+[data-bs-theme="dark"] .twitter-feed-header,
+[data-theme="dark"] .twitter-feed-header,
+.dark .twitter-feed-header {
+    background: #16181c !important;
+    border-bottom-color: #2f3336 !important;
+    color: #e7e9ea !important;
+}
+
+[data-bs-theme="dark"] .twitter-feed-content,
+[data-theme="dark"] .twitter-feed-content,
+.dark .twitter-feed-content {
+    background: #16181c !important;
+}
+
+[data-bs-theme="dark"] .tweet-item,
+[data-theme="dark"] .tweet-item,
+.dark .tweet-item {
+    background: #16181c !important;
+    border-bottom-color: #2f3336 !important;
+}
+
+[data-bs-theme="dark"] .tweet-item:hover,
+[data-theme="dark"] .tweet-item:hover,
+.dark .tweet-item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+[data-bs-theme="dark"] .tweet-avatar img {
+    border-color: #2f3336;
+}
+
+[data-bs-theme="dark"] .tweet-display-name,
+[data-theme="dark"] .tweet-display-name,
+.dark .tweet-display-name {
+    color: #e7e9ea !important;
+}
+
+[data-bs-theme="dark"] .tweet-content,
+[data-theme="dark"] .tweet-content,
+.dark .tweet-content {
+    color: #e7e9ea !important;
+}
+
+[data-bs-theme="dark"] .tweet-handle,
+[data-bs-theme="dark"] .tweet-time,
+[data-theme="dark"] .tweet-handle,
+[data-theme="dark"] .tweet-time,
+.dark .tweet-handle,
+.dark .tweet-time {
+    color: #71767b !important;
+}
+
+[data-bs-theme="dark"] .tweet-action {
+    color: #71767b;
+}
+
+[data-bs-theme="dark"] .tweet-action:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+    color: #1d9bf0;
+}
+
+[data-bs-theme="dark"] .twitter-feed-loading,
+[data-bs-theme="dark"] .twitter-feed-error {
+    color: #71767b;
+}
+
+[data-bs-theme="dark"] .twitter-feed-content::-webkit-scrollbar-thumb {
+    background: #2f3336;
+}
+
+[data-bs-theme="dark"] .twitter-feed-content::-webkit-scrollbar-thumb:hover {
+    background: #3e4144;
+}
+
+/* Enhanced styling for better Twitter-like appearance */
+.twitter-feed-container {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.tweet-item.emergency {
+    border-left: 3px solid #dc3545;
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.05) 0%, transparent 100%);
+}
+
+.tweet-item.fire-service {
+    border-left: 3px solid #ffc107;
+    background: linear-gradient(90deg, rgba(255, 193, 7, 0.05) 0%, transparent 100%);
+}
+
+/* Engagement stats styling */
+.tweet-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: 52px;
+    margin-top: 8px;
+    color: #657786;
+    font-size: 13px;
+}
+
+.tweet-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .twitter-feed-header {
+        padding: 12px 16px;
+        font-size: 18px;
+    }
+    
+    .tweet-item {
+        padding: 10px 12px;
+    }
+    
+    .tweet-avatar img {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .tweet-header {
+        gap: 10px;
+    }
+    
+    .tweet-content {
+        margin-left: 46px;
+        font-size: 14px;
+    }
+    
+    .tweet-actions {
+        margin-left: 46px;
+        margin-top: 8px;
+    }
+    
+    .tweet-stats {
+        margin-left: 46px;
+    }
+    
+    .tweet-username {
+        font-size: 14px;
+    }
+    
+    .tweet-display-name {
+        font-size: 14px;
+    }
+    
+    .tweet-handle,
+    .tweet-time {
+        font-size: 14px;
+    }
+    
+    .activation-number {
+        width: 18px;
+        height: 18px;
+        font-size: 11px;
+    }
+}
+
+/* Animation for new tweets */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tweet-item.new {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Ensure light theme is default when no dark theme is explicitly set */
+:root .twitter-feed-container,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .twitter-feed-container {
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+}
+
+:root .twitter-feed-header,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .twitter-feed-header {
+    background: #ffffff !important;
+    border-bottom-color: #dee2e6 !important;
+    color: #212529 !important;
+}
+
+:root .twitter-feed-content,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .twitter-feed-content {
+    background: #ffffff !important;
+}
+
+:root .tweet-item,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .tweet-item {
+    background: #ffffff !important;
+    border-bottom-color: #dee2e6 !important;
+}
+
+:root .tweet-item:hover,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .tweet-item:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+:root .tweet-display-name,
+:root .tweet-content,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .tweet-display-name,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .tweet-content {
+    color: #212529 !important;
+}
+
+:root .tweet-handle,
+:root .tweet-time,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .tweet-handle,
+html:not(.dark-theme):not([data-bs-theme="dark"]):not([data-theme="dark"]):not(.dark) .tweet-time {
+    color: #657786 !important;
+}
+
+/* Dark theme class applied by JavaScript */
+.dark-theme .twitter-feed-container {
+    background: #16181c !important;
+    border-color: #2f3336 !important;
+}
+
+.dark-theme .twitter-feed-header {
+    background: #16181c !important;
+    border-bottom-color: #2f3336 !important;
+    color: #e7e9ea !important;
+}
+
+.dark-theme .twitter-feed-content {
+    background: #16181c !important;
+}
+
+.dark-theme .tweet-item {
+    background: #16181c !important;
+    border-bottom-color: #2f3336 !important;
+}
+
+.dark-theme .tweet-item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.dark-theme .tweet-display-name,
+.dark-theme .tweet-content {
+    color: #e7e9ea !important;
+}
+
+.dark-theme .tweet-handle,
+.dark-theme .tweet-time {
+    color: #71767b !important;
+}
+
+.dark-theme .tweet-action {
+    color: #71767b !important;
+}
+
+.dark-theme .tweet-action:hover {
+    background-color: rgba(29, 155, 240, 0.1) !important;
+    color: #1d9bf0 !important;
+}
+
+.dark-theme .twitter-feed-loading,
+.dark-theme .twitter-feed-error {
+    color: #71767b !important;
+}
+
+.dark-theme .twitter-feed-content::-webkit-scrollbar-thumb {
+    background: #2f3336 !important;
+}
+
+.dark-theme .twitter-feed-content::-webkit-scrollbar-thumb:hover {
+    background: #3e4144 !important;
+}
