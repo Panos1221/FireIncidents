@@ -352,7 +352,7 @@
                         const items = xmlDoc.querySelectorAll('item');
                         
                         if (items.length > 0) {
-                            const feedItems = Array.from(items).slice(0, 8).map(item => {
+                            const feedItems = Array.from(items).slice(0, 12).map(item => {
                                 let title = item.querySelector('title')?.textContent || 'No title';
                                 let description = item.querySelector('description')?.textContent || 'No description';
                                 const link = item.querySelector('link')?.textContent || '#';
@@ -367,7 +367,7 @@
                                 return { title, description, link, pubDate };
                             });
                             
-                            displayFeedItems(feedItems, containerId, feedKey);
+                            displayFeedItems(feedItems, containerId, feedKey, false);
                         } else {
                             displayFeedError(containerId, 'No items found in feed');
                         }
@@ -386,8 +386,20 @@
                 }
             }
 
-            // Display feed items
-            function displayFeedItems(items, containerId, feedKey) {
+            // Store all feed items for pagination
+            const feedData = {
+                '112greece': [],
+                'pyrosvestiki': []
+            };
+            
+            const itemsPerPage = 4;
+            const currentPage = {
+                '112greece': 1,
+                'pyrosvestiki': 1
+            };
+
+            // Display feed items with pagination support
+            function displayFeedItems(items, containerId, feedKey, append = false) {
                 try {
                     const container = document.getElementById(containerId);
                     if (!container) return;
@@ -395,12 +407,19 @@
                     const profile = profiles[feedKey];
                     if (!profile) return;
                     
+                    // Store all items for pagination
+                    if (!append) {
+                        feedData[feedKey] = items;
+                        currentPage[feedKey] = 1;
+                    }
+                    
+                    const startIndex = append ? (currentPage[feedKey] - 1) * itemsPerPage : 0;
+                    const endIndex = currentPage[feedKey] * itemsPerPage;
+                    const itemsToShow = feedData[feedKey].slice(0, endIndex);
+                    
                     let html = '';
                     
-                    // Limit items to prevent performance issues
-                    const limitedItems = items.slice(0, 6);
-                    
-                    limitedItems.forEach(function(item, index) {
+                    itemsToShow.forEach(function(item, index) {
                     const pubDate = new Date(item.pubDate);
                     const timeAgo = getTimeAgo(pubDate);
 
@@ -456,7 +475,37 @@
                     '</div>';
                     });
                     
-                    container.innerHTML = html;
+                    // Add Load More button if there are more items
+                    const hasMoreItems = feedData[feedKey].length > currentPage[feedKey] * itemsPerPage;
+                    if (hasMoreItems) {
+                        html += '<div class="tweet-load-more-container">' +
+                            '<button class="btn btn-outline-primary tweet-load-more-btn" data-feed="' + feedKey + '" data-translate="loadMorePosts">' +
+                                '<i class="fas fa-chevron-down me-2"></i>' +
+                                'Load More Posts' +
+                            '</button>' +
+                        '</div>';
+                    }
+                    
+                    if (append) {
+                        // Remove existing load more button
+                        const existingLoadMore = container.querySelector('.tweet-load-more-container');
+                        if (existingLoadMore) {
+                            existingLoadMore.remove();
+                        }
+                        
+                        // Append new items (excluding the first items that are already shown)
+                        const newItemsHtml = html;
+                        container.insertAdjacentHTML('beforeend', newItemsHtml);
+                    } else {
+                        container.innerHTML = html;
+                    }
+                    
+                    // Apply translations to the new content
+                    if (typeof applyTranslations === 'function') {
+                        applyTranslations();
+                    } else if (typeof window.translations !== 'undefined' && typeof window.translations.updatePageTranslations === 'function') {
+                        window.translations.updatePageTranslations();
+                    }
 
                     // Add click handlers for tweet items (with error handling)
                     setTimeout(function() {
@@ -466,6 +515,7 @@
                                 item.addEventListener('click', function(e) {
                                     try {
                                         if (e.target.closest('.tweet-actions')) return;
+                                        if (e.target.closest('.tweet-load-more-btn')) return;
                                         const link = this.dataset.link;
                                         if (link && link !== '#') {
                                             window.open(link, '_blank', 'noopener');
@@ -475,6 +525,16 @@
                                     }
                                 });
                             });
+                            
+                            // Add click handlers for load more buttons
+                            const loadMoreBtns = container.querySelectorAll('.tweet-load-more-btn');
+                            loadMoreBtns.forEach(function(btn) {
+                                btn.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const feedKey = this.dataset.feed;
+                                    loadMoreItems(feedKey);
+                                });
+                            });
                         } catch (err) {
                             console.warn('Event binding error:', err);
                         }
@@ -482,6 +542,34 @@
                 } catch (error) {
                     console.error('Display feed items error:', error);
                     displayFeedError(containerId, 'Error displaying feed');
+                }
+            }
+
+            // Load more items function
+            function loadMoreItems(feedKey) {
+                try {
+                    const containerId = 'feed-' + feedKey;
+                    const container = document.getElementById(containerId);
+                    if (!container) return;
+                    
+                    const loadMoreBtn = container.querySelector('.tweet-load-more-btn[data-feed="' + feedKey + '"]');
+                    if (loadMoreBtn) {
+                        // Show loading state
+                        const originalText = loadMoreBtn.innerHTML;
+                        const loadingText = (typeof window.translations !== 'undefined' && typeof window.translations.getText === 'function') 
+                            ? window.translations.getText('loading') 
+                            : 'Loading...';
+                        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + loadingText;
+                        loadMoreBtn.disabled = true;
+                        
+                        // Simulate loading delay for better UX
+                        setTimeout(function() {
+                            currentPage[feedKey]++;
+                            displayFeedItems(feedData[feedKey], containerId, feedKey, true);
+                        }, 300);
+                    }
+                } catch (error) {
+                    console.error('Load more items error:', error);
                 }
             }
 

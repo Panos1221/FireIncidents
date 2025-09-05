@@ -505,51 +505,61 @@
         padding: 12px 16px;
         font-size: 18px;
     }
-    
+
     .tweet-item {
         padding: 10px 12px;
     }
-    
+
     .tweet-avatar img {
         width: 36px;
         height: 36px;
     }
-    
+
     .tweet-header {
         gap: 10px;
     }
-    
+
     .tweet-content {
         margin-left: 46px;
         font-size: 14px;
     }
-    
+
     .tweet-actions {
         margin-left: 46px;
         margin-top: 8px;
     }
-    
+
     .tweet-stats {
         margin-left: 46px;
     }
-    
+
     .tweet-username {
         font-size: 14px;
     }
-    
+
     .tweet-display-name {
         font-size: 14px;
     }
-    
+
     .tweet-handle,
     .tweet-time {
         font-size: 14px;
     }
-    
+
     .activation-number {
         width: 18px;
         height: 18px;
         font-size: 11px;
+    }
+
+    .tweet-load-more-container {
+        padding: 12px 16px;
+    }
+
+    .tweet-load-more-btn {
+        padding: 6px 16px;
+        font-size: 13px;
+        min-width: 120px;
     }
 }
 
@@ -559,6 +569,7 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -567,6 +578,79 @@
 
 .tweet-item.new {
     animation: slideIn 0.3s ease-out;
+}
+
+/* Load More Button Styling */
+.tweet-load-more-container {
+    padding: 16px 20px;
+    text-align: center;
+    border-top: 1px solid #dee2e6;
+    background: #ffffff;
+}
+
+.tweet-load-more-btn {
+    border: 1px solid #1d9bf0;
+    color: #1d9bf0;
+    background: transparent;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.tweet-load-more-btn:hover {
+    background: #1d9bf0;
+    color: #ffffff;
+    border-color: #1d9bf0;
+}
+
+.tweet-load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.tweet-load-more-btn:disabled:hover {
+    background: transparent;
+    color: #1d9bf0;
+    border-color: #1d9bf0;
+}
+
+/* Dark theme support for Load More button */
+[data-bs-theme="dark"] .tweet-load-more-container,
+[data-theme="dark"] .tweet-load-more-container,
+.dark .tweet-load-more-container,
+.dark-theme .tweet-load-more-container {
+    background: #16181c !important;
+    border-top-color: #2f3336 !important;
+}
+
+[data-bs-theme="dark"] .tweet-load-more-btn,
+[data-theme="dark"] .tweet-load-more-btn,
+.dark .tweet-load-more-btn,
+.dark-theme .tweet-load-more-btn {
+    border-color: #1d9bf0 !important;
+    color: #1d9bf0 !important;
+    background: transparent !important;
+}
+
+[data-bs-theme="dark"] .tweet-load-more-btn:hover,
+[data-theme="dark"] .tweet-load-more-btn:hover,
+.dark .tweet-load-more-btn:hover,
+.dark-theme .tweet-load-more-btn:hover {
+    background: #1d9bf0 !important;
+    color: #ffffff !important;
+    border-color: #1d9bf0 !important;
+}
+
+[data-bs-theme="dark"] .tweet-load-more-btn:disabled:hover,
+[data-theme="dark"] .tweet-load-more-btn:disabled:hover,
+.dark .tweet-load-more-btn:disabled:hover,
+.dark-theme .tweet-load-more-btn:disabled:hover {
+    background: transparent !important;
+    color: #1d9bf0 !important;
+    border-color: #1d9bf0 !important;
 }
 
 /* Ensure light theme is default when no dark theme is explicitly set */
