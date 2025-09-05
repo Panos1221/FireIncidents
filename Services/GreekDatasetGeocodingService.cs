@@ -554,6 +554,19 @@ namespace FireIncidents.Services
             {
                 variations.Add(word.Substring(0, word.Length - 1)); // Remove ο ending
             }
+            else if (word.EndsWith("ΩΝ", StringComparison.OrdinalIgnoreCase))
+            {
+                variations.Add(word.Substring(0, word.Length - 2) + "ες"); // Φιλιατών → Φιλιάτες
+            }
+            else if (word.EndsWith("ΟΥ", StringComparison.OrdinalIgnoreCase))
+            {
+                variations.Add(word.Substring(0, word.Length - 2) + "Ο"); // ΔΙΣΤΡΑΤΟΥ → ΔΙΣΤΡΑΤΟ
+            }
+            else if (word.EndsWith("ΟΥ", StringComparison.OrdinalIgnoreCase))
+            {
+                variations.Add(word.Substring(0, word.Length - 2) + "ΟΝ"); // ΔΙΣΤΡΑΤΟΥ → ΔΙΣΤΡΑΤΟΝ
+            }
+                   
 
             return variations;
         }
