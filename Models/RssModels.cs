@@ -80,8 +80,10 @@ namespace FireIncidents.Models
         {
             get
             {
-                if (DateTime.TryParse(PubDateString, out DateTime result))
-                    return result;
+                if (DateTimeOffset.TryParse(PubDateString, out DateTimeOffset result))
+                    return result.DateTime;
+                if (DateTime.TryParse(PubDateString, out DateTime fallbackResult))
+                    return fallbackResult;
                 return DateTime.MinValue;
             }
         }
