@@ -116,15 +116,12 @@ namespace FireIncidents.Services
                     return new List<GeocodedWarning112>();
                 }
 
-                _logger.LogInformation($"Found {rawWarnings.Count} raw warnings from Twitter");
+                _logger.LogInformation($"Found {rawWarnings.Count} raw warnings from RSS feed");
 
-                // Pair English and Greek versions of the same warning
-                var pairedWarnings = PairWarningsByContent(rawWarnings);
-
-                // Process and geocode the warnings
+                // Process and geocode the warnings (no pairing needed since each RSS item already contains both languages)
                 var geocodedWarnings = new List<GeocodedWarning112>();
 
-                foreach (var warning in pairedWarnings)
+                foreach (var warning in rawWarnings)
                 {
                     try
                     {
@@ -144,7 +141,7 @@ namespace FireIncidents.Services
                     }
                 }
 
-                _logger.LogInformation($"Successfully processed {geocodedWarnings.Count} geocoded warnings from {rawWarnings.Count} raw warnings");
+                _logger.LogInformation($"Successfully processed {geocodedWarnings.Count} geocoded warnings from {rawWarnings.Count} RSS items");
 
                 return geocodedWarnings;
             }
@@ -1670,12 +1667,13 @@ namespace FireIncidents.Services
                             continue;
                         }
                         
-                        // Create Warning112 object from RSS item
+                        // Create Warning112 object from RSS item with both Greek and English content
+                        var fullContent = $"{item.Title}\n{item.Description}";
                         var warning = new Warning112
                         {
                             Id = GenerateWarningId(item),
-                            EnglishContent = ExtractEnglishContent(item),
-                            GreekContent = ExtractGreekContent(item),
+                            EnglishContent = ExtractEnglishContentFromMixed(fullContent),
+                            GreekContent = ExtractGreekContentFromMixed(fullContent),
                             Locations = ExtractLocationsFromRssItem(item),
                             TweetDate = item.PubDate,
                             SourceUrl = item.Link ?? "https://feeds.livefireincidents.gr/112Greece/rss",
@@ -1712,34 +1710,40 @@ namespace FireIncidents.Services
             return $"rss_{content.GetHashCode():X8}";
         }
         
-        private string ExtractEnglishContent(RssItem item)
+        private string ExtractEnglishContentFromMixed(string content)
         {
-            // RSS feed contains both Greek and English content
-            // Try to extract English content from title and description
-            var content = $"{item.Title}\n{item.Description}";
+            // Split content by common separators and extract English parts
+            var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var englishLines = new List<string>();
             
-            // Simple heuristic: if content contains Latin characters, it's likely English
-            if (ContainsLatinCharacters(content))
+            foreach (var line in lines)
             {
-                return content.Trim();
+                var trimmedLine = line.Trim();
+                if (!string.IsNullOrEmpty(trimmedLine) && ContainsLatinCharacters(trimmedLine))
+                {
+                    englishLines.Add(trimmedLine);
+                }
             }
             
-            return string.Empty;
+            return englishLines.Any() ? string.Join("\n", englishLines) : string.Empty;
         }
         
-        private string ExtractGreekContent(RssItem item)
+        private string ExtractGreekContentFromMixed(string content)
         {
-            // RSS feed contains both Greek and English content
-            // Try to extract Greek content from title and description
-            var content = $"{item.Title}\n{item.Description}";
+            // Split content by common separators and extract Greek parts
+            var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var greekLines = new List<string>();
             
-            // Simple heuristic: if content contains Greek characters, it's Greek
-            if (ContainsGreekCharacters(content))
+            foreach (var line in lines)
             {
-                return content.Trim();
+                var trimmedLine = line.Trim();
+                if (!string.IsNullOrEmpty(trimmedLine) && ContainsGreekCharacters(trimmedLine))
+                {
+                    greekLines.Add(trimmedLine);
+                }
             }
             
-            return string.Empty;
+            return greekLines.Any() ? string.Join("\n", greekLines) : string.Empty;
         }
         
         private bool ContainsLatinCharacters(string text)

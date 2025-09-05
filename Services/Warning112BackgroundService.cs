@@ -152,11 +152,14 @@ namespace FireIncidents.Services
         
         private Warning112 ConvertRssItemToWarning(RssItem item)
         {
+            // Extract both Greek and English content from the same RSS item
+            var fullContent = $"{item.Title}\n{item.Description}";
+            
             return new Warning112
             {
                 Id = GenerateWarningId(item),
-                EnglishContent = ExtractEnglishContent(item),
-                GreekContent = ExtractGreekContent(item),
+                EnglishContent = ExtractEnglishContentFromMixed(fullContent),
+                GreekContent = ExtractGreekContentFromMixed(fullContent),
                 Locations = ExtractLocationsFromRssItem(item),
                 TweetDate = item.PubDate,
                 SourceUrl = item.Link ?? "https://feeds.livefireincidents.gr/112Greece/rss",
@@ -170,16 +173,40 @@ namespace FireIncidents.Services
             return $"rss_{content.GetHashCode():X8}";
         }
         
-        private string ExtractEnglishContent(RssItem item)
+        private string ExtractEnglishContentFromMixed(string content)
         {
-            var content = $"{item.Title}\n{item.Description}";
-            return ContainsLatinCharacters(content) ? content.Trim() : string.Empty;
+            // Split content by common separators and extract English parts
+            var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var englishLines = new List<string>();
+            
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+                if (!string.IsNullOrEmpty(trimmedLine) && ContainsLatinCharacters(trimmedLine))
+                {
+                    englishLines.Add(trimmedLine);
+                }
+            }
+            
+            return englishLines.Any() ? string.Join("\n", englishLines) : string.Empty;
         }
         
-        private string ExtractGreekContent(RssItem item)
+        private string ExtractGreekContentFromMixed(string content)
         {
-            var content = $"{item.Title}\n{item.Description}";
-            return ContainsGreekCharacters(content) ? content.Trim() : string.Empty;
+            // Split content by common separators and extract Greek parts
+            var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var greekLines = new List<string>();
+            
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+                if (!string.IsNullOrEmpty(trimmedLine) && ContainsGreekCharacters(trimmedLine))
+                {
+                    greekLines.Add(trimmedLine);
+                }
+            }
+            
+            return greekLines.Any() ? string.Join("\n", greekLines) : string.Empty;
         }
         
         private bool ContainsLatinCharacters(string text)

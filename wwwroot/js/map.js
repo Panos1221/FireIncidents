@@ -14,23 +14,25 @@ let fireDistrictsData = null;
 let fireDistrictsColors = new Map();
 let isInitialLoad = true;
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     initMap();
     initModal();
     setupEventListeners();
-    loadIncidents();
+    
+    // Load incidents first, then warnings to ensure proper collision detection
+    await loadIncidents();
     
     // Only load 112 warnings if enabled in configuration
     if (window.appConfig && window.appConfig.show112Warnings) {
-        loadWarnings112();
+        await loadWarnings112();
     }
 
     // Auto-refresh every 5 minutes
-    setInterval(() => {
-        loadIncidents();
+    setInterval(async () => {
+        await loadIncidents();
         // Only refresh 112 warnings if enabled in configuration
         if (window.appConfig && window.appConfig.show112Warnings) {
-            loadWarnings112();
+            await loadWarnings112();
         }
     }, 5 * 60 * 1000);
 });
@@ -291,14 +293,12 @@ function addWarningsToMap(warnings) {
             return;
         }
 
-        setTimeout(() => {
-            try {
-                createWarningMarkers(warning);
-                createWarningHighlights(warning);
-            } catch (error) {
-                console.error("Error creating warning markers:", error);
-            }
-        }, index * 10); // Small delay for each warning
+        try {
+            createWarningMarkers(warning);
+            createWarningHighlights(warning);
+        } catch (error) {
+            console.error("Error creating warning markers:", error);
+        }
     });
 }
 
@@ -316,6 +316,9 @@ function createWarningMarkers(warning) {
         if (!location.isGeocoded) return;
         
         try {
+            // Apply offset to prevent overlap with incident markers
+            const adjustedCoords = getAdjustedCoordinates(location.latitude, location.longitude);
+            
             const icon = L.icon({
                 iconUrl: `/images/markers/${markerImage}`,
                 iconSize: [32, 32],
@@ -326,7 +329,7 @@ function createWarningMarkers(warning) {
                 shadowAnchor: [13, 41]
             });
 
-            const marker = L.marker([location.latitude, location.longitude], {
+            const marker = L.marker([adjustedCoords.lat, adjustedCoords.lng], {
                 icon: icon,
                 title: `112 Warning - ${location.locationName}`,
                 riseOnHover: true,
@@ -340,7 +343,9 @@ function createWarningMarkers(warning) {
             warningMarkers.push({
                 marker: marker,
                 warning: warning,
-                location: location
+                location: location,
+                originalLat: location.latitude,
+                originalLng: location.longitude
             });
 
         } catch (error) {
@@ -381,8 +386,18 @@ function createWarningHighlights(warning) {
 // Update warning popup content
 function updateWarningPopup(marker, warning, location) {
     const currentLanguage = getCurrentLanguage();
-    const content = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) : 
-                   (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
+    // Extract HTML content from the formatted content, preferring the <p> tag content
+    let rawContent = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) : 
+                    (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
+    
+    // If content contains both raw text and HTML, extract only the HTML part
+    let content = rawContent;
+    if (rawContent && rawContent.includes('<p>')) {
+        const pTagMatch = rawContent.match(/<p[^>]*>([\s\S]*?)<\/p>/);
+        if (pTagMatch && pTagMatch[1]) {
+            content = pTagMatch[1];
+        }
+    }
     
     const shortContent = content ? content.substring(0, 100) + (content.length > 100 ? '...' : '') : '';
     
@@ -412,8 +427,18 @@ function showWarningDetails(warning) {
     
     modalTitle.textContent = `⚠️ ${warning.warningType || '112 Emergency Warning'}`;
     
-    const content = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) : 
-                   (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
+    // Extract HTML content from the formatted content, preferring the <p> tag content
+    let rawContent = warning.getDisplayContent ? warning.getDisplayContent(currentLanguage) : 
+                    (currentLanguage === 'el' && warning.greekContent ? warning.greekContent : warning.englishContent);
+    
+    // If content contains both raw text and HTML, extract only the HTML part
+    let content = rawContent;
+    if (rawContent && rawContent.includes('<p>')) {
+        const pTagMatch = rawContent.match(/<p[^>]*>([\s\S]*?)<\/p>/);
+        if (pTagMatch && pTagMatch[1]) {
+            content = pTagMatch[1];
+        }
+    }
     
     const locations = warning.geocodedLocations && warning.geocodedLocations.length > 0 
         ? warning.geocodedLocations.map(l => l.locationName).join(', ')
@@ -464,6 +489,58 @@ function clearWarnings() {
 function getCurrentLanguage() {
     const languageSelector = document.getElementById('languageSelector');
     return languageSelector ? languageSelector.value : 'en';
+}
+
+// Check for overlapping markers and return adjusted coordinates
+function getAdjustedCoordinates(lat, lng) {
+    const tolerance = 0.001; // ~100 meters tolerance for overlap detection
+    const offsetDistance = 0.005; // ~500 meters offset
+    
+    console.log(`Checking collision for warning at (${lat}, ${lng}), total incident markers: ${markers.length}`);
+    
+    // Find overlapping incident markers at this location
+    const overlappingIncidents = markers.filter(markerObj => {
+        const incidentMarker = markerObj.marker;
+        const incidentLat = incidentMarker.getLatLng().lat;
+        const incidentLng = incidentMarker.getLatLng().lng;
+        
+        const latDiff = Math.abs(incidentLat - lat);
+        const lngDiff = Math.abs(incidentLng - lng);
+        const isOverlapping = latDiff < tolerance && lngDiff < tolerance;
+        
+        if (isOverlapping) {
+            console.log(`Found overlapping incident at (${incidentLat}, ${incidentLng}), diffs: lat=${latDiff}, lng=${lngDiff}`);
+        }
+        
+        return isOverlapping;
+    });
+    
+    console.log(`Found ${overlappingIncidents.length} overlapping incidents`);
+    
+    // Only apply offset if there are incident markers at this location
+    if (overlappingIncidents.length > 0) {
+        console.log(`Applying offset: (${lat}, ${lng}) -> (${lat}, ${lng + offsetDistance})`);
+        return {
+            lat: lat,
+            lng: lng + offsetDistance
+        };
+    }
+    
+    // No collision, return original coordinates
+    console.log(`No collision, keeping original coordinates: (${lat}, ${lng})`);
+    return { lat, lng };
+}
+
+// Calculate distance between two coordinates in kilometers
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
 }
 
 // status code for marker image
