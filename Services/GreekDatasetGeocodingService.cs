@@ -591,7 +591,10 @@ namespace FireIncidents.Services
             {
                 variations.Add(word.Substring(0, word.Length - 2) + "ΟΝ"); // ΔΙΣΤΡΑΤΟΥ → ΔΙΣΤΡΑΤΟΝ
             }
-                   
+            else if (word.EndsWith("ΟΥ", StringComparison.OrdinalIgnoreCase))
+            {
+                variations.Add(word.Substring(0, word.Length - 2) + "ις");
+            }                   
 
             return variations;
         }

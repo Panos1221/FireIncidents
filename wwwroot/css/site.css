@@ -852,8 +852,167 @@ html, body {
         white-space: nowrap;
     }
 
-/* Responsive design for email contact */
+/* Comprehensive Mobile Responsive Styles */
 @media (max-width: 768px) {
+    /* Base layout adjustments */
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    /* Main layout - stack sidebar below map on mobile */
+    .row {
+        flex-direction: column-reverse;
+    }
+    
+    .col-md-3, .col-md-9 {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+    
+    /* Map adjustments for mobile */
+    #map {
+        height: 60vh;
+        min-height: 400px;
+        margin-bottom: 15px;
+    }
+    
+    /* Card styling for mobile */
+    .card {
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+    
+    .card-body {
+        padding: 12px;
+    }
+    
+    .card-header {
+        padding: 10px 12px;
+    }
+    
+    .card-header h5 {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+    
+    /* Text and font adjustments */
+    body {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .form-check-label {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    
+    /* Statistics styling */
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--card-border);
+    }
+    
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        flex: 1;
+    }
+    
+    .stat-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: right;
+    }
+    
+    /* Legend adjustments */
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    
+    .legend-item img {
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+    
+    .legend-item span {
+        flex: 1;
+    }
+    
+    /* Navbar mobile improvements */
+    .navbar {
+        padding: 8px 0;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .navbar-brand img {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+    }
+    
+    .navbar-brand span {
+        display: none;
+    }
+    
+    .language-selector {
+        margin-left: 10px;
+    }
+    
+    .language-selector label {
+        display: none;
+    }
+    
+    .language-selector select {
+        font-size: 0.8rem;
+        padding: 4px 6px;
+    }
+    
+    /* Button adjustments */
+    .btn {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+    
+    #btnShowMap {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    /* Theme toggle positioning */
+    .theme-toggle {
+        bottom: 20px;
+        right: 20px;
+        width: 48px;
+        height: 48px;
+    }
+    
+    .theme-toggle i {
+        font-size: 1.4rem;
+    }
+    
+    /* Email contact mobile */
     .email-contact {
         right: 16px;
         bottom: 40px;
@@ -867,6 +1026,204 @@ html, body {
     
     .email-contact i {
         font-size: 1.1rem;
+    }
+    
+    /* Footer adjustments */
+    .footer {
+        padding: 15px 0;
+        font-size: 0.8rem;
+    }
+    
+    .disclaimer {
+        margin-bottom: 8px;
+    }
+    
+    /* Twitter feeds mobile */
+    .twitter-feed-container {
+        margin-bottom: 15px;
+    }
+    
+    .tweet-item {
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+    
+    .tweet-content {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    
+    .tweet-header {
+        margin-bottom: 8px;
+    }
+    
+    .tweet-username {
+        font-size: 0.8rem;
+    }
+    
+    /* Form controls mobile */
+    .form-check {
+        margin-bottom: 8px;
+    }
+    
+    .form-check-input {
+        margin-top: 0.2rem;
+    }
+    
+    /* Modal adjustments for mobile */
+    .modal-dialog {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .incident-detail {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .incident-label {
+         width: 100%;
+         margin-bottom: 4px;
+         font-weight: 600;
+     }
+}
+
+/* Additional mobile improvements for better touch interaction */
+@media (max-width: 480px) {
+    /* Extra small screens - phones in portrait */
+    .container-fluid {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    /* Larger touch targets */
+    .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+    }
+    
+    .form-check-label {
+        padding-left: 0.3em;
+        cursor: pointer;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Better button sizing for touch */
+    .btn {
+        min-height: 44px;
+        font-size: 0.9rem;
+    }
+    
+    /* Improved navbar for very small screens */
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .navbar-brand img {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Map height adjustment for small screens */
+    #map {
+        height: 50vh;
+        min-height: 350px;
+    }
+    
+    /* Compact statistics display */
+    .stat-item {
+        padding: 4px 0;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .stat-value {
+        font-size: 0.85rem;
+    }
+    
+    /* Smaller legend items */
+    .legend-item {
+        font-size: 0.75rem;
+        margin-bottom: 6px;
+    }
+    
+    .legend-item img {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Footer adjustments */
+    .footer {
+        font-size: 0.75rem;
+        padding: 10px 0;
+    }
+    
+    /* Theme toggle smaller */
+    .theme-toggle {
+        width: 44px;
+        height: 44px;
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .theme-toggle i {
+        font-size: 1.2rem;
+    }
+}
+
+/* Landscape orientation improvements */
+@media (max-width: 768px) and (orientation: landscape) {
+    #map {
+        height: 70vh;
+        min-height: 300px;
+    }
+    
+    .navbar {
+        padding: 5px 0;
+    }
+    
+    .card-header {
+        padding: 8px 12px;
+    }
+    
+    .card-body {
+        padding: 10px;
+    }
+}
+
+/* Improve text readability and prevent zoom on input focus */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Better spacing for touch interactions */
+    .card {
+        margin-bottom: 12px;
+    }
+    
+    /* Improve scrolling performance */
+    .twitter-feed-container {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Better visual hierarchy */
+    .section-title {
+        font-size: 1rem;
+        margin-bottom: 8px;
     }
 }
 
