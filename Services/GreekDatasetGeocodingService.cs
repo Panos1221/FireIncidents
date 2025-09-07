@@ -208,7 +208,9 @@ namespace FireIncidents.Services
 
         public async Task<GeocodedIncident> GeocodeIncidentAsync(FireIncident incident)
         {
+            _logger.LogInformation("GreekDatasetGeocodingService: GeocodeIncidentAsync called");
             await InitializeAsync();
+            _logger.LogInformation("GreekDatasetGeocodingService: Initialization completed");
 
             var geocodedIncident = new GeocodedIncident
             {
@@ -269,8 +271,15 @@ namespace FireIncidents.Services
                 return null;
             }
 
+            // Debug: Log the exact municipality string and its bytes
+            _logger.LogInformation("GreekDatasetGeocodingService: Processing municipality: '{Municipality}'", incident.Municipality);
+            var municipalityBytes = Encoding.UTF8.GetBytes(incident.Municipality);
+            var hexString = BitConverter.ToString(municipalityBytes);
+            _logger.LogInformation("GreekDatasetGeocodingService: Municipality bytes (hex): {Hex}", hexString);
+
             // Normalize the scraped municipality name
             var normalizedMunicipality = NormalizeMunicipalityName(incident.Municipality);
+            _logger.LogInformation("GreekDatasetGeocodingService: Normalized municipality: '{Normalized}'", normalizedMunicipality);
 
             _logger.LogDebug("Searching for municipality: '{Original}' -> normalized: '{Normalized}'",
                 incident.Municipality, normalizedMunicipality);
@@ -299,6 +308,9 @@ namespace FireIncidents.Services
                     {
                         // Determine if this is an exact match
                         bool isExactMatch = IsExactMatch(searchKey, normalizedMunicipality, incident.Municipality);
+                        
+                        _logger.LogInformation("IsExactMatch result for '{SearchKey}': {IsExact} (normalized: '{Normalized}', original: '{Original}')",
+                            searchKey, isExactMatch, normalizedMunicipality, incident.Municipality);
 
                         // Add all valid entries as candidates
                         foreach (var entry in validEntries)
@@ -312,13 +324,18 @@ namespace FireIncidents.Services
                             "Total entries: {Total}, With coordinates: {WithCoords}, After region filter: {Valid}",
                             searchKey, cityEntries.Count, entriesWithCoords, validEntries.Count);
 
-                        // Debug
+                        // Debug: Show region comparison details
+                        _logger.LogInformation("Region filtering debug for '{SearchKey}': Incident region='{IncidentRegion}' normalized='{NormalizedIncident}'",
+                            searchKey, incident.Region, NormalizeRegionName(incident.Region));
+                        
                         for (int i = 0; i < Math.Min(3, cityEntries.Count); i++)
                         {
                             var entry = cityEntries[i];
-                            _logger.LogDebug("Sample entry {Index}: City='{City}', Municipality='{Municipality}', " +
-                                "Region='{Region}', HasGeo={HasGeo}, Lat={Lat}, Lon={Lon}",
-                                i + 1, entry.City, entry.Municipality, entry.Region, entry.Has_Geolocation, entry.Latitude, entry.Longitude);
+                            var normalizedEntryRegion = NormalizeRegionName(entry.Region);
+                            var regionMatches = MatchesRegion(entry.Region, incident.Region);
+                            _logger.LogInformation("Sample entry {Index}: City='{City}', Municipality='{Municipality}', " +
+                                "Region='{Region}' normalized='{NormalizedRegion}', RegionMatches={RegionMatches}, HasGeo={HasGeo}, Lat={Lat}, Lon={Lon}",
+                                i + 1, entry.City, entry.Municipality, entry.Region, normalizedEntryRegion, regionMatches, entry.Has_Geolocation, entry.Latitude, entry.Longitude);
                         }
                     }
                 }
@@ -331,6 +348,14 @@ namespace FireIncidents.Services
                 var exactMatches = allCandidates.Where(c => c.IsExactMatch).ToList();
                 if (exactMatches.Any())
                 {
+                    // Debug: Log all exact matches before selection
+                    _logger.LogInformation("Found {Count} exact matches:", exactMatches.Count);
+                    foreach (var match in exactMatches)
+                    {
+                        _logger.LogInformation("  - SearchKey: '{SearchKey}', City: '{City}', Municipality: '{Municipality}', TotalEntries: {Total}",
+                            match.SearchKey, match.Entry.City, match.Entry.Municipality, match.TotalEntriesForKey);
+                    }
+
                     var selectedEntry = SelectBestExactMatch(exactMatches);
                     var matchInfo = exactMatches.First(c => c.Entry == selectedEntry);
 
@@ -856,7 +881,22 @@ namespace FireIncidents.Services
                 searchKeyGroups.Count, searchKeyGroups.OrderBy(g => g.First().TotalEntriesForKey).First().Key,
                 searchKeyGroups.OrderBy(g => g.First().TotalEntriesForKey).First().First().TotalEntriesForKey);
 
-            // Look for entries where the city name matches the search key (more specific than just municipality match)
+            // PRIORITY 1: Look for municipality-level matches first (search keys that contain "ΔΗΜΟΣ" or "Δ.")
+            var municipalityMatches = exactMatches.Where(m =>
+                m.SearchKey.Contains("ΔΗΜΟΣ", StringComparison.OrdinalIgnoreCase) ||
+                m.SearchKey.Contains("Δ.", StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+
+            if (municipalityMatches.Any())
+            {
+                _logger.LogDebug("SelectBestExactMatch: Found {Count} municipality-level matches, prioritizing these", municipalityMatches.Count);
+                // Among municipality matches, select the one with highest population or most specific
+                var bestMunicipalityMatch = municipalityMatches.OrderBy(m => m.TotalEntriesForKey)
+                    .ThenByDescending(m => m.Entry.Population).First();
+                return bestMunicipalityMatch.Entry;
+            }
+
+            // PRIORITY 2: Look for entries where the city name matches the search key (but only if no municipality matches)
             var cityNameMatches = exactMatches.Where(m =>
                 NormalizeMunicipalityName(m.Entry.City).Contains(m.SearchKey, StringComparison.OrdinalIgnoreCase) ||
                 m.SearchKey.Contains(NormalizeMunicipalityName(m.Entry.City), StringComparison.OrdinalIgnoreCase)
@@ -869,7 +909,7 @@ namespace FireIncidents.Services
                 return bestCityMatch.Entry;
             }
 
-            // Fall back to the original logic: find the most specific search key
+            // PRIORITY 3: Fall back to the original logic: find the most specific search key
             var mostSpecificGroup = searchKeyGroups.OrderBy(g => g.First().TotalEntriesForKey).First();
 
             // If the most specific group has only one entry, return it

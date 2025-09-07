@@ -105,5 +105,37 @@ namespace FireIncidents.Controllers
                 });
             }
         }
+
+        [HttpPost("create-test")]
+        public async Task<ActionResult<GeocodedIncident>> CreateTestIncident([FromBody] FireIncident incident)
+        {
+            try
+            {
+                _logger.LogInformation("API request received to create test incident");
+                _logger.LogInformation($"Test incident: {incident.Location}, {incident.Municipality}, {incident.Region}");
+
+                var geocodedIncident = await _geocodingService.GeocodeIncidentAsync(incident);
+
+                if (geocodedIncident.IsGeocoded)
+                {
+                    _logger.LogInformation($"Successfully geocoded test incident to: {geocodedIncident.Latitude}, {geocodedIncident.Longitude}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to geocode test incident. Using default coordinates.");
+                }
+
+                return Ok(geocodedIncident);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating test incident");
+                return StatusCode(500, new
+                {
+                    error = "Internal server error",
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

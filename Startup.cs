@@ -16,7 +16,11 @@ namespace FireIncidents
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+                });
             
             // Configure geocoding settings
             services.Configure<FireIncidents.Models.GeocodingConfiguration>(
