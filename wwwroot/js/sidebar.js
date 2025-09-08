@@ -443,7 +443,7 @@ class IncidentsSidebar {
         setTimeout(() => {
             notification.style.opacity = '0';
             setTimeout(() => notification.remove(), 300);
-        }, 2000);
+        }, 1000);
     }
 
     showNavigationError() {
@@ -462,7 +462,7 @@ class IncidentsSidebar {
         setTimeout(() => {
             notification.style.opacity = '0';
             setTimeout(() => notification.remove(), 300);
-        }, 5000);
+        }, 2000);
     }
 
     // Method to refresh incidents
