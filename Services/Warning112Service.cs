@@ -1765,8 +1765,6 @@ namespace FireIncidents.Services
                 // Extract locations from both title and description
                 var content = $"{item.Title} {item.Description}";
                 
-                // Use existing location extraction logic (similar to what was used for Twitter)
-                // This is a simplified version - you may want to enhance this based on RSS content structure
                 var locationMatches = Regex.Matches(content, @"[Α-Ωα-ωA-Za-z\s]+(?=\s|$|,|\.|!|\?)", RegexOptions.IgnoreCase);
                 
                 foreach (Match match in locationMatches)

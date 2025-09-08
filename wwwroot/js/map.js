@@ -373,6 +373,7 @@ function createWarningMarkers(warning) {
                 icon: icon,
                 title: `112 Warning - ${location.locationName}`,
                 riseOnHover: true,
+                zIndexOffset: 1000, // Ensure 112 warnings appear above incident markers
                 alt: warning.warningType
             });
 

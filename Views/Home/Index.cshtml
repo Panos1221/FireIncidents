@@ -415,7 +415,7 @@
                     
                     const startIndex = append ? (currentPage[feedKey] - 1) * itemsPerPage : 0;
                     const endIndex = currentPage[feedKey] * itemsPerPage;
-                    const itemsToShow = feedData[feedKey].slice(0, endIndex);
+                    const itemsToShow = append ? feedData[feedKey].slice(startIndex, endIndex) : feedData[feedKey].slice(0, endIndex);
                     
                     let html = '';
                     
@@ -429,10 +429,6 @@
                                     : (item.title && item.title !== 'Image' && item.title.trim() !== 'Image' 
                                         ? item.title 
                                         : '');
-
-                    // Replace hashtags and mentions with styled versions
-                    content = content.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
-                    content = content.replace(/@@(\w+)/g, '<span class="mention">@@$1</span>');
 
                     // Process emergency content (no badges above messages)
                     let badges = '';
@@ -448,9 +444,17 @@
                         });
                     }
                     
+                    // Replace hashtags and mentions first to protect them from other styling
+                    content = content.replace(/#([\w\u0370-\u03FF\u1F00-\u1FFF]+)/g, '<span class="hashtag">#$1</span>');
+                    content = content.replace(/@@(\w+)/g, '<span class="mention">@@$1</span>');
+                    
                     // Style dangerous smoke warnings
-                    content = content.replace(/(Dangerous smoke|Επικίνδυνοι καπνοί)/gi, '<span class="emergency-text">$1</span>');
-                    content = content.replace(/(Wildfire|Δασική πυρκαγιά|Πυρκαγιά)/gi, '<span class="emergency-text">$1</span>');
+                    content = content.replace(/(?<!<span class="hashtag">[^<]*)(Dangerous smoke|Επικίνδυνοι καπνοί)(?![^<]*<\/span>)/gi, '<span class="emergency-text">$1</span>');
+                    // Style wildfire 
+                    content = content.replace(/(?<!<span class="hashtag">[^<]*)(Wildfire|Δασική πυρκαγιά)(?![^<]*<\/span>)/gi, '<span class="emergency-text">$1</span>');
+                    // Style fire terms 
+                    content = content.replace(/\b(Πυρκαγιά)\b(?![^<]*<\/span>)/gi, '<span class="emergency-text">$1</span>');
+                    content = content.replace(/\b(Fire)\b(?![^<]*<\/span>)/gi, '<span class="emergency-text">$1</span>');
 
                     // Style stay indoors warnings  
                     //content = content.replace(/(Stay indoors|Παραμείνετε σε εσωτερικούς χώρους)/gi, '<span class="warning-text">$1</span>');
