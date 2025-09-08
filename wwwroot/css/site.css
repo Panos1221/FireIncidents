@@ -52,7 +52,13 @@ html, body {
     background-color: var(--body-bg);
     color: var(--text-color);
     transition: background-color 0.3s ease, color 0.3s ease;
-    font-family: 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-variant-ligatures: none;
+    -webkit-font-feature-settings: "liga" 0;
+    font-feature-settings: "liga" 0;
 }
 
 /* Theme toggle button */
@@ -1201,6 +1207,16 @@ html, body {
 
 /* Improve text readability and prevent zoom on input focus */
 @media (max-width: 768px) {
+    /* font rendering for mobile */
+    html, body {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        font-variant-ligatures: none;
+        -webkit-font-feature-settings: "liga" 0;
+        font-feature-settings: "liga" 0;
+    }
+    
     input[type="text"],
     input[type="email"],
     input[type="tel"],
@@ -1208,6 +1224,12 @@ html, body {
     select,
     textarea {
         font-size: 16px; /* Prevents zoom on iOS */
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
     
     /* Better spacing for touch interactions */
@@ -1224,6 +1246,16 @@ html, body {
     .section-title {
         font-size: 1rem;
         margin-bottom: 8px;
+    }
+    
+    /* text rendering for Greek characters */
+    .navbar-brand,
+    .form-label,
+    .stat-label,
+    .legend-item,
+    .card-header {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        text-rendering: optimizeLegibility;
     }
 }
 

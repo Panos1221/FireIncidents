@@ -320,13 +320,10 @@ function updateSelectOptions() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // browser language and set initial lang
+    // Default to Greek lang
     if (!localStorage.getItem('preferredLanguage')) {
-        const browserLang = navigator.language.split('-')[0];
-        if (translations[browserLang]) {
-            currentLanguage = browserLang;
-            localStorage.setItem('preferredLanguage', browserLang);
-        }
+        currentLanguage = 'el';
+        localStorage.setItem('preferredLanguage', 'el');
     }
 
     updatePageTranslations();
