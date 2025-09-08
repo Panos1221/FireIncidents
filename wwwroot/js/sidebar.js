@@ -482,7 +482,6 @@ class IncidentsSidebar {
 let incidentsSidebar;
 document.addEventListener('DOMContentLoaded', function() {
     incidentsSidebar = new IncidentsSidebar();
+    // Export for global access after initialization
+    window.incidentsSidebar = incidentsSidebar;
 });
-
-// Export for global access
-window.incidentsSidebar = incidentsSidebar;

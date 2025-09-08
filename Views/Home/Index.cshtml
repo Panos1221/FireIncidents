@@ -786,10 +786,5 @@
         window.appConfig = {
             show112Warnings: @(ViewBag.Show112Warnings.ToString().ToLower())
         };
-        
-        // Initialize sidebar when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            window.incidentsSidebar = new IncidentsSidebar();
-        });
     </script>
 }

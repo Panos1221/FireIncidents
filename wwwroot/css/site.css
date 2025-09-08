@@ -542,6 +542,12 @@ html, body {
         top: 80px;
     }
 
+    /* Hide scale line when sidebar is open on mobile */
+    .incidents-sidebar.open ~ * .leaflet-control-scale-line,
+    body:has(.incidents-sidebar.open) .leaflet-control-scale-line {
+        display: none !important;
+    }
+
     .sidebar-toggle {
         bottom: 80px;
         right: 20px;
