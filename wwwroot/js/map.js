@@ -73,6 +73,8 @@ function initMap() {
         zoomControl: false,
         attributionControl: false
     }).setView([38.2, 23.8], 7);
+    
+    window.map = map;
 
     L.control.zoom({
         position: 'topright'
@@ -160,8 +162,14 @@ function setupEventListeners() {
     });
 
     // Setup status filter checkboxes
-    document.getElementById('ongoingCheck').addEventListener('change', filterIncidents);
-    document.getElementById('partialControlCheck').addEventListener('change', filterIncidents);
+    document.getElementById('ongoingCheck').addEventListener('change', function() {
+        filterIncidents();
+        syncSidebarFromMainPage();
+    });
+    document.getElementById('partialControlCheck').addEventListener('change', function() {
+        filterIncidents();
+        syncSidebarFromMainPage();
+    });
 
     // fire districts toggle
     document.getElementById('fireDistrictsCheck').addEventListener('change', function () {
@@ -174,12 +182,24 @@ function setupEventListeners() {
 
     // Load fire districts data
     loadFireDistricts();
-    document.getElementById('fullControlCheck').addEventListener('change', filterIncidents);
+    document.getElementById('fullControlCheck').addEventListener('change', function() {
+        filterIncidents();
+        syncSidebarFromMainPage();
+    });
 
     // Setup category filter checkboxes
-    document.getElementById('forestFiresCheck').addEventListener('change', filterIncidents);
-    document.getElementById('urbanFiresCheck').addEventListener('change', filterIncidents);
-    document.getElementById('assistanceCheck').addEventListener('change', filterIncidents);
+    document.getElementById('forestFiresCheck').addEventListener('change', function() {
+        filterIncidents();
+        syncSidebarFromMainPage();
+    });
+    document.getElementById('urbanFiresCheck').addEventListener('change', function() {
+        filterIncidents();
+        syncSidebarFromMainPage();
+    });
+    document.getElementById('assistanceCheck').addEventListener('change', function() {
+        filterIncidents();
+        syncSidebarFromMainPage();
+    });
 }
 
 // Get translation text
@@ -1220,5 +1240,12 @@ function updateDistrictsProgress(percentage) {
     }
     if (progressText) {
         progressText.textContent = percentage + '%';
+    }
+}
+
+// Synchronize sidebar filters with main page filters
+function syncSidebarFromMainPage() {
+    if (window.incidentsSidebar && typeof window.incidentsSidebar.syncFromMainPage === 'function') {
+        window.incidentsSidebar.syncFromMainPage();
     }
 }

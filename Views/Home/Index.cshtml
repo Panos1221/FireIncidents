@@ -226,6 +226,78 @@
     </div>
 </div>
 
+<!-- Incidents Sidebar -->
+<div class="incidents-sidebar" id="incidentsSidebar">
+    <div class="incidents-sidebar-header">
+        <h4 data-translate="incidentsList">Incidents List</h4>
+        <button class="close-btn" id="closeSidebar" aria-label="Close sidebar">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Sidebar Filters -->
+    <div class="sidebar-filters">
+        <!-- Category Filters -->
+        <div class="filter-group">
+            <label class="filter-label" data-translate="category">Category</label>
+            <div class="filter-checkboxes">
+                <div class="form-check">
+                    <input class="form-check-input sidebar-filter-checkbox" type="checkbox" value="ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ" id="sidebarForestFiresCheck" data-filter-type="category" checked>
+                    <label class="form-check-label" for="sidebarForestFiresCheck" data-translate="forestFires">
+                        Forest Fires
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input sidebar-filter-checkbox" type="checkbox" value="ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ" id="sidebarUrbanFiresCheck" data-filter-type="category" checked>
+                    <label class="form-check-label" for="sidebarUrbanFiresCheck" data-translate="urbanFires">
+                        Urban Fires
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input sidebar-filter-checkbox" type="checkbox" value="ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ" id="sidebarAssistanceCheck" data-filter-type="category" checked>
+                    <label class="form-check-label" for="sidebarAssistanceCheck" data-translate="assistance">
+                        Assistance
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Filters -->
+        <div class="filter-group">
+            <label class="filter-label" data-translate="status">Status</label>
+            <div class="filter-checkboxes">
+                <div class="form-check">
+                    <input class="form-check-input sidebar-filter-checkbox" type="checkbox" value="ΣΕ ΕΞΕΛΙΞΗ" id="sidebarOngoingCheck" data-filter-type="status" checked>
+                    <label class="form-check-label status-ongoing" for="sidebarOngoingCheck" data-translate="inProgress">
+                        In Progress
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input sidebar-filter-checkbox" type="checkbox" value="ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ" id="sidebarPartialControlCheck" data-filter-type="status" checked>
+                    <label class="form-check-label status-partial" for="sidebarPartialControlCheck" data-translate="partialControl">
+                        Partial Control
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input sidebar-filter-checkbox" type="checkbox" value="ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ" id="sidebarFullControlCheck" data-filter-type="status">
+                    <label class="form-check-label status-controlled" for="sidebarFullControlCheck" data-translate="fullControl">
+                        Full Control
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="incidents-sidebar-content" id="sidebarContent">
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2" data-translate="loadingIncidents">Loading incidents...</p>
+        </div>
+    </div>
+</div>
+
 <!-- Incident Details Modal -->
 <div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -265,6 +337,7 @@
     <link rel="stylesheet" href="~/css/twitter-feeds.css" asp-append-version="true" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/map.js" asp-append-version="true"></script>
+    <script src="~/js/sidebar.js" asp-append-version="true"></script>
 
     <!--Fire Risk Map-->
     <script>
@@ -713,5 +786,10 @@
         window.appConfig = {
             show112Warnings: @(ViewBag.Show112Warnings.ToString().ToLower())
         };
+        
+        // Initialize sidebar when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            window.incidentsSidebar = new IncidentsSidebar();
+        });
     </script>
 }

@@ -9,6 +9,11 @@ const translations = {
         "close": "Close",
         "pyrosvestiki": "Hellenic Fire Service",
         "112greece": "112 Greece",
+        "mapNotAvailable": "Map not available. Please try again later.",
+        "navigatedToIncidentLocation": "Navigated to incident location",
+        "incidentsList": "Incidents List",
+        "clickToNavigate": "Click on an incident to navigate to its location",
+        "noIncidents": "No incidents available",
 
         // Filters
         "filters": "Filters",
@@ -132,6 +137,11 @@ const translations = {
         "close": "Κλείσιμο",
         "pyrosvestiki": "Πυροσβεστικό Σώμα",
         "112greece": "112 Ελλάδος",
+        "mapNotAvailable": "Ο χάρτης δεν είναι διαθέσιμος.",
+        "navigatedToIncidentLocation": "Επιτυχής μετάβαση στο τόπο του συμβάντος",
+        "incidentsList": "Λίστα Συμβάντων",
+        "clickToNavigate": "Κάντε κλικ σε ένα συμβάν για να μεταβείτε στο τοποθεσία του",
+        "noIncidents": "Δεν υπάρχουν διαθέσιμα συμβάντα",
 
         // Filters
         "filters": "Φίλτρα",
