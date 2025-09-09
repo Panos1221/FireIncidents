@@ -126,6 +126,13 @@ namespace FireIncidents.Services
                 
                 foreach (var incident in currentIncidents)
                 {
+                    // Only send notifications for incidents that are "In Progress" (ΣΕ ΕΞΕΛΙΞΗ) since these are the actual new ones.
+                    // Skip incidents that are "Partial Control" (ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ) or "Full Control" (ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ)
+                    if (incident.Status != "ΣΕ ΕΞΕΛΙΞΗ")
+                    {
+                        continue;
+                    }
+                    
                     // Create a unique ID for the incident based on its properties
                     var incidentId = $"{incident.Category}_{incident.Location}_{incident.Municipality}_{incident.Status}";
                     
