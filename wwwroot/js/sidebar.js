@@ -90,6 +90,9 @@ class IncidentsSidebar {
             icon.className = 'fas fa-times';
         }
         
+        // Hide Leaflet zoom controls when sidebar is open
+        this.hideZoomControls();
+        
         // Load incidents if not already loaded
         if (this.incidents.length === 0) {
             this.loadIncidents();
@@ -105,6 +108,9 @@ class IncidentsSidebar {
         if (icon) {
             icon.className = 'fas fa-list';
         }
+        
+        // Show Leaflet zoom controls when sidebar is closed
+        this.showZoomControls();
     }
 
     async loadIncidents() {
@@ -475,6 +481,32 @@ class IncidentsSidebar {
     applyFilters(filters) {
         console.log('Applying filters to sidebar:', filters);
         this.loadIncidents();
+    }
+
+    // Hide Leaflet zoom controls
+    hideZoomControls() {
+        const zoomInButton = document.querySelector('.leaflet-control-zoom-in');
+        const zoomOutButton = document.querySelector('.leaflet-control-zoom-out');
+        
+        if (zoomInButton) {
+            zoomInButton.style.display = 'none';
+        }
+        if (zoomOutButton) {
+            zoomOutButton.style.display = 'none';
+        }
+    }
+
+    // Show Leaflet zoom controls
+    showZoomControls() {
+        const zoomInButton = document.querySelector('.leaflet-control-zoom-in');
+        const zoomOutButton = document.querySelector('.leaflet-control-zoom-out');
+        
+        if (zoomInButton) {
+            zoomInButton.style.display = '';
+        }
+        if (zoomOutButton) {
+            zoomOutButton.style.display = '';
+        }
     }
 }
 
