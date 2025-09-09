@@ -1,4 +1,4 @@
-namespace FireIncidents.Models
+﻿namespace FireIncidents.Models
 {
     public class Warning112
     {
@@ -17,30 +17,56 @@ namespace FireIncidents.Models
         {
             get
             {
-                if (string.IsNullOrEmpty(EnglishContent))
+                if (string.IsNullOrEmpty(EnglishContent) && string.IsNullOrEmpty(GreekContent))
                     return "General Warning";
-                    
-                if (EnglishContent.Contains("Wildfire", StringComparison.OrdinalIgnoreCase) ||
-                    EnglishContent.Contains("Wild fire", StringComparison.OrdinalIgnoreCase))
+
+                var contentToCheck = $"{EnglishContent} {GreekContent}".ToLower();
+
+                // Wildfire warnings (English and Greek)
+                if (contentToCheck.Contains("wildfire") ||
+                    contentToCheck.Contains("wild fire") ||
+                    contentToCheck.Contains("πυρκαγιά") ||
+                    contentToCheck.Contains("φωτιά") ||
+                    contentToCheck.Contains("δασική πυρκαγιά") ||
+                    contentToCheck.Contains("πυρκαγιάς"))
                     return "Wildfire Warning";
-                    
-                if (EnglishContent.Contains("evacuation", StringComparison.OrdinalIgnoreCase) ||
-                    EnglishContent.Contains("evacuate", StringComparison.OrdinalIgnoreCase))
+
+                // Evacuation warnings (English and Greek)
+                if (contentToCheck.Contains("evacuation") ||
+                    contentToCheck.Contains("evacuate") ||
+                    contentToCheck.Contains("εκκένωση") ||
+                    contentToCheck.Contains("εκκενώστε") ||
+                    contentToCheck.Contains("εκκενώσετε") ||
+                    contentToCheck.Contains("απομάκρυνση"))
                     return "Evacuation Warning";
-                    
-                if (EnglishContent.Contains("flood", StringComparison.OrdinalIgnoreCase))
+
+                // Flood warnings (English and Greek)
+                if (contentToCheck.Contains("flood") ||
+                    contentToCheck.Contains("πλημμύρα") ||
+                    contentToCheck.Contains("πλημμύρες") ||
+                    contentToCheck.Contains("κατακλυσμός"))
                     return "Flood Warning";
-                    
+
+                // Smoke warnings (English and Greek)
+                if (contentToCheck.Contains("smoke") ||
+                    contentToCheck.Contains("καπνός") ||
+                    contentToCheck.Contains("καπνού") ||
+                    contentToCheck.Contains("καπνό") ||
+                    contentToCheck.Contains("καπνοί"))
+                    return "Smoke Warning";
+
                 return "Emergency Warning";
             }
         }
-        
+
         // Get display content based on language preference
         public string GetDisplayContent(string language = "en")
         {
-            return language?.ToLower() == "el" && !string.IsNullOrEmpty(GreekContent) 
-                ? GreekContent 
-                : EnglishContent;
+            if (language?.ToLower() == "el" && !string.IsNullOrEmpty(GreekContent))
+                return GreekContent;
+
+            // Fallback to Greek content if English is not available
+            return !string.IsNullOrEmpty(EnglishContent) ? EnglishContent : GreekContent;
         }
 
         // Get icon filename based on current time (red `12 hours, yellow after for 12 more)
