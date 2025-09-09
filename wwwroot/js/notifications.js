@@ -23,6 +23,7 @@ class NotificationManager {
         this.setupSignalR();
         this.setupToastContainer();
         this.setSessionStartTime();
+        this.setupLanguageListener();
     }
 
     loadSettings() {
@@ -154,6 +155,13 @@ class NotificationManager {
         }
     }
 
+    setupLanguageListener() {
+        // Listen for language change events
+        document.addEventListener('languageChanged', () => {
+            this.onLanguageChange();
+        });
+    }
+
     handleNotification(notification) {
         if (!this.notificationSettings.enabled) {
             return;
@@ -262,10 +270,18 @@ class NotificationManager {
         const icon = this.getNotificationIcon(notification);
         const urgencyClass = this.getUrgencyClass(notification);
         
+        // Translate the notification title based on type
+        let translatedTitle = notification.title;
+        if (notification.type === 'incident' && window.translations) {
+            translatedTitle = window.translations.translateIncidentCategory(notification.title);
+        } else if (notification.type === 'warning112' && window.translations) {
+            translatedTitle = window.translations.translateWarningType(notification.warningType || notification.title);
+        }
+        
         toast.innerHTML = `
             <div class="toast-header ${urgencyClass}">
                 <i class="${icon}"></i>
-                <strong>${notification.title}</strong>
+                <strong>${translatedTitle}</strong>
                 <button type="button" class="toast-close" onclick="this.parentNode.parentNode.remove()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -348,7 +364,15 @@ class NotificationManager {
     showBrowserNotification(notification) {
         if ('Notification' in window && Notification.permission === 'granted') {
             try {
-                const browserNotification = new Notification(notification.title, {
+                // Translate the notification title based on type
+                let translatedTitle = notification.title;
+                if (notification.type === 'incident' && window.translations) {
+                    translatedTitle = window.translations.translateIncidentCategory(notification.title);
+                } else if (notification.type === 'warning112' && window.translations) {
+                    translatedTitle = window.translations.translateWarningType(notification.warningType || notification.title);
+                }
+
+                const browserNotification = new Notification(translatedTitle, {
                     body: notification.message,
                     icon: '/images/fire-dept-icon.png',
                     tag: notification.id,
@@ -404,7 +428,7 @@ class NotificationManager {
         const testNotification = {
             type: 'incident',
             id: 'test-visual-' + Date.now(),
-            title: 'Test Visual Notification',
+            title: 'ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ', // Use raw category for translation
             message: 'This is a test visual notification',
             location: { lat: 38.2466, lng: 21.7359 },
             timestamp: new Date().toISOString()
@@ -439,6 +463,22 @@ class NotificationManager {
         };
         
         await this.showNotification(testNotification);
+    }
+
+    // Handle language changes
+    onLanguageChange() {
+        // Update any existing toast notifications
+        const existingToasts = document.querySelectorAll('.notification-toast');
+        existingToasts.forEach(toast => {
+            // remove existing toasts when language changes
+            // New notifications will use the new language
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        });
     }
 
     // Cleanup

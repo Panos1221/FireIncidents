@@ -26,9 +26,10 @@ const translations = {
         "fullControl": "Full Control",
 
         // Categories
-        "forestFires": "Forest Fires",
-        "urbanFires": "Urban Fires",
+        "forestFires": "Forest Fire",
+        "urbanFires": "Structure Fire",
         "assistance": "Assistance",
+        "fireIncident": "Fire Incident",
 
         // Legend
         "legend": "Legend",
@@ -123,7 +124,7 @@ const translations = {
         "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service or the Civil Protection.",
         "locationDisclaimer": "All locations are approximate, as there are no official addresses or coordinates, only the municipality.",
         "warning112Disclaimer": "112 warnings are provided for informational purposes only. Some data could not be parsed automatically or may be placed in the wrong location.",
-        "alwaysFollowAuthorities":"Always follow instructions from official authorities.",
+        "alwaysFollowAuthorities": "Always follow instructions from official authorities.",
 
         //Civil Protection Daily Map
         "civilmap": "Fire Risk Map",
@@ -168,9 +169,10 @@ const translations = {
         "fullControl": "ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ",
 
         // Categories
-        "forestFires": "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ",
-        "urbanFires": "ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ",
-        "assistance": "ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ",
+        "forestFires": "Δασική Πυρκαγιά",
+        "urbanFires": "Αστική Πυρκαγιά",
+        "assistance": "Παροχή Βοήθειας",
+        "fireIncident": "Πυρκαγιά",
 
         // Legend
         "legend": "Υπόμνημα",
@@ -265,7 +267,7 @@ const translations = {
         "disclaimer": "Αυτή είναι μια ανεπίσημη εφαρμογή που δεν συνδέεται, δεν υποστηρίζεται και δεν έχει σχέση με το Πυροσβεστικό Σώμα Ελλάδος ή την Πολιτική Προστασία",
         "locationDisclaimer": "Όλες οι τοποθεσίες είναι κατά προσέγγιση, καθώς δεν υπάρχουν επίσημες διευθύνσεις ή συντεταγμένες, παρά μόνο ο δήμος.",
         "warning112Disclaimer": "Οι προειδοποιήσεις 112 παρέχονται μόνο για ενημερωτικούς σκοπούς. Ορισμένα δεδομένα μπορεί να μην έχουν αναγνωριστεί αυτόματα ή να είναι σε λάθος τοποθεσία.",
-        "alwaysFollowAuthorities":"Ακολουθείτε πάντα τις οδηγίες των αρμόδιων αρχών.",
+        "alwaysFollowAuthorities": "Ακολουθείτε πάντα τις οδηγίες των αρμόδιων αρχών.",
 
         //Civil Protection Daily Map
         "civilmap": "Χάρτης Πρόβλεψης Κινδύνου Πυρκαγιάς",
@@ -395,10 +397,40 @@ function translateWarningType(warningType) {
     return translationKey ? getText(translationKey) : warningType;
 }
 
+// Function to translate incident categories
+function translateIncidentCategory(category) {
+    if (!category) return getText('fireIncident');
+
+    const categoryMap = {
+        'ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ': 'forestFires',
+        'ΑΣΤΙΚΕΣ ΠΥΡΚΑΓΙΕΣ': 'urbanFires',
+        'ΠΑΡΟΧΕΣ ΒΟΗΘΕΙΑΣ': 'assistance'
+    };
+
+    const translationKey = categoryMap[category];
+    return translationKey ? getText(translationKey) : category;
+}
+
+// Function to translate incident status
+function translateIncidentStatus(status) {
+    if (!status) return status;
+
+    const statusMap = {
+        'ΣΕ ΕΞΕΛΙΞΗ': 'inProgress',
+        'ΜΕΡΙΚΟΣ ΕΛΕΓΧΟΣ': 'partialControl',
+        'ΠΛΗΡΗΣ ΕΛΕΓΧΟΣ': 'fullControl'
+    };
+
+    const translationKey = statusMap[status];
+    return translationKey ? getText(translationKey) : status;
+}
+
 window.translations = {
     getText,
     setLanguage,
     getCurrentLanguage: () => currentLanguage,
     updatePageTranslations,
-    translateWarningType
+    translateWarningType,
+    translateIncidentCategory,
+    translateIncidentStatus
 };

@@ -25,7 +25,7 @@ namespace FireIncidents.Services
                 {
                     type = "incident",
                     id = $"incident_{incident.GetHashCode()}",
-                    title = GetIncidentTypeDisplayName(incident.Category),
+                    title = incident.Category, // Send raw category for frontend translation
                     message = $"{incident.Location}, {incident.Municipality}",
                     location = new { lat = incident.Latitude, lng = incident.Longitude },
                     category = incident.Category,
@@ -107,7 +107,7 @@ namespace FireIncidents.Services
                     {
                         type = "incident",
                         id = "test_incident_" + Guid.NewGuid().ToString("N")[..8],
-                        title = "Forest Fire",
+                        title = "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ", // Send raw category for frontend translation
                         message = "Test Location, Test Municipality",
                         location = new { lat = 38.2466, lng = 21.7359 },
                         category = "ΔΑΣΙΚΕΣ ΠΥΡΚΑΓΙΕΣ",
