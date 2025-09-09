@@ -106,6 +106,7 @@ const translations = {
         "greek": "Greek",
 
         // Notifications
+        "notificationSettings": "Notification Settings",
         "enableNotifications": "Enable Notifications",
         "enableNotificationsDesc": "Turn on/off all notifications",
         "visualNotifications": "Visual Notifications",
@@ -247,6 +248,7 @@ const translations = {
         "greek": "Ελληνικά",
 
         // Notifications
+        "notificationSettings": "Ρυθμίσεις Ειδοποιήσεων",
         "enableNotifications": "Ενεργοποίηση Ειδοποιήσεων",
         "enableNotificationsDesc": "Ενεργοποίηση/απενεργοποίηση όλων των ειδοποιήσεων",
         "visualNotifications": "Οπτικές Ειδοποιήσεις",

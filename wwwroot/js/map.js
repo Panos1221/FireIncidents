@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Now that both are loaded, apply filters and display everything
     await filterIncidents();
 
-    // Auto-refresh every 5 minutes
+    // Auto-refresh every 1 minutes
     setInterval(async () => {
         const refreshPromises = [loadIncidents()];
 
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Update statistics after both are refreshed
         updateStatistics(allIncidents);
-    }, 5 * 60 * 1000);
+    }, 1 * 60 * 1000);
 });
 
 // Listen for language changes to update the map

@@ -203,6 +203,10 @@ class NotificationManager {
 
     async showNotification(notification) {
         try {
+            // Automatically refresh map data when new notification arrives
+            // This ensures the incident/warning is visible on the map
+            await this.refreshMapData();
+            
             // Play audio notification
             if (this.notificationSettings.audio && this.notificationSound) {
                 await this.playNotificationSound();
@@ -307,10 +311,37 @@ class NotificationManager {
         return 'info';
     }
 
-    focusOnLocation(location) {
+    async focusOnLocation(location) {
         if (window.map && location.lat && location.lng) {
+            // First, trigger a map refresh to ensure the incident is loaded
+            await this.refreshMapData();
+            
+            // Then focus on the location
             window.map.setView([location.lat, location.lng], 13);
             console.log('Focused map on:', location);
+        }
+    }
+
+    async refreshMapData() {
+        try {
+            // Check if the map refresh function exists and call it
+            if (typeof window.loadIncidents === 'function') {
+                await window.loadIncidents();
+            }
+            
+            // Also refresh 112 warnings if available
+            if (typeof window.loadWarnings112 === 'function') {
+                await window.loadWarnings112();
+            }
+            
+            // Trigger filter update to display new data
+            if (typeof window.filterIncidents === 'function') {
+                await window.filterIncidents();
+            }
+            
+            console.log('Map data refreshed due to new notification');
+        } catch (error) {
+            console.warn('Failed to refresh map data:', error);
         }
     }
 
