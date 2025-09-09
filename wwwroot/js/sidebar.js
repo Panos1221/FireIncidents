@@ -324,13 +324,13 @@ class IncidentsSidebar {
                 ${incident.startDate ? `
                     <div class="incident-card-time">
                         <i class="fas fa-clock me-1"></i>
-                        Started: ${incident.startDate}
+                        <span data-translate="startDate">Started:</span> ${incident.startDate}                       
                     </div>
                 ` : ''}
                 ${incident.lastUpdate ? `
                     <div class="incident-card-time">
                         <i class="fas fa-sync-alt me-1"></i>
-                        Updated: ${incident.lastUpdate}
+                        <span data-translate="lastUpdated">Updated:</span> ${incident.lastUpdate}
                     </div>
                 ` : ''}
             </div>

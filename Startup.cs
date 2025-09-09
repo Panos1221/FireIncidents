@@ -1,5 +1,6 @@
 using FireIncidents.Services;
 using FireIncidents.Logging;
+using FireIncidents.Hubs;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -63,6 +64,10 @@ namespace FireIncidents
                     provider.GetRequiredService<IHttpClientFactory>().CreateClient("RSSFeed"),
                     provider.GetRequiredService<IMemoryCache>()));
             services.AddScoped<Warning112Service>();
+            services.AddSingleton<NotificationService>();
+
+            // Configure SignalR
+            services.AddSignalR();
 
             // Register background services
             services.AddHostedService<RssBackgroundService>();
@@ -113,6 +118,7 @@ namespace FireIncidents
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<NotificationHub>("/notificationHub");
             });
 
             logger.LogInformation("Application configuration complete");

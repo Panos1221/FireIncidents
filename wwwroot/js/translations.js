@@ -14,6 +14,7 @@ const translations = {
         "incidentsList": "Incidents List",
         "clickToNavigate": "Click on an incident to navigate to its location",
         "noIncidents": "No incidents available",
+        "notificationSettings": "Notification Settings",
 
         // Filters
         "filters": "Filters",
@@ -104,6 +105,18 @@ const translations = {
         "english": "English",
         "greek": "Greek",
 
+        // Notifications
+        "enableNotifications": "Enable Notifications",
+        "enableNotificationsDesc": "Turn on/off all notifications",
+        "visualNotifications": "Visual Notifications",
+        "visualNotificationsDesc": "Show toast notifications on screen",
+        "audioNotifications": "Audio Notifications",
+        "audioNotificationsDesc": "Play sound when notifications arrive",
+        "testNotifications": "Test Notifications",
+        "testVisual": "Visual",
+        "testAudio": "Audio",
+        "testFull": "Full",
+
         // Footer
         "footer": "Fire Incidents Map - Hellenic Fire Service",
         "disclaimer": "This is an unofficial application that is not affiliated with, endorsed by, or connected to the Hellenic Fire Service or the Civil Protection.",
@@ -142,6 +155,7 @@ const translations = {
         "incidentsList": "Λίστα Συμβάντων",
         "clickToNavigate": "Κάντε κλικ σε ένα συμβάν για να μεταβείτε στο τοποθεσία του",
         "noIncidents": "Δεν υπάρχουν διαθέσιμα συμβάντα",
+        "notificationSettings": "Ρυθμίσεις Ειδοποιήσεων",
 
         // Filters
         "filters": "Φίλτρα",
@@ -231,6 +245,18 @@ const translations = {
         "language": "Γλώσσα",
         "english": "Αγγλικά",
         "greek": "Ελληνικά",
+
+        // Notifications
+        "enableNotifications": "Ενεργοποίηση Ειδοποιήσεων",
+        "enableNotificationsDesc": "Ενεργοποίηση/απενεργοποίηση όλων των ειδοποιήσεων",
+        "visualNotifications": "Οπτικές Ειδοποιήσεις",
+        "visualNotificationsDesc": "Εμφάνιση ειδοποιήσεων στην οθόνη",
+        "audioNotifications": "Ηχητικές Ειδοποιήσεις",
+        "audioNotificationsDesc": "Αναπαραγωγή ήχου κατά την άφιξη ειδοποιήσεων",
+        "testNotifications": "Δοκιμή Ειδοποιήσεων",
+        "testVisual": "Οπτική",
+        "testAudio": "Ηχητική",
+        "testFull": "Πλήρης",
 
         // Footer
         "footer": "Χάρτης Πυρκαγιών - Δεδομένα Πυροσβεστικού Σώματος Ελλάδος",

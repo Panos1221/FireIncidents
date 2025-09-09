@@ -10,7 +10,9 @@ namespace FireIncidents.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
+        private readonly NotificationService _notificationService;
         private readonly TimeSpan _interval;
+        private readonly HashSet<string> _processedWarningIds = new();
         
 
 
@@ -18,12 +20,14 @@ namespace FireIncidents.Services
             ILogger<Warning112BackgroundService> logger,
             IServiceProvider serviceProvider,
             IMemoryCache cache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            NotificationService notificationService)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
             _cache = cache;
             _configuration = configuration;
+            _notificationService = notificationService;
             
             // Get interval from configuration, default to 1 minute
             var intervalMinutes = _configuration.GetValue<int>("BackgroundServices:Warning112ProcessingIntervalMinutes", 1);
@@ -88,13 +92,16 @@ namespace FireIncidents.Services
                 
                 if (processedWarnings?.Any() == true)
                 {
+                    // Check for new warnings and send notifications
+                    await CheckForNewWarningsAndNotify(processedWarnings);
+                    
                     // Cache the processed warnings with extended expiration
                     _cache.Set(CacheKeyManager.WARNING112_BACKGROUND_DATA, processedWarnings, CacheKeyManager.GetBackgroundCacheOptions());
-                     _cache.Set(CacheKeyManager.WARNING112_BACKGROUND_LAST_UPDATE, DateTime.UtcNow, CacheKeyManager.GetBackgroundCacheOptions());
+                    _cache.Set(CacheKeyManager.WARNING112_BACKGROUND_LAST_UPDATE, DateTime.UtcNow, CacheKeyManager.GetBackgroundCacheOptions());
                      
-                     // Generate and cache statistics
-                     var statistics = GenerateStatistics(processedWarnings);
-                     _cache.Set(CacheKeyManager.WARNING112_BACKGROUND_STATISTICS, statistics, CacheKeyManager.GetBackgroundCacheOptions());
+                    // Generate and cache statistics
+                    var statistics = GenerateStatistics(processedWarnings);
+                    _cache.Set(CacheKeyManager.WARNING112_BACKGROUND_STATISTICS, statistics, CacheKeyManager.GetBackgroundCacheOptions());
                     
                     _logger.LogInformation($"Warning112 background processing completed. Cached {processedWarnings.Count} warnings");
                 }
@@ -315,6 +322,49 @@ namespace FireIncidents.Services
         public static DateTime? GetLastUpdateTime(IMemoryCache cache)
         {
             return cache.TryGetValue(CacheKeyManager.WARNING112_BACKGROUND_LAST_UPDATE, out DateTime lastUpdate) ? lastUpdate : null;
+        }
+
+        private async Task CheckForNewWarningsAndNotify(List<GeocodedWarning112> currentWarnings)
+        {
+            try
+            {
+                foreach (var warning in currentWarnings)
+                {
+                    // Check if this is a new warning we haven't processed
+                    if (!_processedWarningIds.Contains(warning.Id))
+                    {
+                        _processedWarningIds.Add(warning.Id);
+                        
+                        try
+                        {
+                            // Only send notifications for active warnings
+                            if (warning.IsActive && warning.HasGeocodedLocations)
+                            {
+                                await _notificationService.SendNewWarningNotification(warning);
+                                _logger.LogInformation($"Sent notification for new 112 warning: {warning.WarningType} - {warning.Id}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Error processing new warning notification: {warning.Id}");
+                        }
+                    }
+                }
+                
+                // Clean up old processed IDs to prevent memory growth (keep last 1000)
+                if (_processedWarningIds.Count > 1000)
+                {
+                    var toRemove = _processedWarningIds.Take(_processedWarningIds.Count - 1000).ToList();
+                    foreach (var id in toRemove)
+                    {
+                        _processedWarningIds.Remove(id);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking for new warnings");
+            }
         }
     }
 }
