@@ -45,9 +45,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Wait for both to complete, then filter/display
         await Promise.all(refreshPromises);
         await filterIncidents();
-
-        // Update statistics after both are refreshed
-        updateStatistics(allIncidents);
     }, 1 * 60 * 1000);
 });
 
@@ -150,9 +147,6 @@ function setupEventListeners() {
             // Wait for both to complete, then filter/display
             await Promise.all(refreshPromises);
             await filterIncidents();
-
-            // Update statistics after both incidents and warnings are loaded
-            updateStatistics(allIncidents);
         } finally {
             setTimeout(() => {
                 refreshBtn.disabled = false;
