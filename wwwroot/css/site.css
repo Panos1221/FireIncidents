@@ -124,7 +124,7 @@ html, body {
 /* Sidebar toggle button */
 .sidebar-toggle {
     position: fixed;
-    bottom: 170px;
+    bottom: 100px;
     right: 30px;
     z-index: 1000;
     width: 56px;
