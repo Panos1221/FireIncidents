@@ -2,6 +2,7 @@ const translations = {
     en: {
         // General
         "appTitle": "Hellenic Fire Service Live Incidents Map",
+        "appTitleShort": "Fire Incidents",
         "refresh": "Refresh Data",
         "loading": "Loading...",
         "lastUpdated": "Last Updated",
@@ -145,6 +146,7 @@ const translations = {
     el: {
         // General
         "appTitle": "Συμβάντα Επικράτειας του Πυροσβεστικού Σώματος Ελλάδος",
+        "appTitleShort": "Συμβάντα Επικράτειας",
         "refresh": "Ανανέωση Δεδομένων",
         "loading": "Ενημέρωση...",
         "lastUpdated": "Τελευταία Ενημέρωση",

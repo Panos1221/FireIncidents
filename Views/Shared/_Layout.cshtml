@@ -15,32 +15,40 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/images/fire-dept-icon.png" alt="Fire Incidents Icon" class="navbar-icon" />
-                    <span data-translate="appTitle">Hellenic Fire Service Live Incidents Map</span>
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index"
+                    style="max-width: 75%; min-width: 0;">
+                    <img src="~/images/fire-dept-icon.png" alt="Fire Incidents Icon"
+                        class="navbar-icon me-2 flex-shrink-0" style="width: 32px; height: 32px;" />
+                    <div class="brand-text" style="min-width: 0; overflow: hidden;">
+                        <span class="full-title" data-translate="appTitle" style="display: none;">Hellenic Fire Service
+                            Live Incidents Map</span>
+                        <span class="short-title" data-translate="appTitleShort"
+                            style="font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Fire
+                            Incidents</span>
+                    </div>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     @* <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-map me-1"></i>
-                                <span data-translate="map">Map</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Feeds">
-                                <i class="fas fa-rss me-1"></i>
-                                <span data-translate="feeds">RSS Feeds</span>
-                            </a>
-                        </li>
+                    <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-map me-1"></i>
+                    <span data-translate="map">Map</span>
+                    </a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Feeds">
+                    <i class="fas fa-rss me-1"></i>
+                    <span data-translate="feeds">RSS Feeds</span>
+                    </a>
+                    </li>
                     </ul> *@
                     <!-- Language select -->
                     <div class="language-selector ms-auto">
-                        <label for="languageSelector" data-translate="language">Language</label>
+                        <label for="languageSelector" class="me-2" data-translate="language">Language</label>
                         <select id="languageSelector" class="form-select form-select-sm">
                             <option value="en" data-translate="english">English</option>
                             <option value="el" data-translate="greek">Greek</option>
@@ -60,7 +68,7 @@
     <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
         <i class="fas fa-moon"></i>
     </button>
-    
+
     <!-- Sidebar toggle -->
     <button id="sidebarToggle" class="sidebar-toggle" title="Toggle Incidents Sidebar">
         <i class="fas fa-list"></i>
@@ -83,12 +91,12 @@
                         <small data-translate="warning112Disclaimer">
                             112 warnings are provided for informational purposes only. Some data could not be parsed automatically. Always follow instructions from official authorities.
                         </small>
-                    </p>        
+                    </p>
                     <p class="disclaimer">
                         <small data-translate="alwaysFollowAuthorities">
                             <strong>Always follow instructions from official authorities.</strong>
                         </small>
-                    </p>      
+                    </p>
                     <div id="fireAntennaStatus" class="fire-status" title="Checking status...">
                         <span class="status-light" id="antennaStatusLight"></span>
                     </div>
@@ -119,18 +127,18 @@
                 const response = await fetch('/Status/CheckFireServiceStatus');
                 const data = await response.json();
                 if (data.status === "up") {
-                   antennaStatusLight.className = "status-light online";
-                   antennaDiv.title = "The official Hellenic Fire Service Incidents Page is Online";
+                    antennaStatusLight.className = "status-light online";
+                    antennaDiv.title = "The official Hellenic Fire Service Incidents Page is Online";
                 } else {
-                   antennaStatusLight.className = "status-light offline";
-                   antennaDiv.title = "The official Hellenic Fire Service Incidents Page is DOWN";
+                    antennaStatusLight.className = "status-light offline";
+                    antennaDiv.title = "The official Hellenic Fire Service Incidents Page is DOWN";
                 }
             } catch {
                 antennaStatusLight.setAttribute('fill', '#dc3545'); // red
                 antennaDiv.title = "The official Hellenic Fire Service Incidents Page is DOWN";
             }
         }
-        checkAntennaStatus(); 
+        checkAntennaStatus();
         setInterval(checkAntennaStatus, 60000);
     </script>
 </body>
