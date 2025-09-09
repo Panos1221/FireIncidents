@@ -13,6 +13,7 @@ namespace FireIncidents.Services
         private readonly NotificationService _notificationService;
         private readonly TimeSpan _interval;
         private readonly HashSet<string> _processedIncidentIds = new();
+        private bool _isFirstRun = true;
         
 
 
@@ -124,6 +125,23 @@ namespace FireIncidents.Services
                 // Get current incidents from the scraper
                 var currentIncidents = await scraperService.ScrapeIncidentsAsync();
                 
+                // On first run, just populate the processed IDs without sending notifications
+                if (_isFirstRun)
+                {
+                    _logger.LogInformation("First run - initializing processed incident IDs without sending notifications");
+                    foreach (var incident in currentIncidents)
+                    {
+                        if (incident.Status == "ΣΕ ΕΞΕΛΙΞΗ")
+                        {
+                            var incidentId = $"{incident.Category}_{incident.Location}_{incident.Municipality}_{incident.Status}";
+                            _processedIncidentIds.Add(incidentId);
+                        }
+                    }
+                    _isFirstRun = false;
+                    _logger.LogInformation($"Initialized with {_processedIncidentIds.Count} existing incidents");
+                    return;
+                }
+                
                 foreach (var incident in currentIncidents)
                 {
                     // Only send notifications for incidents that are "In Progress" (ΣΕ ΕΞΕΛΙΞΗ) since these are the actual new ones.
@@ -148,7 +166,10 @@ namespace FireIncidents.Services
                             
                             if (geocodedIncident.IsGeocoded)
                             {
-                                await _notificationService.SendNewIncidentNotification(geocodedIncident);
+                                // Use the current time as the incident detection time since we can't reliably parse the Greek StartDate
+                                // This represents when we first detected this incident, which is when notifications should be sent
+                                var incidentDetectedAt = DateTime.UtcNow;
+                                await _notificationService.SendNewIncidentNotification(geocodedIncident, incidentDetectedAt);
                                 _logger.LogInformation($"Sent notification for new incident: {incident.Category} in {incident.Location}");
                             }
                         }

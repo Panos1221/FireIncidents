@@ -13,6 +13,7 @@ namespace FireIncidents.Services
         private readonly NotificationService _notificationService;
         private readonly TimeSpan _interval;
         private readonly HashSet<string> _processedWarningIds = new();
+        private bool _isFirstRun = true;
         
 
 
@@ -328,6 +329,22 @@ namespace FireIncidents.Services
         {
             try
             {
+                // On first run, just populate the processed IDs without sending notifications
+                if (_isFirstRun)
+                {
+                    _logger.LogInformation("First run - initializing processed warning IDs without sending notifications");
+                    foreach (var warning in currentWarnings)
+                    {
+                        if (warning.IsActive && warning.HasGeocodedLocations)
+                        {
+                            _processedWarningIds.Add(warning.Id);
+                        }
+                    }
+                    _isFirstRun = false;
+                    _logger.LogInformation($"Initialized with {_processedWarningIds.Count} existing warnings");
+                    return;
+                }
+                
                 foreach (var warning in currentWarnings)
                 {
                     // Check if this is a new warning we haven't processed
@@ -340,7 +357,8 @@ namespace FireIncidents.Services
                             // Only send notifications for active warnings
                             if (warning.IsActive && warning.HasGeocodedLocations)
                             {
-                                await _notificationService.SendNewWarningNotification(warning);
+                                // Use the warning's TweetDate as the occurrence time
+                                await _notificationService.SendNewWarningNotification(warning, warning.TweetDate);
                                 _logger.LogInformation($"Sent notification for new 112 warning: {warning.WarningType} - {warning.Id}");
                             }
                         }

@@ -19,6 +19,11 @@ namespace FireIncidents.Services
 
         public async Task SendNewIncidentNotification(GeocodedIncident incident)
         {
+            await SendNewIncidentNotification(incident, DateTime.UtcNow);
+        }
+
+        public async Task SendNewIncidentNotification(GeocodedIncident incident, DateTime incidentOccurredAt)
+        {
             try
             {
                 var notification = new
@@ -30,14 +35,24 @@ namespace FireIncidents.Services
                     location = new { lat = incident.Latitude, lng = incident.Longitude },
                     category = incident.Category,
                     status = incident.Status,
-                    timestamp = DateTime.UtcNow,
+                    timestamp = incidentOccurredAt,
                     data = incident
                 };
 
-                await _hubContext.Clients.Group("NotificationUsers")
-                    .SendAsync("NewIncidentNotification", notification);
+                // Get eligible connection IDs (users who joined before the incident occurred)
+                var eligibleConnectionIds = GetEligibleConnectionIds(incidentOccurredAt);
+                
+                if (eligibleConnectionIds.Any())
+                {
+                    await _hubContext.Clients.Clients(eligibleConnectionIds)
+                        .SendAsync("NewIncidentNotification", notification);
 
-                _logger.LogInformation($"Sent new incident notification: {incident.Category} in {incident.Location}");
+                    _logger.LogInformation($"Sent new incident notification to {eligibleConnectionIds.Count} eligible users: {incident.Category} in {incident.Location}");
+                }
+                else
+                {
+                    _logger.LogInformation($"No eligible users found for incident notification: {incident.Category} in {incident.Location}");
+                }
             }
             catch (Exception ex)
             {
@@ -46,6 +61,11 @@ namespace FireIncidents.Services
         }
 
         public async Task SendNewWarningNotification(GeocodedWarning112 warning)
+        {
+            await SendNewWarningNotification(warning, warning.TweetDate);
+        }
+
+        public async Task SendNewWarningNotification(GeocodedWarning112 warning, DateTime warningOccurredAt)
         {
             try
             {
@@ -63,14 +83,24 @@ namespace FireIncidents.Services
                     location = primaryLocation != null ? new { lat = primaryLocation.Latitude, lng = primaryLocation.Longitude } : null,
                     warningType = warning.WarningType,
                     iconType = warning.IconType,
-                    timestamp = DateTime.UtcNow,
+                    timestamp = warningOccurredAt,
                     data = warning
                 };
 
-                await _hubContext.Clients.Group("NotificationUsers")
-                    .SendAsync("NewWarningNotification", notification);
+                // Get eligible connection IDs (users who joined before the warning occurred)
+                var eligibleConnectionIds = GetEligibleConnectionIds(warningOccurredAt);
+                
+                if (eligibleConnectionIds.Any())
+                {
+                    await _hubContext.Clients.Clients(eligibleConnectionIds)
+                        .SendAsync("NewWarningNotification", notification);
 
-                _logger.LogInformation($"Sent new 112 warning notification: {warning.WarningType} for {locationName}");
+                    _logger.LogInformation($"Sent new 112 warning notification to {eligibleConnectionIds.Count} eligible users: {warning.WarningType} for {locationName}");
+                }
+                else
+                {
+                    _logger.LogInformation($"No eligible users found for warning notification: {warning.WarningType} for {locationName}");
+                }
             }
             catch (Exception ex)
             {
@@ -157,6 +187,33 @@ namespace FireIncidents.Services
         public DateTime GetLastWarningCheckTime(string key)
         {
             return _lastWarningCheck.TryGetValue(key, out var time) ? time : DateTime.MinValue;
+        }
+
+        /// <summary>
+        /// Gets the connection IDs of users who joined before the specified event time
+        /// (i.e., users who should receive notifications for events that occurred after they joined)
+        /// </summary>
+        /// <param name="eventOccurredAt">The timestamp when the event occurred</param>
+        /// <returns>List of connection IDs eligible to receive the notification</returns>
+        private List<string> GetEligibleConnectionIds(DateTime eventOccurredAt)
+        {
+            var eligibleConnections = new List<string>();
+            var allConnectionStartTimes = NotificationHub.GetAllConnectionSessionStartTimes();
+
+            foreach (var kvp in allConnectionStartTimes)
+            {
+                var connectionId = kvp.Key;
+                var sessionStartTime = kvp.Value;
+
+                // Only send notification if the user joined BEFORE the event occurred
+                // This ensures users only get notifications for events that happen AFTER they join
+                if (sessionStartTime < eventOccurredAt)
+                {
+                    eligibleConnections.Add(connectionId);
+                }
+            }
+
+            return eligibleConnections;
         }
     }
 }
