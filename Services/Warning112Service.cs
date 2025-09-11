@@ -417,9 +417,35 @@ namespace FireIncidents.Services
                 }
 
                 // Filter out regional units and administrative contexts from all location types
+                // But first, check if any filtered regional units can enhance our regional context
+                var originalDangerZones = new List<string>(info.DangerZones);
+                var originalSafeZones = new List<string>(info.SafeZones);
+                var originalFireLocations = new List<string>(info.FireLocations);
+                
                 info.DangerZones = FilterOutRegionalUnits(info.DangerZones);
                 info.SafeZones = FilterOutRegionalUnits(info.SafeZones);
                 info.FireLocations = FilterOutRegionalUnits(info.FireLocations);
+                
+                // If no regional context was found through standard patterns, 
+                // check if any filtered-out locations could serve as regional context
+                if (string.IsNullOrEmpty(info.RegionalContext))
+                {
+                    var filteredOutLocations = originalDangerZones.Concat(originalSafeZones).Concat(originalFireLocations)
+                        .Except(info.DangerZones.Concat(info.SafeZones).Concat(info.FireLocations))
+                        .Distinct()
+                        .ToList();
+                        
+                    foreach (var filteredLocation in filteredOutLocations)
+                    {
+                        var regionalVariants = GetRegionalUnitVariants(filteredLocation);
+                        if (regionalVariants.Count > 1)
+                        {
+                            info.RegionalContext = filteredLocation;
+                            _logger.LogInformation($"✅ Using filtered regional unit as context: {filteredLocation}");
+                            break; // Use the first one found
+                        }
+                    }
+                }
 
                 // Apply intelligent administrative filtering to fire locations
                 if (info.FireLocations.Any())
