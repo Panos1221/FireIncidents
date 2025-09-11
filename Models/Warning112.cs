@@ -8,8 +8,27 @@
         public List<string> Locations { get; set; } = new List<string>();
         public DateTime TweetDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public bool IsActive => DateTime.UtcNow < TweetDate.ToUniversalTime().AddHours(24);
-        public string IconType => DateTime.UtcNow < TweetDate.ToUniversalTime().AddHours(12) ? "red" : "yellow";
+        public bool IsActive 
+        { 
+            get 
+            {
+                var currentGreeceTime = Services.GreeceTimeZoneHelper.GetCurrentGreeceTime();
+                var tweetGreeceTime = Services.GreeceTimeZoneHelper.ToGreeceTime(TweetDate);
+                
+                return currentGreeceTime < tweetGreeceTime.AddHours(24);
+            }
+        }
+        
+        public string IconType 
+        { 
+            get 
+            {
+                var currentGreeceTime = Services.GreeceTimeZoneHelper.GetCurrentGreeceTime();
+                var tweetGreeceTime = Services.GreeceTimeZoneHelper.ToGreeceTime(TweetDate);
+                
+                return currentGreeceTime < tweetGreeceTime.AddHours(12) ? "red" : "yellow";
+            }
+        }
         public string SourceUrl { get; set; }
 
         // Extract warning type from content more to be added as needed. To do: add smoke warning which is common 

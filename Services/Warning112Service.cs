@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Globalization;
+using static FireIncidents.Services.GreeceTimeZoneHelper;
 
 namespace FireIncidents.Services
 {
@@ -1951,7 +1952,8 @@ namespace FireIncidents.Services
                 _logger.LogInformation($"Converting {rssItems.Count} RSS items to Warning112 objects...");
                 
                 var warnings = new List<Warning112>();
-                var cutoffDate = DateTime.UtcNow.AddDays(-daysBack);
+                // Use Greece timezone for cutoff date calculation
+                var cutoffDate = GreeceTimeZoneHelper.GetCurrentGreeceTime().AddDays(-daysBack);
                 
                 foreach (var item in rssItems)
                 {

@@ -74,16 +74,36 @@ namespace FireIncidents.Models
         [XmlElement("creator", Namespace = "http://purl.org/dc/elements/1.1/")]
         public string Creator { get; set; }
 
-        // Parsed publication date
+        // Parsed publication date with Greece timezone conversion
         [XmlIgnore]
         public DateTime PubDate
         {
             get
             {
+                if (string.IsNullOrEmpty(PubDateString))
+                    return DateTime.MinValue;
+
+                // Try parsing with DateTimeOffset first (handles timezone info in RSS)
                 if (DateTimeOffset.TryParse(PubDateString, out DateTimeOffset result))
-                    return result.DateTime;
+                {
+                    // Convert to Greece time, then to UTC for consistent storage
+                    var greeceTime = TimeZoneInfo.ConvertTime(result, Services.GreeceTimeZoneHelper.GreeceTimeZone);
+                    return greeceTime.DateTime;
+                }
+                
+                // Fallback: assume the date is already in Greece timezone
                 if (DateTime.TryParse(PubDateString, out DateTime fallbackResult))
+                {
+                    // Treat as Greece local time and convert to UTC for storage
+                    if (fallbackResult.Kind == DateTimeKind.Unspecified)
+                    {
+                        // Assume it's Greece local time
+                        var greeceTime = DateTime.SpecifyKind(fallbackResult, DateTimeKind.Unspecified);
+                        return Services.GreeceTimeZoneHelper.ConvertToUtc(greeceTime);
+                    }
                     return fallbackResult;
+                }
+                
                 return DateTime.MinValue;
             }
         }

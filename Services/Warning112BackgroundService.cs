@@ -1,6 +1,7 @@
 using FireIncidents.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using static FireIncidents.Services.GreeceTimeZoneHelper;
 
 namespace FireIncidents.Services
 {
@@ -123,7 +124,8 @@ namespace FireIncidents.Services
             try
             {
                 var warnings = new List<GeocodedWarning112>();
-                var cutoffDate = DateTime.UtcNow.AddDays(-7); // Process last 7 days
+                // Use Greece timezone for cutoff date calculation
+                var cutoffDate = GreeceTimeZoneHelper.GetCurrentGreeceTime().AddDays(-7); // Process last 7 days
                 
                 foreach (var item in rssItems.Where(i => i.PubDate >= cutoffDate))
                 {
@@ -305,8 +307,8 @@ namespace FireIncidents.Services
             {
                 ["total_warnings"] = warnings.Count,
                 ["active_warnings"] = activeWarnings.Count,
-                ["warnings_last_24h"] = warnings.Count(w => w.TweetDate >= DateTime.UtcNow.AddDays(-1)),
-                ["warnings_last_week"] = warnings.Count(w => w.TweetDate >= DateTime.UtcNow.AddDays(-7))
+                ["warnings_last_24h"] = warnings.Count(w => w.TweetDate >= GreeceTimeZoneHelper.GetCurrentGreeceTime().AddDays(-1)),
+                ["warnings_last_week"] = warnings.Count(w => w.TweetDate >= GreeceTimeZoneHelper.GetCurrentGreeceTime().AddDays(-7))
             };
         }
         

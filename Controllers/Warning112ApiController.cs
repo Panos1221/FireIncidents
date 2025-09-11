@@ -191,9 +191,10 @@ namespace FireIncidents.Controllers
             {
                 _logger.LogInformation($"API request received for 112 warnings by date range: {fromDate} to {toDate}");
 
-                // Set default date range if not provided (last 7 days)
-                var effectiveFromDate = fromDate ?? DateTime.UtcNow.AddDays(-7);
-                var effectiveToDate = toDate ?? DateTime.UtcNow;
+                // Set default date range if not provided (last 7 days) - use Greece timezone
+                var currentGreeceTime = Services.GreeceTimeZoneHelper.GetCurrentGreeceTime();
+                var effectiveFromDate = fromDate ?? currentGreeceTime.AddDays(-7);
+                var effectiveToDate = toDate ?? currentGreeceTime;
 
                 // Ensure fromDate is not after toDate
                 if (effectiveFromDate > effectiveToDate)
@@ -382,8 +383,8 @@ namespace FireIncidents.Controllers
                     warningsFound = warnings.Count,
                     dateRange = new 
                     {
-                        from = DateTime.UtcNow.AddDays(-daysBack).ToString("yyyy-MM-dd"),
-                        to = DateTime.UtcNow.ToString("yyyy-MM-dd")
+                        from = Services.GreeceTimeZoneHelper.GetCurrentGreeceTime().AddDays(-daysBack).ToString("yyyy-MM-dd"),
+                        to = Services.GreeceTimeZoneHelper.GetCurrentGreeceTime().ToString("yyyy-MM-dd")
                     },
                     warnings = warnings.Select(w => new
                     {
@@ -413,6 +414,56 @@ namespace FireIncidents.Controllers
                     error = "Internal server error",
                     message = ex.Message,
                     details = ex.ToString()
+                });
+            }
+        }
+
+        [HttpGet("timezone-test")]
+        public ActionResult GetTimezoneTest()
+        {
+            try
+            {
+                var utcNow = DateTime.UtcNow;
+                var greeceTime = Services.GreeceTimeZoneHelper.GetCurrentGreeceTime();
+                
+                // Create a test warning with current time
+                var testWarning = new Warning112
+                {
+                    Id = "timezone-test",
+                    EnglishContent = "Test warning for timezone verification",
+                    GreekContent = "Δοκιμαστική προειδοποίηση για επαλήθευση ζώνης ώρας",
+                    TweetDate = utcNow,
+                    CreatedAt = utcNow,
+                    SourceUrl = "test://timezone"
+                };
+
+                return Ok(new
+                {
+                    message = "Timezone test information",
+                    utcTime = utcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"),
+                    greeceTime = greeceTime.ToString("yyyy-MM-dd HH:mm:ss 'Greece'"),
+                    timezoneOffset = Services.GreeceTimeZoneHelper.GreeceTimeZone.GetUtcOffset(utcNow).ToString(),
+                    isDaylightSaving = Services.GreeceTimeZoneHelper.GreeceTimeZone.IsDaylightSavingTime(greeceTime),
+                    testWarning = new
+                    {
+                        id = testWarning.Id,
+                        tweetDate = testWarning.TweetDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                        tweetDateKind = testWarning.TweetDate.Kind.ToString(),
+                        isActive = testWarning.IsActive,
+                        iconType = testWarning.IconType,
+                        hoursUntilExpiry = testWarning.IsActive ? 
+                            (int)(testWarning.TweetDate.AddHours(24) - Services.GreeceTimeZoneHelper.GetCurrentGreeceTime()).TotalHours : 
+                            0
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in timezone test");
+                return StatusCode(500, new
+                {
+                    error = "Internal server error",
+                    message = ex.Message
                 });
             }
         }
