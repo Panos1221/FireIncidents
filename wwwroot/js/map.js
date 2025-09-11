@@ -239,7 +239,7 @@ async function loadIncidents() {
 
         // Update last updated time
         document.getElementById('lastUpdated').classList.remove('loading-text');
-        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString('en-GB', { hour12: false });
 
         return data;
     } catch (error) {
