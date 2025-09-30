@@ -37,6 +37,26 @@ This project visualizes active incidents from the official Hellenic Fire Service
 - Fire station boundaries are based on official open data from http://geodata.gov.gr/.
 - These boundaries are rendered as a GeoJSON overlay on the map to provide clear district context around incidents and 112 warnings.
 
+## How to run the application
+First, clone the repository:
+
+```bash
+git clone https://github.com/Panos1221/FireIncidents.git
+```
+Then, switch to the project folder to edit the app.config file, specifying the required parameters.
+```bash
+cd FireIncidents
+```
+Restore nuget packages.
+```bash
+dotnet restore
+```
+Finally, run the application with the `dotnet run` command.
+```console
+dotnet run
+```
+The application will be accessible on http://localhost:5000/
+
 ## Hosting & Cost
 - Self‑hosted on a Raspberry Pi for low running costs and full control.
 - Previously deployed to Azure and SmarterASP.NET for experimentation and comparison but the cost to keep the application hosted there is big.
