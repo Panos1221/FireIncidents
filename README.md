@@ -1,14 +1,14 @@
 # Hellenic Fire Service Live Incidents Map
 
-Real‑time fire incidents across Greece, including 112 warnings — fast, lightweight, and self‑hosted on a Raspberry Pi.
+Real‑time fire incidents across Greece, including 112 warnings.
 
 ## Live Demo
 - https://livefireincidents.gr
 
-> Previously hosted on Azure and SmarterASP.NET. Today the app runs on a Raspberry Pi for a cost‑effective, always‑on setup.
+> Previously hosted on Azure and SmarterASP.NET. Today the app runs on a Raspberry Pi.
 
 ## Overview
-This project visualizes active incidents from the official Hellenic Fire Service and surfaces 112 warnings on an interactive map. It is designed to be reliable, snappy, and affordable to operate on small hardware.
+This project visualizes active incidents from the official Hellenic Fire Service and surfaces 112 warnings on an interactive map.
 
 ![Fire Incidents Features](https://github.com/Panos1221/FireIncidents/raw/main/fireincidents-features.png)
 
@@ -39,7 +39,7 @@ This project visualizes active incidents from the official Hellenic Fire Service
 
 ## Hosting & Cost
 - Self‑hosted on a Raspberry Pi for low running costs and full control.
-- Previously deployed to Azure and SmarterASP.NET for experimentation and comparison.
+- Previously deployed to Azure and SmarterASP.NET for experimentation and comparison but the cost to keep the application hosted there is big.
 
 ## Disclaimer
 This application is an unofficial tool and is not affiliated with, endorsed by, or connected to the Hellenic Fire Service in any way. It is an independent project that utilizes publicly available data. All incident information comes from the official [Hellenic Fire Service Website](https://museum.fireservice.gr/symvanta/), but this application itself is not an official product of the Greek government or any fire service authority.
