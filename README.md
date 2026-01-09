@@ -3,7 +3,13 @@
 Real‑time fire incidents across Greece, including 112 warnings.
 
 ## Live Demo
-- https://livefireincidents.gr
+
+⚠️ **Offline**
+
+The official data source used by this project has been taken down, which means the live demo is no longer functional.
+
+> The application itself remains intact and can still be run locally for demonstration and development purposes using the last available data structure.
+
 
 > Previously hosted on Azure and SmarterASP.NET. Today the app runs on a Raspberry Pi.
 
